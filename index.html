@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Rentoo: Curated rentals in Jaipur</title>
+  <meta name="description" content="Hand-verified residential and commercial rentals in Jaipur. No brokerage from tenants. WhatsApp-first response within 30 minutes.">
+  <link rel="icon" type="image/png" href="Rentooicon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site-header" role="banner">
+  <div class="nav-inner">
+    <a href="/" class="logo" aria-label="Rentoo home">
+      <img src="Rentoo.png" alt="Rentoo" width="120" height="38">
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <a href="/rent">Rent</a>
+      <a href="/commercial">Commercial</a>
+      <a href="/about">About</a>
+    </nav>
+
+    <a href="/api/whatsapp/redirect?ref=nav" class="btn-whatsapp" data-cta="whatsapp-nav">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/>
+      </svg>
+      <span>WhatsApp us</span>
+    </a>
+
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="mobile-menu" hidden>
+    <a href="/rent">Rent</a>
+    <a href="/commercial">Commercial</a>
+    <a href="/about">About</a>
+    <a href="/api/whatsapp/redirect?ref=mobile-nav" class="btn-whatsapp btn-whatsapp--block">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+      <span>WhatsApp us</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO ============================================================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-content">
+      <div class="hero-text">
+        <p class="byline">
+          <span class="byline-label">Curated by</span>
+          <span class="byline-name">Rishabh + the Rentoo team</span>
+          <span class="byline-sep" aria-hidden="true">·</span>
+          <span class="byline-meta">Jaipur, since 2021</span>
+        </p>
+
+        <h1 id="hero-title">We visit every property.<br>Then we send you the ones that fit.</h1>
+
+        <p class="hero-sub">A small Jaipur brokerage. Every listing hand-verified. No tenant brokerage. Most inquiries answered on WhatsApp within 30 minutes.</p>
+
+        <form class="hero-search" role="search" action="/rent" method="get">
+          <div class="search-grid">
+            <label class="search-field">
+              <span class="field-label">Locality</span>
+              <input type="text" name="neighbourhood" placeholder="Mansarovar, C-Scheme..." autocomplete="off">
+            </label>
+            <label class="search-field">
+              <span class="field-label">BHK</span>
+              <select name="bhk">
+                <option value="">Any</option>
+                <option value="1bhk">1 BHK</option>
+                <option value="2bhk">2 BHK</option>
+                <option value="3bhk">3 BHK</option>
+                <option value="4bhk">4 BHK</option>
+              </select>
+            </label>
+            <label class="search-field">
+              <span class="field-label">Budget</span>
+              <select name="max_rent">
+                <option value="">Any</option>
+                <option value="20000">Under ₹20K</option>
+                <option value="30000">Under ₹30K</option>
+                <option value="50000">Under ₹50K</option>
+                <option value="100000">Under ₹1L</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit" class="btn-primary search-submit">
+            <span>Find homes</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <div class="hero-chips" role="list" aria-label="Popular searches">
+          <a href="/rent?bhk=2bhk&neighbourhood=mansarovar" role="listitem">2BHK in Mansarovar</a>
+          <a href="/commercial?type=office&neighbourhood=c-scheme" role="listitem">Office in C-Scheme</a>
+          <a href="/rent?bhk=3bhk&neighbourhood=bapu-nagar" role="listitem">3BHK in Bapu Nagar</a>
+          <a href="/rent?furnishing=furnished&max_rent=30000" role="listitem">Furnished under ₹30K</a>
+        </div>
+      </div>
+
+      <aside class="hero-feature" aria-label="Featured property">
+        <span class="display-id-tag display-id-tag--prominent" aria-hidden="true">#01</span>
+        <article class="property-card property-card--feature">
+          <a href="/rent/2bhk-furnished-apartment-gulab-garh-01" class="card-link">
+            <div class="card-image">
+              <!-- PLACEHOLDER: replace with real photo before launch -->
+              <img src="https://picsum.photos/seed/rentoo-hero/800/600" alt="2BHK Furnished Apartment near Gulab Garh, Mansarovar" loading="eager" width="800" height="600">
+              <span class="status-pill status-pill--available">
+                <span class="dot" aria-hidden="true"></span>Available
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="curator-note">
+                <span class="curator-note-label">Picked by Rishabh</span>
+                <p>Quiet block off Gulab Garh. Owners just refinished the kitchen. South-facing, so winter mornings work without a heater.</p>
+              </div>
+              <h3 class="card-title">2BHK Furnished Apartment near Gulab Garh, Mansarovar</h3>
+              <div class="price-row">
+                <span class="price">₹35,000<span class="price-unit"> / month</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+              <p class="card-id"><span class="card-id-listed">Listed 2 days ago</span></p>
+            </div>
+          </a>
+        </article>
+      </aside>
+    </div>
+  </section>
+
+  <!-- RECENTLY VIEWED ===================================================== -->
+  <!-- Visible only if recently_viewed cookie is populated. Shown by default in prototype. -->
+  <section class="section section--recently-viewed" aria-labelledby="recently-viewed-title">
+    <div class="section-inner">
+      <header class="section-marker section-marker--minor">
+        <span class="section-marker-num" aria-hidden="true">↩</span>
+        <h2 id="recently-viewed-title">Continue where you left off</h2>
+      </header>
+
+      <div class="card-row" role="list">
+        <article class="property-card property-card--compact" role="listitem">
+          <a href="/rent/3bhk-semi-furnished-apartment-manas-04" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">#04</span>
+              <img src="https://picsum.photos/seed/rentoo-viewed-1/600/450" alt="3BHK Semi-Furnished Apartment near Manas Hospital, Malviya Nagar" loading="lazy" width="600" height="450">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">3BHK Semi-Furnished Apartment</h3>
+              <p class="card-landmark">near Manas Hospital, Malviya Nagar</p>
+              <div class="price-row">
+                <span class="price">₹42,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+            </div>
+          </a>
+        </article>
+
+        <article class="property-card property-card--compact" role="listitem">
+          <a href="/commercial/office-mi-road-c-3" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">C-3</span>
+              <img src="https://picsum.photos/seed/rentoo-viewed-2/600/450" alt="1,200 sqft Office Space near MI Road, C-Scheme" loading="lazy" width="600" height="450">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">1,200 sqft Office Space</h3>
+              <p class="card-landmark">near MI Road, C-Scheme</p>
+              <div class="price-row">
+                <span class="price">₹85,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+            </div>
+          </a>
+        </article>
+
+        <article class="property-card property-card--compact" role="listitem">
+          <a href="/rent/2bhk-furnished-apartment-birla-07" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">#07</span>
+              <img src="https://picsum.photos/seed/rentoo-viewed-3/600/450" alt="2BHK Furnished Apartment near Birla Mandir, Bapu Nagar" loading="lazy" width="600" height="450">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">2BHK Furnished Apartment</h3>
+              <p class="card-landmark">near Birla Mandir, Bapu Nagar</p>
+              <div class="price-row">
+                <span class="price">₹28,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+            </div>
+          </a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECENTLY ADDED ===================================================== -->
+  <section class="section section--recently-added" aria-labelledby="recently-added-title">
+    <div class="section-inner">
+      <header class="section-marker">
+        <span class="section-marker-num" aria-hidden="true">01</span>
+        <h2 id="recently-added-title">Just added to the catalog</h2>
+        <a href="/rent" class="section-marker-meta">See all 134 listings &nbsp;↗</a>
+      </header>
+
+      <div class="card-grid" role="list">
+        <article class="property-card" role="listitem">
+          <a href="/rent/3bhk-villa-vidhyadhar-15" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">#15</span>
+              <img src="https://picsum.photos/seed/rentoo-prop-1/800/600" alt="4BHK Villa near Vidhyadhar Nagar" loading="lazy" width="800" height="600">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">4BHK Villa</h3>
+              <p class="card-landmark">near Vidhyadhar Nagar</p>
+              <div class="price-row">
+                <span class="price">₹65,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+              <p class="card-meta-row"><span class="card-id-listed">Listed today</span></p>
+            </div>
+          </a>
+        </article>
+
+        <article class="property-card" role="listitem">
+          <a href="/commercial/warehouse-sitapura-c-7" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">C-7</span>
+              <img src="https://picsum.photos/seed/rentoo-prop-2/800/600" alt="3,500 sqft Warehouse near Sitapura Industrial Area" loading="lazy" width="800" height="600">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">3,500 sqft Warehouse</h3>
+              <p class="card-landmark">near Sitapura Industrial Area</p>
+              <div class="price-row">
+                <span class="price">₹1,20,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+              <p class="card-meta-row"><span class="card-id-listed">Listed today</span></p>
+            </div>
+          </a>
+        </article>
+
+        <article class="property-card" role="listitem">
+          <a href="/rent/1bhk-furnished-rajapark-22" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">#22</span>
+              <img src="https://picsum.photos/seed/rentoo-prop-3/800/600" alt="1BHK Furnished Apartment near Rajapark Market" loading="lazy" width="800" height="600">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">1BHK Furnished Apartment</h3>
+              <p class="card-landmark">near Rajapark Market</p>
+              <div class="price-row">
+                <span class="price">₹18,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+              <p class="card-meta-row"><span class="card-id-listed">Listed yesterday</span></p>
+            </div>
+          </a>
+        </article>
+
+        <article class="property-card" role="listitem">
+          <a href="/rent/3bhk-house-portion-vaishali-31" class="card-link">
+            <div class="card-image">
+              <span class="display-id-tag display-id-tag--card" aria-hidden="true">#31</span>
+              <img src="https://picsum.photos/seed/rentoo-prop-4/800/600" alt="3BHK House Portion in Vaishali Nagar" loading="lazy" width="800" height="600">
+              <span class="status-pill status-pill--available"><span class="dot" aria-hidden="true"></span>Available</span>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">3BHK House Portion</h3>
+              <p class="card-landmark">Vaishali Nagar, near Akshardham</p>
+              <div class="price-row">
+                <span class="price">₹32,000<span class="price-unit"> / mo</span></span>
+                <span class="no-brokerage-badge">No tenant brokerage</span>
+              </div>
+              <p class="card-meta-row"><span class="card-id-listed">Listed 3 days ago</span></p>
+            </div>
+          </a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- BROWSE BY AREA ===================================================== -->
+  <section class="section section--areas" aria-labelledby="areas-title">
+    <div class="section-inner">
+      <header class="section-marker">
+        <span class="section-marker-num" aria-hidden="true">02</span>
+        <h2 id="areas-title">By neighbourhood</h2>
+        <span class="section-marker-meta">Pick what you know</span>
+      </header>
+
+      <div class="area-chips" role="list">
+        <a href="/rent?neighbourhood=mansarovar" role="listitem"><span>Mansarovar</span> <em>34 properties</em></a>
+        <a href="/rent?neighbourhood=c-scheme" role="listitem"><span>C-Scheme</span> <em>12 properties</em></a>
+        <a href="/rent?neighbourhood=bapu-nagar" role="listitem"><span>Bapu Nagar</span> <em>21 properties</em></a>
+        <a href="/rent?neighbourhood=malviya-nagar" role="listitem"><span>Malviya Nagar</span> <em>18 properties</em></a>
+        <a href="/rent?neighbourhood=rajapark" role="listitem"><span>Rajapark</span> <em>9 properties</em></a>
+        <a href="/rent?neighbourhood=vaishali-nagar" role="listitem"><span>Vaishali Nagar</span> <em>26 properties</em></a>
+        <a href="/rent?neighbourhood=vidhyadhar-nagar" role="listitem"><span>Vidhyadhar Nagar</span> <em>14 properties</em></a>
+        <a href="/rent?neighbourhood=jagatpura" role="listitem"><span>Jagatpura</span> <em>11 properties</em></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITORIAL: WHY RENTOO ============================================== -->
+  <section class="editorial-section" aria-labelledby="why-title">
+    <div class="section-inner">
+      <p class="editorial-kicker">A note from the team</p>
+      <h2 id="why-title">Most rental sites in Jaipur list whatever the broker sends them. We don't.</h2>
+
+      <div class="editorial-body">
+        <p>Every property on Rentoo has been visited by someone on our team before it shows up here. We meet the owners, walk the place, take the photos ourselves. If something is broken or the rent is unrealistic, we say so or we don't list it.</p>
+
+        <p>We charge owners a small fee when their property gets rented through us. We <strong>never charge tenants brokerage</strong>. The rent you see on this page is the rent you'll pay, full stop.</p>
+
+        <p>Our phone is the same as our WhatsApp. If you message us, you're messaging Rishabh or someone he works with directly, not a call centre. Most inquiries get a reply within 30 minutes during business hours.</p>
+      </div>
+
+      <div class="editorial-proof" role="list">
+        <div class="proof-stat" role="listitem">
+          <span class="stat-num">247</span>
+          <span class="stat-label">Families placed since 2021</span>
+        </div>
+        <div class="proof-stat" role="listitem">
+          <span class="stat-num">26 min</span>
+          <span class="stat-label">Median WhatsApp response (last 30 days)</span>
+        </div>
+        <div class="proof-stat" role="listitem">
+          <span class="stat-num">₹0</span>
+          <span class="stat-label">Brokerage charged to tenants. Ever.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS ======================================================= -->
+  <section class="section section--testimonials" aria-labelledby="testimonials-title">
+    <div class="section-inner">
+      <header class="section-marker">
+        <span class="section-marker-num" aria-hidden="true">03</span>
+        <h2 id="testimonials-title">Word of mouth</h2>
+        <span class="section-marker-meta">Recent moves</span>
+      </header>
+
+      <div class="testimonial-row" role="list">
+        <figure class="testimonial" role="listitem">
+          <blockquote>
+            <p>Found my Mansarovar apartment in 2 days. Rishabh visited every place with me, no broker games. The photos online were the photos in person.</p>
+          </blockquote>
+          <figcaption>
+            <span class="testimonial-avatar" aria-hidden="true">PS</span>
+            <div>
+              <strong>Priya S.</strong>
+              <span>Software engineer · 2BHK in Mansarovar</span>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="testimonial" role="listitem">
+          <blockquote>
+            <p>We had been searching for office space in C-Scheme for months. Rentoo's listings were the only ones with accurate area numbers and real photos. Signed in a week.</p>
+          </blockquote>
+          <figcaption>
+            <span class="testimonial-avatar" aria-hidden="true">AM</span>
+            <div>
+              <strong>Ankit M.</strong>
+              <span>Startup founder · 900 sqft office in C-Scheme</span>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="testimonial" role="listitem">
+          <blockquote>
+            <p>First time renting in Jaipur from Delhi. Rentoo replied to my WhatsApp at 9pm with everything I needed. Moved in 10 days later. No site visits required from my end.</p>
+          </blockquote>
+          <figcaption>
+            <span class="testimonial-avatar" aria-hidden="true">RK</span>
+            <div>
+              <strong>Rohit K.</strong>
+              <span>Consultant · 3BHK in Vaishali Nagar</span>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURATOR SIGN-OFF =================================================== -->
+  <section class="curator-signoff" aria-labelledby="signoff-title">
+    <div class="section-inner">
+      <div class="signoff-portrait" aria-hidden="true">RJ</div>
+      <div class="signoff-body">
+        <p id="signoff-title">Hi, I'm Rishabh. If you've made it this far, you probably have something specific in mind.</p>
+
+        <p>Tell me what you're after on WhatsApp. Locality, BHK, budget, move-in date, anything that matters. I'll send you 3 to 5 places I'd actually live in myself, with notes on each one.</p>
+
+        <p>If I don't have something right today, I'll keep an eye out and tell you when something fits.</p>
+
+        <div class="signoff-actions">
+          <a href="/api/whatsapp/redirect?ref=curator-signoff" class="btn-whatsapp btn-whatsapp--lg">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+            Send WhatsApp to Rishabh
+          </a>
+        </div>
+
+        <p class="signoff-meta">+91 8741800496 · connect@rentoo.in · Mangalam Radiance, Durgapura</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="Rentoo.png" alt="Rentoo" width="120" height="38" class="footer-logo">
+      <p>Curated rentals across Jaipur, residential and commercial. Hand-verified, no tenant brokerage, fast on WhatsApp.</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Visit us</h4>
+      <address>
+        Mangalam Radiance,<br>
+        Durgapura, Jaipur 302018<br>
+        Rajasthan, India
+      </address>
+    </div>
+
+    <div class="footer-col">
+      <h4>Reach us</h4>
+      <ul>
+        <li><a href="/api/whatsapp/redirect?ref=footer">WhatsApp +91 8741800496</a></li>
+        <li><a href="tel:+918741800496">Call +91 8741800496</a></li>
+        <li><a href="mailto:connect@rentoo.in">connect@rentoo.in</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Popular areas</h4>
+      <ul>
+        <li><a href="/rent?neighbourhood=mansarovar">Mansarovar rentals</a></li>
+        <li><a href="/rent?neighbourhood=c-scheme">C-Scheme rentals</a></li>
+        <li><a href="/rent?neighbourhood=bapu-nagar">Bapu Nagar rentals</a></li>
+        <li><a href="/rent?neighbourhood=malviya-nagar">Malviya Nagar rentals</a></li>
+        <li><a href="/rent?neighbourhood=vaishali-nagar">Vaishali Nagar rentals</a></li>
+        <li><a href="/commercial">All commercial spaces</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Site</h4>
+      <ul>
+        <li><a href="/about">About Rentoo</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/terms">Terms of Use</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-base">
+    <p>&copy; 2026 Rentoo. Operating in Jaipur since 2021.</p>
+  </div>
+</footer>
+
+<script>
+  // Minimal mobile-menu toggle
+  const navToggle = document.querySelector('.nav-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  navToggle?.addEventListener('click', () => {
+    const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+    navToggle.setAttribute('aria-expanded', String(!expanded));
+    mobileMenu.hidden = expanded;
+  });
+</script>
+
+</body>
+</html>
