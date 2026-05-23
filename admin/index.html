@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Properties · Rentoo Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <link rel="stylesheet" href="/rentoo/admin/_admin.css">
+</head>
+<body class="adm-body">
+
+<div class="adm-preview-banner">
+  Demo build · no real authentication · <a href="/rentoo/">return to public site</a>
+</div>
+
+<div class="adm-shell">
+
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <div class="adm-brand-logo">R</div>
+      <div class="adm-brand-name">
+        <strong>Rentoo</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <nav class="adm-nav" aria-label="Admin navigation">
+      <a href="/rentoo/admin/" class="active">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Properties
+      </a>
+      <a href="/rentoo/admin/inquiries/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="adm-nav-badge">3</span>
+      </a>
+      <a href="#owners">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Owners
+      </a>
+      <a href="#analytics">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="adm-nav-section-label">System</div>
+      <a href="#imports">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imports
+      </a>
+      <a href="#audit">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit log
+      </a>
+      <a href="#settings">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="adm-user">
+      <div class="adm-user-avatar">R</div>
+      <div class="adm-user-info">
+        <strong>Rishabh</strong>
+        <span>connect@rentoo.in</span>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="adm-mobile-nav" aria-label="Mobile admin nav">
+    <a href="/rentoo/admin/" class="active">Properties</a>
+    <a href="/rentoo/admin/inquiries/">Inquiries <span style="background:var(--whatsapp-signal);color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:3px">3</span></a>
+    <a href="#owners">Owners</a>
+    <a href="#analytics">Analytics</a>
+    <a href="#settings">Settings</a>
+  </nav>
+
+  <main class="adm-main">
+
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <h1>Properties</h1>
+        <div class="meta">263 total · 142 available · 121 rented</div>
+      </div>
+      <div class="adm-topbar-right">
+        <button class="adm-btn adm-btn-ghost">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Import from Drive
+        </button>
+        <button class="adm-btn adm-btn-primary">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add property
+        </button>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <div class="adm-stats">
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Available now</div>
+          <div class="adm-stat-val">142</div>
+          <div class="adm-stat-delta">↑ 8 this week</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Rented out</div>
+          <div class="adm-stat-val">121</div>
+          <div class="adm-stat-delta">↑ 4 this week</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Inquiries this week</div>
+          <div class="adm-stat-val">38</div>
+          <div class="adm-stat-delta">↑ 12 vs last week</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Median reply</div>
+          <div class="adm-stat-val">26<span style="font-size:14px;color:var(--ink-muted);font-weight:500"> min</span></div>
+          <div class="adm-stat-delta neg">↓ slower by 4 min</div>
+        </div>
+      </div>
+
+      <div class="adm-filter-bar">
+        <div class="adm-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search by ID, landmark, owner name…">
+        </div>
+        <select class="adm-select">
+          <option>All segments</option>
+          <option>Residential under ₹50K</option>
+          <option>Residential ₹50K+</option>
+          <option>Commercial</option>
+        </select>
+        <select class="adm-select">
+          <option>All BHK</option>
+          <option>1BHK</option>
+          <option>2BHK</option>
+          <option>3BHK</option>
+          <option>4BHK+</option>
+        </select>
+        <select class="adm-select">
+          <option>All status</option>
+          <option>Available</option>
+          <option>Rented out</option>
+          <option>Hidden</option>
+        </select>
+        <select class="adm-select">
+          <option>All neighbourhoods</option>
+          <option>Mansarovar</option>
+          <option>C-Scheme</option>
+          <option>Malviya Nagar</option>
+          <option>Bapu Nagar</option>
+        </select>
+      </div>
+
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th style="width:60px"></th>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Landmark · Neighbourhood</th>
+              <th>Owner</th>
+              <th>Rent / mo</th>
+              <th>Area</th>
+              <th>Furnishing</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-1/120/90)"></div></td>
+              <td><span class="adm-cell-id">#01</span></td>
+              <td>2BHK Apt</td>
+              <td><div class="adm-cell-title">RR Heights<small>Gulab Garh · Mansarovar</small></div></td>
+              <td>Rajesh G.</td>
+              <td class="adm-cell-rent">₹35,000</td>
+              <td class="adm-cell-area">1,150 sqft</td>
+              <td>Furnished</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-2/120/90)"></div></td>
+              <td><span class="adm-cell-id">#03</span></td>
+              <td>3BHK Apt</td>
+              <td><div class="adm-cell-title">Krishna Apts<small>Iskcon Temple · Malviya Nagar</small></div></td>
+              <td>Shashi B.</td>
+              <td class="adm-cell-rent">₹23,000</td>
+              <td class="adm-cell-area">1,400 sqft</td>
+              <td>Semi-furn.</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-3/120/90)"></div></td>
+              <td><span class="adm-cell-id">#04</span></td>
+              <td>4BHK Penth.</td>
+              <td><div class="adm-cell-title">Royal Arcade<small>Civil Lines · C-Scheme</small></div></td>
+              <td>Anil M.</td>
+              <td class="adm-cell-rent">₹2,00,000</td>
+              <td class="adm-cell-area">3,200 sqft</td>
+              <td>Furnished</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-4/120/90)"></div></td>
+              <td><span class="adm-cell-id">#05</span></td>
+              <td>2BHK Apt</td>
+              <td><div class="adm-cell-title">Lake View<small>Model Town · Bapu Nagar</small></div></td>
+              <td>Priya S.</td>
+              <td class="adm-cell-rent">₹25,000</td>
+              <td class="adm-cell-area">1,050 sqft</td>
+              <td>Furnished</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-viewed-1/120/90)"></div></td>
+              <td><span class="adm-cell-id">#07</span></td>
+              <td>2BHK Apt</td>
+              <td><div class="adm-cell-title">Birla Residency<small>Birla Temple · C-Scheme</small></div></td>
+              <td>Mohan J.</td>
+              <td class="adm-cell-rent">₹28,000</td>
+              <td class="adm-cell-area">1,180 sqft</td>
+              <td>Furnished</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-viewed-2/120/90)"></div></td>
+              <td><span class="adm-cell-id">#15</span></td>
+              <td>3BHK Villa</td>
+              <td><div class="adm-cell-title">Green Acres<small>Sector 11 · Vidhyadhar Nagar</small></div></td>
+              <td>Sandeep R.</td>
+              <td class="adm-cell-rent">₹65,000</td>
+              <td class="adm-cell-area">2,400 sqft</td>
+              <td>Semi-furn.</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-viewed-3/120/90)"></div></td>
+              <td><span class="adm-cell-id">#22</span></td>
+              <td>1BHK Apt</td>
+              <td><div class="adm-cell-title">Sunshine Heights<small>Sector 4 · Rajapark</small></div></td>
+              <td>Neha A.</td>
+              <td class="adm-cell-rent">₹18,000</td>
+              <td class="adm-cell-area">620 sqft</td>
+              <td>Furnished</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr style="opacity:0.7">
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-1/120/90)"></div></td>
+              <td><span class="adm-cell-id">#31</span></td>
+              <td>3BHK House</td>
+              <td><div class="adm-cell-title">Maharaja House<small>Sector 7 · Vaishali Nagar</small></div></td>
+              <td>Vikash T.</td>
+              <td class="adm-cell-rent">₹32,000</td>
+              <td class="adm-cell-area">1,800 sqft</td>
+              <td>Semi-furn.</td>
+              <td><button class="adm-toggle adm-toggle-off"><span class="dot"></span>Rented out</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-2/120/90)"></div></td>
+              <td><span class="adm-cell-id">C-3</span></td>
+              <td>Office</td>
+              <td><div class="adm-cell-title">Empire Tower<small>Mirza Ismail Rd · C-Scheme</small></div></td>
+              <td>Vijay K.</td>
+              <td class="adm-cell-rent">₹2,00,000</td>
+              <td class="adm-cell-area">3,000 sqft</td>
+              <td>Furnished</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+            <tr>
+              <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-3/120/90)"></div></td>
+              <td><span class="adm-cell-id">C-7</span></td>
+              <td>Warehouse</td>
+              <td><div class="adm-cell-title">Sitapura Industrial<small>Phase 4 · Sitapura</small></div></td>
+              <td>Logistics Co.</td>
+              <td class="adm-cell-rent">₹3,60,000</td>
+              <td class="adm-cell-area">12,000 sqft</td>
+              <td>Bare shell</td>
+              <td><button class="adm-toggle adm-toggle-on"><span class="dot"></span>Available</button></td>
+              <td><button class="adm-edit-btn">Edit ›</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="adm-table-foot">
+          <div>Showing 1–10 of 263 properties</div>
+          <div class="adm-pagination">
+            <button class="adm-page-btn" disabled>‹</button>
+            <button class="adm-page-btn active">1</button>
+            <button class="adm-page-btn">2</button>
+            <button class="adm-page-btn">3</button>
+            <span style="padding:4px">…</span>
+            <button class="adm-page-btn">27</button>
+            <button class="adm-page-btn">›</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:var(--space-md);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-muted);text-align:center">
+        Tap a status pill to toggle without opening the listing &nbsp;·&nbsp;
+        Bulk actions appear when you select multiple rows
+      </p>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

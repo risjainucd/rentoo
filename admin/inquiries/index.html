@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Inquiries · Rentoo Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <link rel="stylesheet" href="/rentoo/admin/_admin.css">
+</head>
+<body class="adm-body">
+
+<div class="adm-preview-banner">
+  Demo build · no real authentication · <a href="/rentoo/">return to public site</a>
+</div>
+
+<div class="adm-shell">
+
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <div class="adm-brand-logo">R</div>
+      <div class="adm-brand-name">
+        <strong>Rentoo</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <nav class="adm-nav" aria-label="Admin navigation">
+      <a href="/rentoo/admin/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Properties
+      </a>
+      <a href="/rentoo/admin/inquiries/" class="active">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="adm-nav-badge">3</span>
+      </a>
+      <a href="#owners">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Owners
+      </a>
+      <a href="#analytics">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="adm-nav-section-label">System</div>
+      <a href="#imports">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imports
+      </a>
+      <a href="#audit">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit log
+      </a>
+      <a href="#settings">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="adm-user">
+      <div class="adm-user-avatar">R</div>
+      <div class="adm-user-info">
+        <strong>Rishabh</strong>
+        <span>connect@rentoo.in</span>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="adm-mobile-nav" aria-label="Mobile admin nav">
+    <a href="/rentoo/admin/">Properties</a>
+    <a href="/rentoo/admin/inquiries/" class="active">Inquiries <span style="background:var(--whatsapp-signal);color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:3px">3</span></a>
+    <a href="#owners">Owners</a>
+    <a href="#analytics">Analytics</a>
+    <a href="#settings">Settings</a>
+  </nav>
+
+  <main class="adm-main">
+
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <h1>Inquiries</h1>
+        <div class="meta">3 new · 8 contacted · 12 closed this week</div>
+      </div>
+      <div class="adm-topbar-right">
+        <button class="adm-btn adm-btn-ghost">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Export CSV
+        </button>
+        <button class="adm-btn adm-btn-primary">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Mark all read
+        </button>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <div class="adm-stats">
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">New (unread)</div>
+          <div class="adm-stat-val" style="color:var(--terracotta)">3</div>
+          <div class="adm-stat-delta">Need reply</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Median reply time</div>
+          <div class="adm-stat-val">26<span style="font-size:14px;color:var(--ink-muted);font-weight:500"> min</span></div>
+          <div class="adm-stat-delta">Within target (30 min)</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Conversion this month</div>
+          <div class="adm-stat-val">14%</div>
+          <div class="adm-stat-delta">↑ 3% vs last month</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">WhatsApp share</div>
+          <div class="adm-stat-val">87%</div>
+          <div class="adm-stat-delta">vs callback / form</div>
+        </div>
+      </div>
+
+      <div class="adm-filter-bar">
+        <div class="adm-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search name, phone, property ID…">
+        </div>
+        <select class="adm-select">
+          <option>All statuses</option>
+          <option>New</option>
+          <option>Contacted</option>
+          <option>Visit scheduled</option>
+          <option>Closed</option>
+        </select>
+        <select class="adm-select">
+          <option>All channels</option>
+          <option>WhatsApp</option>
+          <option>Callback request</option>
+          <option>Web form</option>
+        </select>
+        <select class="adm-select">
+          <option>Last 7 days</option>
+          <option>Last 30 days</option>
+          <option>All time</option>
+        </select>
+      </div>
+
+      <div class="adm-inquiry-list">
+
+        <article class="adm-inquiry">
+          <div class="adm-inquiry-avatar">AS</div>
+          <div class="adm-inquiry-body">
+            <div class="adm-inquiry-head">
+              <span class="adm-inquiry-name">Aditi Sharma</span>
+              <span class="adm-inquiry-time">2 min ago · WhatsApp</span>
+              <span class="adm-inquiry-status adm-inquiry-status--new">New</span>
+            </div>
+            <p class="adm-inquiry-message">"Hi Rentoo, interested in <strong>#01</strong> — 2BHK Gulab Garh. Is it still available? Can I see it Saturday morning?" · <a href="tel:+919876543210" style="color:var(--jaipur-navy)">+91 98765 43210</a></p>
+            <span class="adm-inquiry-prop">→ #01 · 2BHK Mansarovar</span>
+          </div>
+          <div class="adm-inquiry-actions">
+            <a href="https://wa.me/919876543210" class="adm-btn adm-btn-primary" style="background:var(--whatsapp-signal)">Reply on WhatsApp</a>
+            <button class="adm-btn adm-btn-ghost">Schedule visit</button>
+          </div>
+        </article>
+
+        <article class="adm-inquiry">
+          <div class="adm-inquiry-avatar">VK</div>
+          <div class="adm-inquiry-body">
+            <div class="adm-inquiry-head">
+              <span class="adm-inquiry-name">Vikram Kumar</span>
+              <span class="adm-inquiry-time">11 min ago · WhatsApp</span>
+              <span class="adm-inquiry-status adm-inquiry-status--new">New</span>
+            </div>
+            <p class="adm-inquiry-message">"Looking for 3BHK in Bapu Nagar, budget under ₹30K. Family of 4, moving end of month." · <a href="tel:+919821000456" style="color:var(--jaipur-navy)">+91 98210 00456</a></p>
+            <span class="adm-inquiry-prop" style="background:var(--rest-mist);color:var(--rest-gray)">No specific property</span>
+          </div>
+          <div class="adm-inquiry-actions">
+            <a href="https://wa.me/919821000456" class="adm-btn adm-btn-primary" style="background:var(--whatsapp-signal)">Reply on WhatsApp</a>
+            <button class="adm-btn adm-btn-ghost">Send 3 matches</button>
+          </div>
+        </article>
+
+        <article class="adm-inquiry">
+          <div class="adm-inquiry-avatar">RM</div>
+          <div class="adm-inquiry-body">
+            <div class="adm-inquiry-head">
+              <span class="adm-inquiry-name">Logistics Co. (Rohit M.)</span>
+              <span class="adm-inquiry-time">34 min ago · Callback</span>
+              <span class="adm-inquiry-status adm-inquiry-status--new">New</span>
+            </div>
+            <p class="adm-inquiry-message">"Need warehouse, 10–15K sqft, Sitapura or Bagru. Power load 50KW+. Long lease OK." · <a href="tel:+919414567890" style="color:var(--jaipur-navy)">+91 94145 67890</a></p>
+            <span class="adm-inquiry-prop">→ C-7 · 12,000 sqft warehouse Sitapura</span>
+          </div>
+          <div class="adm-inquiry-actions">
+            <button class="adm-btn adm-btn-primary">Call back</button>
+            <button class="adm-btn adm-btn-ghost">Send details</button>
+          </div>
+        </article>
+
+        <article class="adm-inquiry">
+          <div class="adm-inquiry-avatar">PS</div>
+          <div class="adm-inquiry-body">
+            <div class="adm-inquiry-head">
+              <span class="adm-inquiry-name">Priya Singh</span>
+              <span class="adm-inquiry-time">3 hr ago · WhatsApp</span>
+              <span class="adm-inquiry-status adm-inquiry-status--contacted">Contacted</span>
+            </div>
+            <p class="adm-inquiry-message">"Visit confirmed for Sunday 11 AM at <strong>#03</strong>. Will call when reaching." · <a href="tel:+919555123789" style="color:var(--jaipur-navy)">+91 95551 23789</a></p>
+            <span class="adm-inquiry-prop">→ #03 · 3BHK Iskcon</span>
+          </div>
+          <div class="adm-inquiry-actions">
+            <button class="adm-btn adm-btn-ghost">Mark visited</button>
+          </div>
+        </article>
+
+        <article class="adm-inquiry">
+          <div class="adm-inquiry-avatar">NA</div>
+          <div class="adm-inquiry-body">
+            <div class="adm-inquiry-head">
+              <span class="adm-inquiry-name">Neha Agarwal</span>
+              <span class="adm-inquiry-time">Yesterday · WhatsApp</span>
+              <span class="adm-inquiry-status adm-inquiry-status--contacted">Contacted</span>
+            </div>
+            <p class="adm-inquiry-message">"Asked about <strong>#22</strong> — sent photos and rent confirmation. Owner waiting for response."</p>
+            <span class="adm-inquiry-prop">→ #22 · 1BHK Rajapark</span>
+          </div>
+          <div class="adm-inquiry-actions">
+            <button class="adm-btn adm-btn-ghost">Follow up</button>
+          </div>
+        </article>
+
+        <article class="adm-inquiry" style="opacity:0.75">
+          <div class="adm-inquiry-avatar">SK</div>
+          <div class="adm-inquiry-body">
+            <div class="adm-inquiry-head">
+              <span class="adm-inquiry-name">Sandeep Khanna</span>
+              <span class="adm-inquiry-time">2 days ago · WhatsApp</span>
+              <span class="adm-inquiry-status adm-inquiry-status--closed">Closed — signed</span>
+            </div>
+            <p class="adm-inquiry-message">"Lease signed for <strong>#31</strong>. Moving in next week. Will share keys handover date."</p>
+            <span class="adm-inquiry-prop">→ #31 · 3BHK Vaishali (rented)</span>
+          </div>
+          <div class="adm-inquiry-actions">
+            <button class="adm-btn adm-btn-ghost">View thread</button>
+          </div>
+        </article>
+
+      </div>
+
+      <div style="margin-top:var(--space-md);text-align:center">
+        <button class="adm-btn adm-btn-ghost">Load older inquiries</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
