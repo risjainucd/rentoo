@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Commercial spaces in Jaipur — Offices, retail, warehouses · Rentoo</title>
+  <meta name="description" content="Hand-verified commercial spaces in Jaipur — offices, shops, warehouses. C-Scheme, Tonk Road, Sitapura industrial. No tenant brokerage. WhatsApp-first inquiries.">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <style>
+    .listings-head{background:var(--paper);padding-block:var(--space-3xl) var(--space-xl);border-bottom:1px solid var(--line)}
+    .listings-head .section-inner{max-width:var(--max-w)}
+    .listings-head h1{font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.1;letter-spacing:-0.02em;max-width:24ch;margin-top:var(--space-md)}
+    .listings-head .sub{margin-top:var(--space-md);font-size:1rem;color:var(--ink-muted);max-width:56ch}
+
+    .segment-tabs{display:flex;flex-wrap:wrap;gap:var(--space-sm);margin-top:var(--space-lg);padding-top:var(--space-lg);border-top:1px solid var(--line)}
+    .segment-tabs a{padding:8px var(--space-md);font-size:0.875rem;font-weight:500;background:var(--paper);border:1px solid var(--line);border-radius:999px;color:var(--ink-muted)}
+    .segment-tabs a.active{background:var(--jaipur-navy);color:var(--paper);border-color:var(--jaipur-navy);font-weight:600}
+    .segment-tabs a:hover:not(.active){border-color:var(--jaipur-navy);color:var(--ink)}
+
+    .listings-layout{padding-block:var(--space-2xl) var(--space-4xl)}
+    .listings-layout .section-inner{display:grid;gap:var(--space-2xl);grid-template-columns:1fr}
+    @media(min-width:1024px){.listings-layout .section-inner{grid-template-columns:260px 1fr;gap:var(--space-3xl);align-items:start}}
+
+    .filter-rail{background:var(--paper-snow);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-lg)}
+    @media(min-width:1024px){.filter-rail{position:sticky;top:calc(var(--header-h) + var(--space-lg))}}
+    .filter-rail h2{font-size:0.875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:var(--space-md)}
+    .filter-group{padding-block:var(--space-md);border-bottom:1px solid var(--line)}
+    .filter-group:last-of-type{border-bottom:none}
+    .filter-group legend{font-family:var(--font-mono);font-size:0.6875rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:var(--space-sm)}
+    .filter-opt{display:flex;align-items:center;gap:var(--space-sm);padding:6px 0;font-size:0.9375rem;color:var(--ink);cursor:pointer}
+    .filter-opt input{margin:0;accent-color:var(--jaipur-navy)}
+    .filter-opt span.count{margin-left:auto;font-family:var(--font-mono);font-size:0.75rem;color:var(--ink-soft)}
+    .filter-input{width:100%;padding:8px var(--space-md);border:1px solid var(--line);border-radius:var(--r-sm);font-size:0.9375rem;background:var(--paper);color:var(--ink)}
+    .filter-actions{margin-top:var(--space-lg);display:flex;gap:var(--space-sm)}
+    .filter-actions button{flex:1;font-size:0.875rem;font-weight:600;padding:10px;border-radius:var(--r-sm)}
+    .btn-apply{background:var(--jaipur-navy);color:var(--paper)}
+    .btn-clear{background:transparent;color:var(--ink-muted);border:1px solid var(--line)}
+
+    .results-bar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--space-md);padding-bottom:var(--space-lg);border-bottom:1px solid var(--line);margin-bottom:var(--space-xl)}
+    .results-count{font-family:var(--font-mono);font-size:0.8125rem;letter-spacing:0.06em;color:var(--ink-muted);text-transform:uppercase}
+    .results-count strong{color:var(--ink);font-weight:700}
+    .results-sort{display:flex;align-items:center;gap:var(--space-sm);font-size:0.875rem;color:var(--ink-muted)}
+    .results-sort select{background:transparent;border:1px solid var(--line);padding:6px var(--space-md);border-radius:var(--r-sm);font-size:0.875rem;color:var(--ink)}
+
+    .listing-grid{display:grid;gap:var(--space-lg);grid-template-columns:1fr}
+    @media(min-width:640px){.listing-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:1280px){.listing-grid{grid-template-columns:repeat(3,1fr)}}
+
+    /* Commercial card variant - shows sqft prominently */
+    .property-card .card-area{font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.04em;color:var(--terracotta);text-transform:uppercase;font-weight:600}
+    .price-row-commercial{display:flex;align-items:baseline;gap:var(--space-sm);flex-wrap:wrap}
+    .price-row-commercial .price-per-sqft{font-size:0.8125rem;color:var(--ink-muted)}
+
+    .why-commercial{margin-top:var(--space-3xl);padding:var(--space-xl);background:var(--paper-warm);border:1px solid var(--line);border-radius:var(--r-md)}
+    .why-commercial h3{font-size:1.0625rem;font-weight:600;margin-bottom:var(--space-md);color:var(--ink)}
+    .why-grid{display:grid;gap:var(--space-md);grid-template-columns:1fr;margin-top:var(--space-md)}
+    @media(min-width:768px){.why-grid{grid-template-columns:repeat(3,1fr)}}
+    .why-item h4{font-family:var(--font-mono);font-size:0.6875rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--terracotta);font-weight:700;margin-bottom:var(--space-xs)}
+    .why-item p{font-size:0.875rem;color:var(--ink-muted);line-height:1.55;margin:0}
+
+    .mobile-filter-bar{display:flex;gap:var(--space-sm);overflow-x:auto;padding:var(--space-sm) 0;margin-bottom:var(--space-lg);scrollbar-width:none}
+    .mobile-filter-bar::-webkit-scrollbar{display:none}
+    .mobile-filter-bar button{flex-shrink:0;padding:8px var(--space-md);font-size:0.8125rem;font-weight:500;background:var(--paper);border:1px solid var(--line);border-radius:999px;color:var(--ink-muted)}
+    .mobile-filter-bar button.active{background:var(--jaipur-navy);color:var(--paper);border-color:var(--jaipur-navy)}
+    @media(min-width:1024px){.mobile-filter-bar{display:none}}
+  </style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site-header" role="banner">
+  <div class="nav-inner">
+    <a href="/rentoo/" class="logo" aria-label="Rentoo home"><img src="/rentoo/Rentoo.png" alt="Rentoo" width="120" height="38"></a>
+    <nav class="primary-nav" aria-label="Primary">
+      <a href="/rentoo/rent/">Rent</a>
+      <a href="/rentoo/commercial/" aria-current="page">Commercial</a>
+      <a href="/rentoo/about/">About</a>
+      <a href="/rentoo/preview/">Preview</a>
+    </nav>
+    <a href="https://wa.me/918741800496" class="btn-whatsapp">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+      <span>WhatsApp us</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="listings-head">
+    <div class="section-inner">
+      <div class="byline">
+        <span class="byline-label">Catalog</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-meta">Commercial spaces · Jaipur</span>
+      </div>
+      <h1>Offices, retail, and warehouses across Jaipur.</h1>
+      <p class="sub">Spaces we've walked through and can vouch for. From a 600 sq ft consulting office in C-Scheme to a 12,000 sq ft warehouse in Sitapura — every listing has a real floor plan, real photos, and a real owner we've already talked to.</p>
+      <div class="segment-tabs">
+        <a href="/rentoo/commercial/" class="active">All commercial</a>
+        <a href="/rentoo/commercial/?type=office">Office</a>
+        <a href="/rentoo/commercial/?type=retail">Retail / Shop</a>
+        <a href="/rentoo/commercial/?type=warehouse">Warehouse</a>
+        <a href="/rentoo/commercial/?type=showroom">Showroom</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="listings-layout">
+    <div class="section-inner">
+
+      <aside class="filter-rail" aria-label="Filter commercial spaces">
+        <h2>Filters</h2>
+
+        <fieldset class="filter-group" style="border:none;padding-inline:0">
+          <legend>Locality</legend>
+          <input type="text" class="filter-input" placeholder="C-Scheme, Tonk Road…" value="">
+        </fieldset>
+
+        <fieldset class="filter-group" style="border-top:1px solid var(--line);padding-top:var(--space-md);border-bottom:1px solid var(--line)">
+          <legend>Space type</legend>
+          <label class="filter-opt"><input type="checkbox" checked> Office <span class="count">18</span></label>
+          <label class="filter-opt"><input type="checkbox" checked> Retail / Shop <span class="count">12</span></label>
+          <label class="filter-opt"><input type="checkbox" checked> Warehouse <span class="count">7</span></label>
+          <label class="filter-opt"><input type="checkbox"> Showroom <span class="count">5</span></label>
+          <label class="filter-opt"><input type="checkbox"> Industrial shed <span class="count">3</span></label>
+        </fieldset>
+
+        <fieldset class="filter-group">
+          <legend>Area (sq ft)</legend>
+          <div style="display:flex;gap:var(--space-sm);align-items:center">
+            <input type="text" class="filter-input" placeholder="Min" value="" style="font-variant-numeric:tabular-nums">
+            <span style="color:var(--ink-soft)">–</span>
+            <input type="text" class="filter-input" placeholder="Max" value="" style="font-variant-numeric:tabular-nums">
+          </div>
+        </fieldset>
+
+        <fieldset class="filter-group">
+          <legend>Monthly budget</legend>
+          <div style="display:flex;gap:var(--space-sm);align-items:center">
+            <input type="text" class="filter-input" placeholder="Min ₹" value="" style="font-variant-numeric:tabular-nums">
+            <span style="color:var(--ink-soft)">–</span>
+            <input type="text" class="filter-input" placeholder="Max ₹" value="" style="font-variant-numeric:tabular-nums">
+          </div>
+        </fieldset>
+
+        <fieldset class="filter-group" style="border-bottom:none">
+          <legend>Furnishing</legend>
+          <label class="filter-opt"><input type="checkbox"> Fully furnished <span class="count">14</span></label>
+          <label class="filter-opt"><input type="checkbox"> Semi-furnished <span class="count">19</span></label>
+          <label class="filter-opt"><input type="checkbox"> Bare shell <span class="count">12</span></label>
+        </fieldset>
+
+        <div class="filter-actions">
+          <button class="btn-apply" type="button">Apply</button>
+          <button class="btn-clear" type="button">Clear</button>
+        </div>
+      </aside>
+
+      <div>
+        <div class="mobile-filter-bar" aria-label="Quick filters">
+          <button class="active">All 45</button>
+          <button>Office</button>
+          <button>Retail</button>
+          <button>Warehouse</button>
+          <button>C-Scheme</button>
+          <button>Under ₹1L</button>
+        </div>
+
+        <div class="results-bar">
+          <div class="results-count"><strong>45</strong> commercial spaces · updated 3 days ago</div>
+          <label class="results-sort">Sort
+            <select>
+              <option>Newest first</option>
+              <option>Rent — low to high</option>
+              <option>Area — large to small</option>
+              <option>Price per sq ft</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="listing-grid">
+
+          <article class="property-card">
+            <a href="/rentoo/rent/2bhk-furnished-apartment-gulab-garh-01/" class="card-link">
+              <div class="card-image">
+                <div class="display-id-tag display-id-tag--card">C-3</div>
+                <span class="verified-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>Verified</span>
+                <span class="status-pill status-pill--available"><span class="dot"></span>Available</span>
+                <img src="https://picsum.photos/seed/rentoo-prop-3/800/600" alt="Office space in C-Scheme">
+              </div>
+              <div class="card-body">
+                <div class="price-row price-row-commercial">
+                  <span class="price">₹2,00,000</span>
+                  <span class="price-unit">/ month</span>
+                  <span class="price-per-sqft">· ₹66/sqft</span>
+                </div>
+                <h3 class="card-title">Office space on Mirza Ismail Road, C-Scheme</h3>
+                <p class="card-landmark">Furnished · 3 cabins, 18 workstations · Reception</p>
+                <div class="card-meta-row">
+                  <span>C-3 · </span><span class="card-area">3,000 sq ft</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="property-card">
+            <a href="/rentoo/rent/2bhk-furnished-apartment-gulab-garh-01/" class="card-link">
+              <div class="card-image">
+                <div class="display-id-tag display-id-tag--card">C-7</div>
+                <span class="verified-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>Verified</span>
+                <span class="status-pill status-pill--available"><span class="dot"></span>Available</span>
+                <img src="https://picsum.photos/seed/rentoo-prop-4/800/600" alt="Warehouse in Sitapura">
+              </div>
+              <div class="card-body">
+                <div class="price-row price-row-commercial">
+                  <span class="price">₹3,60,000</span>
+                  <span class="price-unit">/ month</span>
+                  <span class="price-per-sqft">· ₹30/sqft</span>
+                </div>
+                <h3 class="card-title">12,000 sqft warehouse in Sitapura Industrial Area</h3>
+                <p class="card-landmark">Bare shell · 30 ft clear height · Truck access</p>
+                <div class="card-meta-row">
+                  <span>C-7 · </span><span class="card-area">12,000 sq ft</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="property-card">
+            <a href="/rentoo/rent/2bhk-furnished-apartment-gulab-garh-01/" class="card-link">
+              <div class="card-image">
+                <div class="display-id-tag display-id-tag--card">C-2</div>
+                <span class="verified-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>Verified</span>
+                <span class="status-pill status-pill--available"><span class="dot"></span>Available</span>
+                <img src="https://picsum.photos/seed/rentoo-prop-2/800/600" alt="Retail shop on Tonk Road">
+              </div>
+              <div class="card-body">
+                <div class="price-row price-row-commercial">
+                  <span class="price">₹85,000</span>
+                  <span class="price-unit">/ month</span>
+                  <span class="price-per-sqft">· ₹142/sqft</span>
+                </div>
+                <h3 class="card-title">Ground-floor retail space on Tonk Road</h3>
+                <p class="card-landmark">Bare shell · Frontage 18 ft · High footfall</p>
+                <div class="card-meta-row">
+                  <span>C-2 · </span><span class="card-area">600 sq ft</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="property-card">
+            <a href="/rentoo/rent/2bhk-furnished-apartment-gulab-garh-01/" class="card-link">
+              <div class="card-image">
+                <div class="display-id-tag display-id-tag--card">C-9</div>
+                <span class="verified-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>Verified</span>
+                <span class="status-pill status-pill--available"><span class="dot"></span>Available</span>
+                <img src="https://picsum.photos/seed/rentoo-prop-1/800/600" alt="Office in Malviya Nagar">
+              </div>
+              <div class="card-body">
+                <div class="price-row price-row-commercial">
+                  <span class="price">₹65,000</span>
+                  <span class="price-unit">/ month</span>
+                  <span class="price-per-sqft">· ₹54/sqft</span>
+                </div>
+                <h3 class="card-title">Semi-furnished office in Malviya Nagar near JLN Marg</h3>
+                <p class="card-landmark">Semi-furnished · 4 cabins, open floor · 2 washrooms</p>
+                <div class="card-meta-row">
+                  <span>C-9 · </span><span class="card-area">1,200 sq ft</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="property-card">
+            <a href="/rentoo/rent/2bhk-furnished-apartment-gulab-garh-01/" class="card-link">
+              <div class="card-image">
+                <div class="display-id-tag display-id-tag--card">C-12</div>
+                <span class="verified-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>Verified</span>
+                <span class="status-pill status-pill--rented"><span class="dot"></span>Rented out</span>
+                <img src="https://picsum.photos/seed/rentoo-viewed-3/600/450" alt="Showroom in Vaishali">
+              </div>
+              <div class="card-body">
+                <div class="price-row price-row-commercial">
+                  <span class="price">₹1,25,000</span>
+                  <span class="price-unit">/ month</span>
+                  <span class="price-per-sqft">· ₹71/sqft</span>
+                </div>
+                <h3 class="card-title">Showroom with road-facing glass front in Vaishali Nagar</h3>
+                <p class="card-landmark">Furnished · 14 ft frontage · Mezzanine</p>
+                <div class="card-meta-row">
+                  <span>C-12 · </span><span class="card-area">1,750 sq ft</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="property-card">
+            <a href="/rentoo/rent/2bhk-furnished-apartment-gulab-garh-01/" class="card-link">
+              <div class="card-image">
+                <div class="display-id-tag display-id-tag--card">C-5</div>
+                <span class="verified-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>Verified</span>
+                <span class="status-pill status-pill--available"><span class="dot"></span>Available</span>
+                <img src="https://picsum.photos/seed/rentoo-viewed-2/600/450" alt="Co-working ready office in Jagatpura">
+              </div>
+              <div class="card-body">
+                <div class="price-row price-row-commercial">
+                  <span class="price">₹38,000</span>
+                  <span class="price-unit">/ month</span>
+                  <span class="price-per-sqft">· ₹76/sqft</span>
+                </div>
+                <h3 class="card-title">Co-working ready office in Jagatpura</h3>
+                <p class="card-landmark">Furnished · Reception + 10 desks · Conference room</p>
+                <div class="card-meta-row">
+                  <span>C-5 · </span><span class="card-area">500 sq ft</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+        </div>
+
+        <div style="text-align:center;margin-top:var(--space-2xl)">
+          <a href="https://wa.me/918741800496?text=Hi%2C%20looking%20for%20a%20commercial%20space" class="btn-secondary">Looking for a specific kind of space? Tell us on WhatsApp →</a>
+        </div>
+
+        <div class="why-commercial">
+          <h3>Working with us on a commercial deal</h3>
+          <div class="why-grid">
+            <div class="why-item">
+              <h4>01 · We pre-screen</h4>
+              <p>Every commercial owner here has agreed to our paperwork, our rent escalation clauses, and our standard lease terms. We don't list owners we wouldn't sign with ourselves.</p>
+            </div>
+            <div class="why-item">
+              <h4>02 · We co-sign visits</h4>
+              <p>For commercial visits, someone from our team is usually there. We answer the boring stuff about NOC, power load, lift access, and electricity meter — so you don't have to chase the owner.</p>
+            </div>
+            <div class="why-item">
+              <h4>03 · We help with the lease</h4>
+              <p>We have a standard commercial lease template that's been reviewed by our lawyer. Owners and tenants both use it. Saves two weeks of back-and-forth.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand"><img src="/rentoo/Rentoo.png" alt="Rentoo" class="footer-logo"><p>A small, hand-run rental brokerage in Jaipur. We visit every property and charge owners, not tenants.</p></div>
+    <div class="footer-col"><h4>Browse</h4><ul><li><a href="/rentoo/rent/">Rent in Jaipur</a></li><li><a href="/rentoo/commercial/">Commercial spaces</a></li><li><a href="/rentoo/about/">About</a></li></ul></div>
+    <div class="footer-col"><h4>Areas</h4><ul><li><a href="/rentoo/rent/?neighbourhood=mansarovar">Mansarovar</a></li><li><a href="/rentoo/rent/?neighbourhood=c-scheme">C-Scheme</a></li><li><a href="/rentoo/rent/?neighbourhood=bapu-nagar">Bapu Nagar</a></li><li><a href="/rentoo/rent/?neighbourhood=malviya-nagar">Malviya Nagar</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><address><a href="tel:+918741800496">+91 87418 00496</a><br><a href="mailto:connect@rentoo.in">connect@rentoo.in</a><br>Mon–Sat · 10:00–19:30 IST</address></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="/rentoo/preview/">Design preview</a></li></ul></div>
+  </div>
+  <div class="footer-base">© 2026 Rentoo, Jaipur. Photos and listings are watermarked and may not be reused without permission.</div>
+</footer>
+
+</body>
+</html>

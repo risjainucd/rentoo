@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>About Rentoo — A small Jaipur brokerage</title>
+  <meta name="description" content="Rentoo is a small, hand-run rental brokerage in Jaipur. We visit every property, no tenant brokerage, WhatsApp-first replies within 30 minutes.">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <style>
+    .about-hero { background: var(--paper); padding-block: var(--space-3xl) var(--space-2xl); border-bottom: 1px solid var(--line); }
+    @media (min-width: 768px) { .about-hero { padding-block: var(--space-4xl) var(--space-3xl); } }
+    .about-hero .section-inner { max-width: 760px; }
+    .about-hero h1 { font-size: clamp(2rem, 5.5vw, 3.25rem); line-height: 1.05; letter-spacing: -0.022em; max-width: 16ch; margin-top: var(--space-md); }
+    .about-hero .lede { font-size: 1.125rem; line-height: 1.6; color: var(--ink-muted); margin-top: var(--space-xl); max-width: 56ch; }
+
+    .about-prose { padding-block: var(--space-4xl); }
+    .about-prose .section-inner { max-width: 720px; }
+    .about-prose h2 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.01em; margin-bottom: var(--space-lg); }
+    .about-prose p { font-size: 1.0625rem; line-height: 1.7; color: var(--ink-muted); margin-bottom: var(--space-lg); }
+    .about-prose p strong { color: var(--ink); font-weight: 600; }
+    .about-prose .block { margin-bottom: var(--space-3xl); }
+    .about-prose .block:last-child { margin-bottom: 0; }
+
+    .process-list { counter-reset: step; margin-top: var(--space-xl); }
+    .process-step { display: grid; grid-template-columns: 56px 1fr; gap: var(--space-lg); padding: var(--space-lg) 0; border-bottom: 1px solid var(--line); }
+    .process-step:last-child { border-bottom: none; }
+    .process-step::before { counter-increment: step; content: "0" counter(step); font-family: var(--font-mono); font-size: 0.875rem; font-weight: 700; letter-spacing: 0.08em; color: var(--terracotta); padding-top: 4px; }
+    .process-step h3 { font-size: 1.125rem; margin-bottom: 4px; color: var(--ink); font-weight: 600; }
+    .process-step p { font-size: 0.9375rem; line-height: 1.55; color: var(--ink-muted); margin: 0; }
+
+    .ledger { display: grid; gap: var(--space-md); grid-template-columns: 1fr 1fr; margin-top: var(--space-xl); padding: var(--space-xl); background: var(--paper-warm); border: 1px solid var(--line); border-radius: var(--r-md); }
+    @media (min-width: 640px) { .ledger { grid-template-columns: repeat(4, 1fr); } }
+    .ledger dt { font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 4px; }
+    .ledger dd { font-size: 1.5rem; font-weight: 700; color: var(--jaipur-navy); margin: 0; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+    .ledger dd small { display: block; font-size: 0.75rem; font-weight: 500; color: var(--ink-muted); letter-spacing: 0; margin-top: 2px; }
+
+    .contact-card { margin-top: var(--space-2xl); padding: var(--space-xl); background: var(--paper-snow); border: 1px solid var(--line); border-radius: var(--r-md); }
+    .contact-card h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-md); color: var(--ink); }
+    .contact-row { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-lg); }
+    .contact-row a { font-size: 0.9375rem; }
+    .contact-meta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-muted); letter-spacing: 0.04em; margin-top: var(--space-lg); }
+  </style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="site-header" role="banner">
+  <div class="nav-inner">
+    <a href="/rentoo/" class="logo" aria-label="Rentoo home">
+      <img src="/rentoo/Rentoo.png" alt="Rentoo" width="120" height="38">
+    </a>
+    <nav class="primary-nav" aria-label="Primary">
+      <a href="/rentoo/rent/">Rent</a>
+      <a href="/rentoo/commercial/">Commercial</a>
+      <a href="/rentoo/about/" aria-current="page">About</a>
+      <a href="/rentoo/preview/">Preview</a>
+    </nav>
+    <a href="https://wa.me/918741800496" class="btn-whatsapp">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+      <span>WhatsApp us</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="about-hero">
+    <div class="section-inner">
+      <div class="byline">
+        <span class="byline-label">About</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-meta">Jaipur, since 2021</span>
+      </div>
+      <h1>A small Jaipur brokerage. Run by people who pick up the phone.</h1>
+      <p class="lede">
+        Rentoo is a hand-run rental brokerage. We don't list everything we find — we list
+        what we'd be comfortable putting a friend into. That's the whole product.
+      </p>
+    </div>
+  </section>
+
+  <section class="about-prose">
+    <div class="section-inner">
+
+      <div class="block">
+        <h2>Why we started this.</h2>
+        <p>
+          Most rental searches in Jaipur start the same way: a forwarded WhatsApp picture,
+          a phone number that goes to voicemail, three site visits where the photo and the
+          flat don't match, and a brokerage demand at the end that nobody told you about.
+        </p>
+        <p>
+          We didn't want to fix the whole rental market. We wanted to be the small,
+          accountable thing inside it — <strong>visit every property, write our own
+          notes, charge owners not tenants, and reply on WhatsApp before the lead goes cold.</strong>
+          Five years in, that's still the bar.
+        </p>
+      </div>
+
+      <div class="block">
+        <h2>How we actually work.</h2>
+        <div class="process-list">
+          <div class="process-step">
+            <div>
+              <h3>We visit the property.</h3>
+              <p>Every listing is walked through by someone on the team. We photograph what's
+              actually there, not what the owner sent us last year.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <div>
+              <h3>We write the listing ourselves.</h3>
+              <p>Short, honest notes about the flat, the building, the neighbours, the catch.
+              If there's no parking, we say so. If the bathroom is small, we say so.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <div>
+              <h3>You message us on WhatsApp.</h3>
+              <p>Most inquiries come in by WhatsApp. Median reply time is under 30 minutes
+              during business hours. No bots — actual humans you can call back.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <div>
+              <h3>We line up the visit.</h3>
+              <p>We schedule with the owner, coordinate access, and ride along if it's a
+              tricky building. You're not on your own.</p>
+            </div>
+          </div>
+          <div class="process-step">
+            <div>
+              <h3>No brokerage from you.</h3>
+              <p>Owners pay us. Tenants don't. The signed agreement is the only paperwork
+              between you and the owner.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2>The ledger.</h2>
+        <p>What it looks like, in numbers.</p>
+        <dl class="ledger">
+          <div>
+            <dt>Properties listed</dt>
+            <dd>263<small>since 2021</small></dd>
+          </div>
+          <div>
+            <dt>Median reply</dt>
+            <dd>26 min<small>WhatsApp</small></dd>
+          </div>
+          <div>
+            <dt>Tenant brokerage</dt>
+            <dd>₹0<small>per agreement</small></dd>
+          </div>
+          <div>
+            <dt>Repeat owners</dt>
+            <dd>71%<small>list with us again</small></dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="block">
+        <h2>Talk to us.</h2>
+        <p>
+          The fastest way to reach us is WhatsApp. If you're calling about a specific
+          listing, mention the ID (like #01 or C-3) so we can pull up the file.
+        </p>
+        <div class="contact-card">
+          <h3>Rentoo</h3>
+          <p style="font-size:0.9375rem;color:var(--ink-muted);margin:0">
+            Hand-curated rentals across Jaipur — Mansarovar, C-Scheme, Bapu Nagar,
+            Malviya Nagar, Vaishali Nagar, Rajapark, and the surrounding neighbourhoods.
+          </p>
+          <div class="contact-row">
+            <a href="https://wa.me/918741800496" class="btn-whatsapp">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+              <span>Chat on WhatsApp</span>
+            </a>
+            <a href="tel:+918741800496" class="btn-secondary">Call +91 87418 00496</a>
+            <a href="mailto:connect@rentoo.in" class="btn-secondary">Email connect@rentoo.in</a>
+          </div>
+          <div class="contact-meta">Mon–Sat · 10:00–19:30 IST · Closed Sunday</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="curator-signoff">
+    <div class="section-inner">
+      <div class="signoff-portrait">R</div>
+      <div class="signoff-body">
+        <p>Most messages I answer myself, on WhatsApp. If you're looking for something
+        specific — a 2BHK in Mansarovar, a furnished house near a school, a small office
+        on Tonk Road — just send a sentence about what you need.</p>
+        <p>If we have it, we'll send pictures and the rent. If we don't, I'll tell you
+        when we expect something. No drip campaigns, no follow-up bots.</p>
+        <div class="signoff-actions">
+          <a href="https://wa.me/918741800496" class="btn-whatsapp btn-whatsapp--lg">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+            <span>Start a WhatsApp chat</span>
+          </a>
+        </div>
+        <div class="signoff-meta">— Rishabh, Rentoo</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/rentoo/Rentoo.png" alt="Rentoo" class="footer-logo">
+      <p>A small, hand-run rental brokerage in Jaipur. We visit every property and charge owners, not tenants.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Browse</h4>
+      <ul>
+        <li><a href="/rentoo/rent/">Rent in Jaipur</a></li>
+        <li><a href="/rentoo/commercial/">Commercial spaces</a></li>
+        <li><a href="/rentoo/about/">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Areas</h4>
+      <ul>
+        <li><a href="/rentoo/rent/?neighbourhood=mansarovar">Mansarovar</a></li>
+        <li><a href="/rentoo/rent/?neighbourhood=c-scheme">C-Scheme</a></li>
+        <li><a href="/rentoo/rent/?neighbourhood=bapu-nagar">Bapu Nagar</a></li>
+        <li><a href="/rentoo/rent/?neighbourhood=malviya-nagar">Malviya Nagar</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <address>
+        <a href="tel:+918741800496">+91 87418 00496</a><br>
+        <a href="mailto:connect@rentoo.in">connect@rentoo.in</a><br>
+        Mon–Sat · 10:00–19:30 IST
+      </address>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/rentoo/preview/">Design preview</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-base">
+    © 2026 Rentoo, Jaipur. Photos and listings are watermarked and may not be reused without permission.
+  </div>
+</footer>
+
+</body>
+</html>
