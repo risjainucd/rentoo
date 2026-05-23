@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Design Preview — Rentoo</title>
+  <meta name="description" content="Early design mockups for the Rentoo redesign: property detail page, admin dashboard, architecture, and homepage directions.">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="_preview-shared.css">
+  <style>
+    .pv-cards{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:8px;
+    }
+    .pv-card{
+      display:flex;flex-direction:column;
+      background:#fff;border:1px solid var(--line);border-radius:6px;
+      padding:24px;text-decoration:none;color:var(--ink);
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .pv-card:hover{
+      transform:translateY(-2px);
+      border-color:#d8d2c2;
+      box-shadow:0 12px 32px -16px rgba(8,39,70,.18);
+    }
+    .pv-card-tag{
+      font-family:ui-monospace,"SF Mono",Menlo,monospace;
+      font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);
+      margin-bottom:14px;
+    }
+    .pv-card h3{margin:0 0 8px;font-size:19px;font-weight:600}
+    .pv-card p{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.5}
+    .pv-card-arrow{margin-top:auto;font-size:13px;color:var(--accent);font-weight:600}
+
+    .pv-status{
+      background:#fff;border:1px solid var(--line);border-radius:6px;
+      padding:24px;margin-top:32px;
+    }
+    .pv-status-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+    .pv-status-row:last-child{border-bottom:none}
+    .pv-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .dot-live{background:#1f9d55}
+    .dot-mockup{background:#B5532E}
+    .dot-spec{background:#8a8470}
+    .pv-status-label{font-size:14px;flex:1}
+    .pv-status-state{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  </style>
+</head>
+<body>
+
+<header class="pv-header">
+  <div class="pv-header-inner">
+    <a href="/rentoo/" class="pv-brand">
+      <img src="/rentoo/Rentoo.png" alt="Rentoo">
+      <span>Design Preview</span>
+    </a>
+    <div style="display:flex;gap:14px;align-items:center">
+      <a href="/rentoo/" class="pv-back">← Live homepage</a>
+      <a href="https://wa.me/918741800496" class="pv-wa">WhatsApp</a>
+    </div>
+  </div>
+</header>
+
+<main class="pv-main">
+  <div class="pv-kicker">Preview build · May 2026</div>
+  <h1 class="pv-title">What's coming after the homepage.</h1>
+  <p class="pv-lede">
+    The homepage is live. Everything else is still in design or build. Below are the
+    early mockups we worked through — small scale wireframes from a brainstorm session,
+    not finished pages. They show what each section will become.
+  </p>
+
+  <div class="pv-cards">
+    <a href="property-detail.html" class="pv-card">
+      <div class="pv-card-tag">01 · Property page</div>
+      <h3>Listing detail</h3>
+      <p>Gallery + key facts + WhatsApp sticky CTA. The most-clicked link from the homepage.</p>
+      <div class="pv-card-arrow">View mockup →</div>
+    </a>
+
+    <a href="admin.html" class="pv-card">
+      <div class="pv-card-tag">02 · Admin</div>
+      <h3>Admin dashboard</h3>
+      <p>Private panel for managing properties, owners, and inquiries. Single unified table.</p>
+      <div class="pv-card-arrow">View mockup →</div>
+    </a>
+
+    <a href="architecture.html" class="pv-card">
+      <div class="pv-card-tag">03 · System</div>
+      <h3>Architecture &amp; data model</h3>
+      <p>How the stack fits together — hosting, storage, auth, and the Postgres schema.</p>
+      <div class="pv-card-arrow">View diagram →</div>
+    </a>
+
+    <a href="homepage-options.html" class="pv-card">
+      <div class="pv-card-tag">04 · History</div>
+      <h3>Homepage directions</h3>
+      <p>The three homepage variants we considered before picking the curator's catalog direction.</p>
+      <div class="pv-card-arrow">View options →</div>
+    </a>
+  </div>
+
+  <div class="pv-status">
+    <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Build status</div>
+    <div class="pv-status-row"><span class="pv-status-dot dot-live"></span><span class="pv-status-label">Homepage</span><span class="pv-status-state">Live</span></div>
+    <div class="pv-status-row"><span class="pv-status-dot dot-mockup"></span><span class="pv-status-label">Property detail page</span><span class="pv-status-state">Mockup only</span></div>
+    <div class="pv-status-row"><span class="pv-status-dot dot-mockup"></span><span class="pv-status-label">Admin dashboard</span><span class="pv-status-state">Mockup only</span></div>
+    <div class="pv-status-row"><span class="pv-status-dot dot-spec"></span><span class="pv-status-label">/rent listings index</span><span class="pv-status-state">Specced</span></div>
+    <div class="pv-status-row"><span class="pv-status-dot dot-spec"></span><span class="pv-status-label">/commercial listings</span><span class="pv-status-state">Specced</span></div>
+    <div class="pv-status-row"><span class="pv-status-dot dot-spec"></span><span class="pv-status-label">/about page</span><span class="pv-status-state">Specced</span></div>
+  </div>
+
+  <p class="pv-note">
+    <strong>Heads up:</strong> these mockups predate the current homepage redesign
+    (sandstone palette, editorial voice). They use the older navy-only direction
+    so visuals will look different from what's live — they're for layout, not final styling.
+  </p>
+</main>
+
+<footer class="pv-footer">
+  Rentoo · Jaipur · connect@rentoo.in
+</footer>
+
+</body>
+</html>

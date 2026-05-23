@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Admin dashboard mockup — Rentoo</title>
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="_preview-shared.css">
+  <style>
+    /* Scoped mockup styles */
+    .mw{background:#fff;border:1px solid #e1e6ed;border-radius:8px;overflow:hidden;font-family:-apple-system,sans-serif;font-size:10px;color:#082746;max-width:980px;margin:0 auto;display:flex;padding:0}
+    .mw-h{font-weight:800;font-size:14px;margin:0 0 4px}
+    .mw-sub{font-size:10px;opacity:.6}
+    .gallery-thumb{background:linear-gradient(135deg,#c5d3e3,#a8b8cc);border-radius:3px}
+    .admintable td{padding:8px 6px;border-bottom:1px solid #eef1f5;font-size:9px;vertical-align:middle}
+    .admintable th{padding:8px 6px;text-align:left;font-size:8px;opacity:.6;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #d8dee7}
+    .toggle-on{background:#e3f4e7;color:#0a6b2f;padding:3px 7px;border-radius:14px;font-size:8px;font-weight:700;cursor:pointer}
+    .toggle-off{background:#fde7e7;color:#a30404;padding:3px 7px;border-radius:14px;font-size:8px;font-weight:700;cursor:pointer}
+    .sb{background:#082746;color:#fff;width:160px;padding:14px 10px;font-size:10px;min-height:420px;display:flex;flex-direction:column}
+    .sb-item{padding:8px 10px;border-radius:4px;margin-bottom:2px;opacity:.7}
+    .sb-item.active{background:rgba(255,255,255,.12);opacity:1;font-weight:700}
+    .sb-logo{font-size:14px;font-weight:800;margin-bottom:14px;padding:0 4px}
+  </style>
+</head>
+<body>
+
+<header class="pv-header">
+  <div class="pv-header-inner">
+    <a href="/rentoo/" class="pv-brand">
+      <img src="/rentoo/Rentoo.png" alt="Rentoo">
+      <span>Design Preview</span>
+    </a>
+    <div style="display:flex;gap:14px;align-items:center">
+      <a href="index.html" class="pv-back">← All mockups</a>
+      <a href="https://wa.me/918741800496" class="pv-wa">WhatsApp</a>
+    </div>
+  </div>
+</header>
+
+<main class="pv-main">
+  <div class="pv-kicker">02 · Admin</div>
+  <h1 class="pv-title">Admin dashboard</h1>
+  <p class="pv-lede">
+    Private panel for managing properties, owners, and inquiries. One unified table
+    for all three segments (under ₹50K · over ₹50K · commercial), differentiated by
+    ID prefix. Status toggle is one tap, no confirmation modal.
+  </p>
+
+  <div class="pv-frame">
+    <div class="mw">
+      <div class="sb">
+        <div class="sb-logo">RENTOO<div style="font-size:9px;opacity:.5;margin-top:2px">ADMIN</div></div>
+        <div class="sb-item active">📋 Properties</div>
+        <div class="sb-item">👤 Owners</div>
+        <div class="sb-item">💬 Inquiries <span style="background:#25D366;color:#fff;padding:1px 5px;border-radius:8px;font-size:8px;float:right;margin-top:1px">3</span></div>
+        <div class="sb-item">📊 Analytics</div>
+        <div class="sb-item">⚙️ Settings</div>
+        <div style="margin-top:auto;padding:8px 10px;font-size:9px;opacity:.5">Signed in as<br>connect@rentoo.in</div>
+      </div>
+      <div style="flex:1;padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <h3 class="mw-h">Properties</h3>
+            <div class="mw-sub">263 total · 142 available · 121 rented out</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div style="background:#fff;border:1px solid #d8dee7;padding:6px 10px;border-radius:4px;font-size:9px">Import from Drive</div>
+            <div style="background:#082746;color:#fff;padding:6px 14px;border-radius:4px;font-size:9px;font-weight:700">+ Add property</div>
+          </div>
+        </div>
+
+        <div style="background:#f4f6f9;padding:8px;border-radius:6px;margin-bottom:10px;display:flex;gap:6px;font-size:9px;align-items:center">
+          <input style="flex:1;border:1px solid #d8dee7;padding:5px 8px;border-radius:4px;font-size:9px" placeholder="🔍 Search by ID, landmark, owner name…">
+          <select style="padding:5px 8px;border-radius:4px;font-size:9px;border:1px solid #d8dee7"><option>All BHK</option></select>
+          <select style="padding:5px 8px;border-radius:4px;font-size:9px;border:1px solid #d8dee7"><option>All status</option></select>
+          <select style="padding:5px 8px;border-radius:4px;font-size:9px;border:1px solid #d8dee7"><option>All segments</option></select>
+        </div>
+
+        <table class="admintable" style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr><th></th><th>ID</th><th>Type</th><th>Landmark</th><th>Rent</th><th>Furnish</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr><td><div class="gallery-thumb" style="width:32px;height:24px"></div></td><td><strong>#01</strong></td><td>3BHK Apt</td><td>Gulab Garh</td><td>₹35,000</td><td>Furnished</td><td><span class="toggle-off">● Rented out</span></td><td style="opacity:.6">Edit ›</td></tr>
+            <tr><td><div class="gallery-thumb" style="width:32px;height:24px"></div></td><td><strong>#03</strong></td><td>3BHK Apt</td><td>Iskcon Temple</td><td>₹23,000</td><td>Semi-furn</td><td><span class="toggle-on">● Available</span></td><td style="opacity:.6">Edit ›</td></tr>
+            <tr><td><div class="gallery-thumb" style="width:32px;height:24px"></div></td><td><strong>#05</strong></td><td>2BHK Apt</td><td>Model Town</td><td>₹25,000</td><td>Furnished</td><td><span class="toggle-on">● Available</span></td><td style="opacity:.6">Edit ›</td></tr>
+            <tr><td><div class="gallery-thumb" style="width:32px;height:24px"></div></td><td><strong>#04</strong></td><td>4BHK Penth.</td><td>C-Scheme</td><td>₹2,00,000</td><td>Furnished</td><td><span class="toggle-on">● Available</span></td><td style="opacity:.6">Edit ›</td></tr>
+            <tr><td><div class="gallery-thumb" style="width:32px;height:24px"></div></td><td><strong>C-3</strong></td><td>Office</td><td>C-Scheme</td><td>₹2,00,000</td><td>Furnished</td><td><span class="toggle-on">● Available</span></td><td style="opacity:.6">Edit ›</td></tr>
+          </tbody>
+        </table>
+        <div style="text-align:center;font-size:9px;opacity:.6;margin-top:8px">Tap ● to toggle status without opening the listing →</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:14px;text-align:center">
+      Three segments live in one unified table, distinguishable by ID prefix. Edit opens a full form with photo/video upload.
+    </p>
+  </div>
+
+  <p class="pv-note">
+    <strong>Note:</strong> mockup only — no real backend yet. Final build will use
+    Supabase (Postgres + Auth) with row-level security, Cloudflare R2 for media,
+    and auto-watermarking on upload. See the architecture preview for the full stack.
+  </p>
+</main>
+
+<footer class="pv-footer">
+  Rentoo · Jaipur · connect@rentoo.in
+</footer>
+
+</body>
+</html>

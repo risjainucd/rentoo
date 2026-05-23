@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Architecture &amp; data model — Rentoo</title>
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="_preview-shared.css">
+  <style>
+    .arch{background:#fff;border-radius:10px;padding:24px;border:1px solid #e1e6ed;max-width:880px;margin:0 auto}
+    .box{border:1.5px solid #082746;border-radius:8px;padding:10px 14px;background:#fff;font-size:12px;color:#082746;text-align:center;min-width:130px}
+    .box-cloud{background:#f4f6f9;border-color:#082746}
+    .box-store{background:#082746;color:#fff}
+    .box-public{background:#e3f4e7;border-color:#0a6b2f;color:#0a6b2f}
+    .box-admin{background:#fde9c8;border-color:#a35400;color:#5a2f00}
+    .row{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:14px;flex-wrap:wrap}
+    .arrow{font-size:16px;color:#082746;opacity:.5}
+    .erd-table{background:#fff;border:1px solid #082746;border-radius:6px;overflow:hidden;min-width:180px;box-shadow:0 1px 3px rgba(8,39,70,.08)}
+    .erd-header{background:#082746;color:#fff;padding:8px 12px;font-weight:700;font-size:12px}
+    .erd-row{padding:5px 12px;font-size:10px;border-bottom:1px solid #eef1f5;display:flex;justify-content:space-between;gap:8px}
+    .erd-row.pk{background:#fdf6e3}
+    .erd-row.fk{background:#eef4fb}
+    .erd-type{opacity:.55;font-family:monospace;font-size:9px;white-space:nowrap}
+    .erd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:1000px;margin:18px auto 0}
+    .arch-note{background:#f4f6f9;padding:14px 16px;border-radius:6px;margin-top:18px;font-size:13px;line-height:1.55}
+    code{font-family:ui-monospace,"SF Mono",Menlo,monospace;background:#eef1f5;padding:1px 5px;border-radius:3px;font-size:12px}
+  </style>
+</head>
+<body>
+
+<header class="pv-header">
+  <div class="pv-header-inner">
+    <a href="/rentoo/" class="pv-brand">
+      <img src="/rentoo/Rentoo.png" alt="Rentoo">
+      <span>Design Preview</span>
+    </a>
+    <div style="display:flex;gap:14px;align-items:center">
+      <a href="index.html" class="pv-back">← All mockups</a>
+      <a href="https://wa.me/918741800496" class="pv-wa">WhatsApp</a>
+    </div>
+  </div>
+</header>
+
+<main class="pv-main">
+  <div class="pv-kicker">03 · System</div>
+  <h1 class="pv-title">Architecture &amp; data model</h1>
+  <p class="pv-lede">
+    Three layers — visitors, hosting, data. All hosting components run on free tiers
+    at the current scale. Public data is read-only from the browser; owner data and
+    audit logs live behind the service role.
+  </p>
+
+  <div class="pv-frame">
+    <div class="arch">
+      <div class="row">
+        <div class="box box-public">👥 Public visitors<br><span style="font-size:9px;opacity:.7">Tenants browsing</span></div>
+        <div class="box box-admin">🔒 Admin<br><span style="font-size:9px;opacity:.7">Logged in</span></div>
+      </div>
+      <div class="row"><span class="arrow">⬇</span><span style="width:120px"></span><span class="arrow">⬇</span></div>
+      <div class="row">
+        <div class="box box-cloud" style="border-color:#f48120;background:#fff3e8;color:#a04800;min-width:300px">☁️ Cloudflare Pages (Astro)<br><span style="font-size:9px;opacity:.7">Free unlimited bandwidth · Bot Fight · WAF · DNS</span></div>
+      </div>
+      <div class="row"><span class="arrow">⬇</span><span class="arrow">⬇</span><span class="arrow">⬇</span></div>
+      <div class="row" style="gap:16px">
+        <div class="box box-store">🗄️ Supabase<br><span style="font-size:9px;opacity:.7">Postgres · Auth · API</span></div>
+        <div class="box box-store" style="background:#f48120">📦 Cloudflare R2<br><span style="font-size:9px;opacity:.7">Photos · Videos · Hot-link locked</span></div>
+        <div class="box box-cloud">📊 GA4<br><span style="font-size:9px;opacity:.7">Analytics</span></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-around;margin-top:22px;padding-top:16px;border-top:1px dashed #d8dee7;font-size:11px;opacity:.7;text-align:center;gap:12px;flex-wrap:wrap">
+        <div>One-time scripts:<br><strong>Excel → Postgres</strong><br><strong>Drive → R2</strong></div>
+        <div>WhatsApp:<br><strong>Deep-links only (P1)</strong><br>Bots in Phase 2</div>
+        <div>Watermarking:<br><strong>On upload</strong> (sharp lib)<br>Embedded into pixels</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:48px;font-size:24px;font-weight:600">Data model (Postgres, Phase 1)</h2>
+
+  <div class="erd-grid">
+    <div class="erd-table">
+      <div class="erd-header">properties</div>
+      <div class="erd-row pk"><span><strong>id</strong> 🔑</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row"><span>display_id</span><span class="erd-type">"#01"</span></div>
+      <div class="erd-row"><span>segment</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>bhk_type</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>property_type</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>rent_inr</span><span class="erd-type">int</span></div>
+      <div class="erd-row"><span>area_sqft</span><span class="erd-type">int?</span></div>
+      <div class="erd-row"><span>furnishing</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>status</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>landmark</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>neighbourhood</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>map_url</span><span class="erd-type">text?</span></div>
+      <div class="erd-row"><span>description</span><span class="erd-type">text?</span></div>
+      <div class="erd-row fk"><span>owner_id 🔗</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row"><span>slug</span><span class="erd-type">unique</span></div>
+      <div class="erd-row"><span>published</span><span class="erd-type">bool</span></div>
+    </div>
+
+    <div class="erd-table">
+      <div class="erd-header">property_media</div>
+      <div class="erd-row pk"><span><strong>id</strong> 🔑</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row fk"><span>property_id 🔗</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row"><span>kind</span><span class="erd-type">photo|video</span></div>
+      <div class="erd-row"><span>r2_key</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>display_order</span><span class="erd-type">int</span></div>
+      <div class="erd-row"><span>is_cover</span><span class="erd-type">bool</span></div>
+      <div class="erd-row"><span>width</span><span class="erd-type">int</span></div>
+      <div class="erd-row"><span>height</span><span class="erd-type">int</span></div>
+      <div class="erd-row"><span>watermarked</span><span class="erd-type">bool</span></div>
+    </div>
+
+    <div class="erd-table">
+      <div class="erd-header">owners <span style="opacity:.6;font-size:10px">(admin)</span></div>
+      <div class="erd-row pk"><span><strong>id</strong> 🔑</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row"><span>display_id</span><span class="erd-type">"#01"</span></div>
+      <div class="erd-row"><span>full_name</span><span class="erd-type">text?</span></div>
+      <div class="erd-row"><span>phone</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>source</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>notes</span><span class="erd-type">text?</span></div>
+    </div>
+
+    <div class="erd-table">
+      <div class="erd-header">inquiries</div>
+      <div class="erd-row pk"><span><strong>id</strong> 🔑</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row fk"><span>property_id 🔗</span><span class="erd-type">uuid?</span></div>
+      <div class="erd-row"><span>name</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>phone</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>message</span><span class="erd-type">text?</span></div>
+      <div class="erd-row"><span>channel</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>status</span><span class="erd-type">enum</span></div>
+    </div>
+
+    <div class="erd-table">
+      <div class="erd-header">neighbourhoods</div>
+      <div class="erd-row pk"><span><strong>slug</strong> 🔑</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>name</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>display_order</span><span class="erd-type">int</span></div>
+      <div class="erd-row"><span>cover_r2_key</span><span class="erd-type">text?</span></div>
+      <div class="erd-row"><span>short_description</span><span class="erd-type">text?</span></div>
+    </div>
+
+    <div class="erd-table">
+      <div class="erd-header">audit_log</div>
+      <div class="erd-row pk"><span><strong>id</strong> 🔑</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row fk"><span>property_id 🔗</span><span class="erd-type">uuid</span></div>
+      <div class="erd-row"><span>actor_email</span><span class="erd-type">text</span></div>
+      <div class="erd-row"><span>action</span><span class="erd-type">enum</span></div>
+      <div class="erd-row"><span>before</span><span class="erd-type">jsonb</span></div>
+      <div class="erd-row"><span>after</span><span class="erd-type">jsonb</span></div>
+    </div>
+  </div>
+
+  <div class="arch-note">
+    <strong>Row-level security:</strong>
+    Public anon key gets <code>SELECT</code> only on <code>properties WHERE published=true</code>,
+    <code>property_media</code>, and <code>neighbourhoods</code>. Anonymous <code>INSERT</code> on
+    <code>inquiries</code> (rate-limited). Owner data and audit log are <strong>service-role only</strong>,
+    never reachable from a browser.
+  </div>
+</main>
+
+<footer class="pv-footer">
+  Rentoo · Jaipur · connect@rentoo.in
+</footer>
+
+</body>
+</html>
