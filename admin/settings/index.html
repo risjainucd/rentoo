@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Settings · Rentoo Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <link rel="stylesheet" href="/rentoo/admin/_admin.css">
+  <style>
+    .adm-settings-layout { display: grid; gap: var(--space-xl); grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .adm-settings-layout { grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-2xl); align-items: start; } }
+    .adm-settings-tabs { display: flex; flex-direction: column; gap: 2px; }
+    @media (max-width:899px){.adm-settings-tabs{flex-direction:row;overflow-x:auto;border-bottom:1px solid var(--line);padding-bottom:6px}.adm-settings-tabs a{white-space:nowrap}}
+    .adm-settings-tabs a { padding: 8px 12px; font-size: 13.5px; font-weight: 500; color: var(--ink-muted); border-radius: 6px; }
+    .adm-settings-tabs a:hover { background: var(--paper); color: var(--ink); }
+    .adm-settings-tabs a.active { background: var(--paper); color: var(--ink); font-weight: 600; border-left: 2px solid var(--terracotta); padding-left: 10px; }
+    .adm-settings-section { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: var(--space-lg); margin-bottom: var(--space-md); }
+    .adm-settings-section h3 { font-size: 15px; color: var(--ink); margin-bottom: 4px; font-weight: 600; }
+    .adm-settings-section .desc { font-size: 13px; color: var(--ink-muted); margin-bottom: var(--space-md); line-height: 1.55; }
+    .adm-set-row { display: grid; gap: 6px; margin-bottom: var(--space-md); }
+    .adm-set-row:last-child { margin-bottom: 0; }
+    .adm-set-row label { font-size: 12px; font-weight: 600; color: var(--ink-muted); letter-spacing: 0.02em; }
+    .adm-set-input { padding: 9px 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; background: var(--paper-warm); color: var(--ink); width: 100%; font-family:inherit }
+    textarea.adm-set-input{min-height:80px;resize:vertical;line-height:1.5}
+    .adm-chip-removable { display: inline-flex; align-items: center; gap: 6px; padding: 4px 4px 4px 10px; background: var(--haze-tint); border-radius: 999px; font-size: 12.5px; color: var(--jaipur-navy); font-weight: 500; margin: 0 4px 4px 0; }
+    .adm-chip-removable button { width: 18px; height: 18px; background: rgba(8,39,70,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border:none; color:var(--jaipur-navy); font-size:11px }
+    .adm-chip-removable button:hover{background:rgba(8,39,70,0.28)}
+    .adm-toggle-switch-set { display:flex; justify-content:space-between; align-items:flex-start; gap: var(--space-md); padding: 10px 0; }
+    .adm-toggle-switch-set .label-block strong { display:block; font-size: 14px; color: var(--ink); margin-bottom: 2px; font-weight: 600; }
+    .adm-toggle-switch-set .label-block p { font-size: 12.5px; color: var(--ink-muted); line-height: 1.5; margin: 0; max-width: 50ch; }
+    .adm-switch { width: 36px; height: 20px; background: var(--ink-soft); border-radius: 10px; position: relative; cursor: pointer; flex-shrink: 0; margin-top: 2px; border:none }
+    .adm-switch.on { background: var(--ok-green); }
+    .adm-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: left var(--dur-fast); }
+    .adm-switch.on::after { left: 18px; }
+    .adm-danger-zone { border-color: #f4cccc; }
+    .adm-danger-zone h3 { color: #991b1b; }
+    .adm-danger-btn { background: var(--paper); border: 1px solid #f4cccc; color: #991b1b; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .adm-danger-btn:hover { background: #fef2f2; }
+    .adm-btn-primary[disabled]{opacity:0.45;cursor:not-allowed}
+    .adm-logo-preview{display:flex;align-items:center;gap:var(--space-md);padding:10px 12px;background:var(--paper-warm);border:1px solid var(--line);border-radius:6px}
+    .adm-logo-preview-img{width:36px;height:36px;background:var(--jaipur-navy);color:var(--paper);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;font-family:var(--font-mono)}
+    .adm-logo-preview-meta{flex:1;min-width:0}
+    .adm-logo-preview-meta strong{display:block;font-size:13px;color:var(--ink);font-weight:600}
+    .adm-logo-preview-meta small{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);letter-spacing:0.04em}
+    .adm-radio-group{display:flex;flex-direction:column;gap:8px;margin-top:var(--space-sm)}
+    .adm-radio-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--paper-warm);border:1px solid var(--line);border-radius:6px;cursor:pointer}
+    .adm-radio-row.selected{border-color:var(--terracotta);background:var(--terracotta-mist)}
+    .adm-radio-row input[type=radio]{margin-top:3px;accent-color:var(--terracotta)}
+    .adm-radio-row .label-block strong{display:block;font-size:13.5px;color:var(--ink);font-weight:600;margin-bottom:2px}
+    .adm-radio-row .label-block p{font-size:12.5px;color:var(--ink-muted);line-height:1.5;margin:0}
+    .adm-chip-list-wrap{padding:8px 4px 0}
+    .adm-add-chip-row{display:flex;gap:8px;margin-top:var(--space-sm)}
+    .adm-add-chip-row .adm-set-input{flex:1}
+    .adm-add-chip-btn{padding:9px 14px;background:var(--paper-warm);border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap}
+    .adm-add-chip-btn:hover{background:var(--haze-tint)}
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-preview-banner">
+  Demo build · no real authentication · <a href="/rentoo/">return to public site</a>
+</div>
+
+<div class="adm-shell">
+
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <div class="adm-brand-logo">R</div>
+      <div class="adm-brand-name">
+        <strong>Rentoo</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <nav class="adm-nav" aria-label="Admin navigation">
+      <a href="/rentoo/admin/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Properties
+      </a>
+      <a href="/rentoo/admin/inquiries/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="adm-nav-badge">3</span>
+      </a>
+      <a href="/rentoo/admin/owners/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Owners
+      </a>
+      <a href="/rentoo/admin/analytics/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="adm-nav-section-label">System</div>
+      <a href="/rentoo/admin/imports/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imports
+      </a>
+      <a href="/rentoo/admin/audit/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit log
+      </a>
+      <a href="/rentoo/admin/settings/" class="active">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="adm-user">
+      <div class="adm-user-avatar">R</div>
+      <div class="adm-user-info">
+        <strong>Rishabh</strong>
+        <span>connect@rentoo.in</span>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="adm-mobile-nav" aria-label="Mobile admin nav">
+    <a href="/rentoo/admin/">Properties</a>
+    <a href="/rentoo/admin/inquiries/">Inquiries <span style="background:var(--whatsapp-signal);color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:3px">3</span></a>
+    <a href="/rentoo/admin/owners/">Owners</a>
+    <a href="/rentoo/admin/analytics/">Analytics</a>
+    <a href="/rentoo/admin/imports/">Imports</a>
+    <a href="/rentoo/admin/audit/">Audit log</a>
+    <a href="/rentoo/admin/settings/" class="active">Settings</a>
+  </nav>
+
+  <main class="adm-main">
+
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <h1>Settings</h1>
+        <div class="meta">Rentoo workspace · Jaipur</div>
+      </div>
+      <div class="adm-topbar-right">
+        <button class="adm-btn adm-btn-primary" disabled>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Save changes
+        </button>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <div class="adm-settings-layout">
+
+        <nav class="adm-settings-tabs" aria-label="Settings sections">
+          <a href="#general" class="active">General</a>
+          <a href="#hours">Business hours</a>
+          <a href="#whatsapp">WhatsApp + numbers</a>
+          <a href="#watermark">Image watermark</a>
+          <a href="#team">Team</a>
+          <a href="#seo">Domains &amp; SEO</a>
+          <a href="#backups">Backups</a>
+          <a href="#billing">Billing</a>
+        </nav>
+
+        <div>
+
+          <div class="adm-settings-section">
+            <h3>Business name &amp; branding</h3>
+            <p class="desc">How Rentoo shows up across the public site, WhatsApp templates, and PDF rent receipts.</p>
+
+            <div class="adm-set-row">
+              <label for="set-name">Business name</label>
+              <input id="set-name" class="adm-set-input" type="text" value="Rentoo">
+            </div>
+
+            <div class="adm-set-row">
+              <label>Logo</label>
+              <div class="adm-logo-preview">
+                <div class="adm-logo-preview-img">R</div>
+                <div class="adm-logo-preview-meta">
+                  <strong>Rentoo.png</strong>
+                  <small>128 × 128 · uploaded May 2</small>
+                </div>
+                <button class="adm-btn adm-btn-ghost">Replace</button>
+              </div>
+            </div>
+
+            <div class="adm-set-row">
+              <label for="set-tag">Tagline</label>
+              <input id="set-tag" class="adm-set-input" type="text" value="Jaipur's curated rental ledger.">
+            </div>
+          </div>
+
+          <div class="adm-settings-section">
+            <h3>Contact details</h3>
+            <p class="desc">Used on the contact page and embedded in every listing detail.</p>
+
+            <div class="adm-set-row">
+              <label for="set-phone">Primary phone</label>
+              <input id="set-phone" class="adm-set-input" type="tel" value="+91 87418 00496">
+            </div>
+
+            <div class="adm-set-row">
+              <label for="set-email">Email</label>
+              <input id="set-email" class="adm-set-input" type="email" value="connect@rentoo.in">
+            </div>
+
+            <div class="adm-set-row">
+              <label for="set-addr">Business address</label>
+              <textarea id="set-addr" class="adm-set-input">2nd Floor, Crystal Palm, C-Scheme&#10;Ashok Nagar, Jaipur — 302001</textarea>
+            </div>
+          </div>
+
+          <div class="adm-settings-section">
+            <h3>Default neighbourhoods</h3>
+            <p class="desc">Shown as filters on the public site and in the inquiry routing logic.</p>
+
+            <div class="adm-chip-list-wrap">
+              <span class="adm-chip-removable">Mansarovar <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">C-Scheme <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">Malviya Nagar <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">Bapu Nagar <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">Vaishali Nagar <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">Vidhyadhar Nagar <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">Rajapark <button aria-label="Remove">×</button></span>
+              <span class="adm-chip-removable">Sitapura <button aria-label="Remove">×</button></span>
+            </div>
+            <div class="adm-add-chip-row">
+              <input class="adm-set-input" type="text" placeholder="Add neighbourhood…">
+              <button class="adm-add-chip-btn">Add</button>
+            </div>
+          </div>
+
+          <div class="adm-settings-section">
+            <h3>Lead routing</h3>
+            <p class="desc">Where new WhatsApp inquiries land and who gets pinged.</p>
+
+            <div class="adm-set-row">
+              <label for="set-route">Route new WhatsApp inquiries to</label>
+              <select id="set-route" class="adm-set-input">
+                <option selected>Rishabh's WhatsApp (+91 87418 00496)</option>
+                <option>Priya's WhatsApp (+91 98765 12345)</option>
+                <option>Shared inbox (both)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="adm-settings-section">
+            <h3>Auto-reply</h3>
+            <p class="desc">A quick acknowledgement so leads know the inquiry landed — without you needing to be at your phone.</p>
+
+            <div class="adm-toggle-switch-set">
+              <div class="label-block">
+                <strong>Send auto-acknowledgement</strong>
+                <p>Sends a templated WhatsApp message to new inquiries within 2 minutes. Real reply still goes out manually.</p>
+              </div>
+              <button class="adm-switch on" aria-label="Auto-reply enabled" aria-pressed="true"></button>
+            </div>
+
+            <div class="adm-set-row" style="margin-top:var(--space-sm)">
+              <label for="set-template">Template message</label>
+              <textarea id="set-template" class="adm-set-input">Namaste, thank you for reaching out to Rentoo. We've received your inquiry and someone from our team will get back to you within 30 minutes. For urgent calls, dial +91 87418 00496.</textarea>
+            </div>
+          </div>
+
+          <div class="adm-settings-section">
+            <h3>Brokerage policy</h3>
+            <p class="desc">Determines how brokerage is collected and reflected on rent receipts.</p>
+
+            <div class="adm-radio-group">
+              <label class="adm-radio-row">
+                <input type="radio" name="brokerage">
+                <div class="label-block">
+                  <strong>Charge tenants</strong>
+                  <p>Standard 1-month brokerage collected from incoming tenants on lease signing.</p>
+                </div>
+              </label>
+              <label class="adm-radio-row selected">
+                <input type="radio" name="brokerage" checked>
+                <div class="label-block">
+                  <strong>Charge owners only</strong>
+                  <p>Brokerage collected from property owners as a fixed % of first-year rent. Tenants pay nothing to Rentoo. <em>Current default.</em></p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="adm-settings-section adm-danger-zone">
+            <h3>Danger zone</h3>
+            <p class="desc">Irreversible actions. Export your data first if you're not sure.</p>
+
+            <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap">
+              <button class="adm-danger-btn">Export all data</button>
+              <button class="adm-danger-btn">Delete workspace</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <p style="margin-top:var(--space-md);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-muted);text-align:center">
+        Changes are queued and applied after you press Save &nbsp;·&nbsp; Audit log records every change
+      </p>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

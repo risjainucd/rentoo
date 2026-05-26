@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <meta name="robots" content="noindex">
+  <title>Sign in · Rentoo Admin</title>
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <style>
+    /* ============================================================
+       Login page — sandstone editorial, navy admin signal.
+       Self-contained, no header/footer chrome.
+       ============================================================ */
+
+    html, body { height: 100%; }
+
+    body {
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(181, 83, 46, 0.04), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(8, 39, 70, 0.04), transparent 60%),
+        var(--paper);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    .login-page {
+      width: 100%;
+      max-width: 480px;
+      margin: var(--space-xl) auto var(--space-2xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      align-self: center;
+    }
+
+    /* ---- Brand row ---- */
+    .login-brand-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--line);
+    }
+    .login-brand-row a.login-logo {
+      display: inline-flex;
+      align-items: center;
+    }
+    .login-brand-row img {
+      height: 32px;
+      width: auto;
+    }
+    .login-brand-row .login-kicker {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      font-weight: 700;
+    }
+    .login-kicker-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      flex-shrink: 0;
+    }
+
+    /* ---- Headline ---- */
+    .login-headline h1 {
+      font-size: clamp(1.875rem, 5vw, 2.25rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--jaipur-navy);
+      margin-bottom: var(--space-md);
+      font-weight: 700;
+    }
+    .login-lede {
+      font-size: 1rem;
+      line-height: 1.55;
+      color: var(--ink-muted);
+      max-width: 44ch;
+    }
+    .login-lede a {
+      color: var(--terracotta);
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+    .login-lede a:hover {
+      color: var(--jaipur-navy);
+    }
+
+    /* ---- Card ---- */
+    .login-card {
+      background: var(--paper-snow);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow:
+        0 1px 0 rgba(8, 39, 70, 0.03),
+        0 16px 40px -20px rgba(8, 39, 70, 0.10);
+    }
+    @media (max-width: 520px) {
+      .login-card { padding: 24px 20px; }
+    }
+
+    .login-card form + form {
+      margin-top: 0;
+    }
+
+    .login-section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+    .login-section-label .pill-rec {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.1em;
+      color: var(--terracotta);
+      background: var(--terracotta-mist);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .login-field {
+      display: block;
+    }
+
+    .login-field-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 6px;
+    }
+
+    .login-input-wrap {
+      position: relative;
+    }
+    .login-input-wrap svg.lead {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-soft);
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+    }
+    .login-input-wrap .trail-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      color: var(--ink-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+    }
+    .login-input-wrap .trail-btn:hover {
+      color: var(--jaipur-navy);
+      background: var(--paper-warm);
+    }
+    .login-input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 15px;
+      background: var(--paper);
+      color: var(--ink);
+      transition: border-color var(--dur-fast) var(--ease-out),
+                  background var(--dur-fast) var(--ease-out),
+                  box-shadow var(--dur-fast) var(--ease-out);
+    }
+    .login-input::placeholder { color: var(--ink-soft); }
+    .login-input:hover {
+      background: var(--paper-snow);
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--jaipur-navy);
+      background: var(--paper-snow);
+      box-shadow: 0 0 0 3px rgba(8, 39, 70, 0.08);
+    }
+    .login-input-wrap.has-trail .login-input { padding-right: 44px; }
+
+    .login-field + .login-field { margin-top: var(--space-md); }
+
+    /* ---- Buttons ---- */
+    .login-primary-btn {
+      background: var(--jaipur-navy);
+      color: var(--paper);
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      border: 0;
+      margin-top: var(--space-md);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background var(--dur-base) var(--ease-out),
+                  transform var(--dur-fast) var(--ease-out);
+      font-family: inherit;
+    }
+    .login-primary-btn:hover { background: var(--midnight-tile); }
+    .login-primary-btn:active { transform: translateY(1px); }
+
+    .login-secondary-btn {
+      background: var(--paper);
+      color: var(--jaipur-navy);
+      border: 1px solid var(--line);
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: var(--space-md);
+      transition: background var(--dur-fast) var(--ease-out),
+                  border-color var(--dur-fast) var(--ease-out);
+      font-family: inherit;
+    }
+    .login-secondary-btn:hover {
+      background: var(--paper-warm);
+      border-color: var(--jaipur-navy);
+    }
+
+    .login-mono-note {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      letter-spacing: 0.03em;
+      margin-top: 10px;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .login-mono-note svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: var(--ink-soft);
+    }
+
+    /* ---- OR divider ---- */
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: var(--space-xl) 0 var(--space-lg);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    .login-divider::before,
+    .login-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* Password section sits slightly subdued */
+    .login-password-section {
+      opacity: 0.96;
+    }
+    .login-password-section .login-section-label {
+      color: var(--ink-muted);
+    }
+
+    .login-forgot {
+      display: block;
+      text-align: right;
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+    .login-forgot:hover {
+      color: var(--jaipur-navy);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ---- Meta below card ---- */
+    .login-meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      text-align: center;
+    }
+    .login-meta-line {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      letter-spacing: 0.03em;
+    }
+    .login-meta-line.faint {
+      color: var(--ink-soft);
+      font-size: 11px;
+    }
+    .login-meta-line a {
+      color: var(--jaipur-navy);
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+    .login-meta-line a:hover {
+      color: var(--terracotta);
+    }
+
+    .login-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--terracotta) !important;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none !important;
+      margin-top: var(--space-sm);
+      align-self: center;
+      transition: gap var(--dur-fast) var(--ease-out);
+    }
+    .login-back-link:hover {
+      gap: 10px;
+    }
+    .login-back-link svg {
+      flex-shrink: 0;
+    }
+
+    /* ---- Footer ---- */
+    .login-footer {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--ink-soft);
+      letter-spacing: 0.08em;
+      text-align: center;
+      padding: var(--space-xl) var(--space-lg) var(--space-md);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Small responsive tweaks */
+    @media (max-width: 520px) {
+      body { padding: var(--space-md); }
+      .login-page { gap: var(--space-lg); margin-top: var(--space-md); }
+      .login-headline h1 { font-size: 1.625rem; }
+      .login-lede { font-size: 0.9375rem; }
+      .login-brand-row { padding-bottom: var(--space-md); }
+      .login-brand-row img { height: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-page">
+
+    <!-- Brand row -->
+    <div class="login-brand-row">
+      <a href="/rentoo/" class="login-logo" aria-label="Rentoo home">
+        <img src="/rentoo/Rentoo.png" alt="Rentoo" width="120" height="38">
+      </a>
+      <span class="login-kicker" aria-hidden="true">
+        <span class="login-kicker-dot"></span>
+        Rentoo &middot; Admin
+      </span>
+    </div>
+
+    <!-- Headline -->
+    <div class="login-headline">
+      <h1>Welcome back.</h1>
+      <p class="login-lede">
+        This is a private workspace for the Rentoo team. If you're a tenant or owner, <a href="/rentoo/">head back to the public site</a>.
+      </p>
+    </div>
+
+    <!-- Card -->
+    <div class="login-card">
+
+      <!-- MAGIC LINK -->
+      <form action="/rentoo/admin/" method="get" novalidate>
+        <div class="login-section-label">
+          <span>Magic link</span>
+          <span class="pill-rec">Recommended</span>
+        </div>
+
+        <div class="login-field">
+          <label class="login-field-label" for="magic-email">Email</label>
+          <div class="login-input-wrap">
+            <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <input
+              id="magic-email"
+              name="email"
+              type="email"
+              class="login-input"
+              placeholder="you@rentoo.in"
+              autocomplete="email"
+              required
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="login-primary-btn">
+          <span>Email me a magic link</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+
+        <p class="login-mono-note">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          We'll send a one-time link valid for 15 minutes. Faster than typing a password.
+        </p>
+      </form>
+
+      <!-- OR divider -->
+      <div class="login-divider" aria-hidden="true">
+        <span>or</span>
+      </div>
+
+      <!-- PASSWORD -->
+      <form class="login-password-section" action="/rentoo/admin/" method="get" novalidate>
+        <div class="login-section-label">
+          <span>Sign in with a password</span>
+        </div>
+
+        <div class="login-field">
+          <label class="login-field-label" for="pwd-email">Email</label>
+          <div class="login-input-wrap">
+            <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <input
+              id="pwd-email"
+              name="email"
+              type="email"
+              class="login-input"
+              placeholder="you@rentoo.in"
+              autocomplete="email"
+            >
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label class="login-field-label" for="pwd-password">Password</label>
+          <div class="login-input-wrap has-trail">
+            <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input
+              id="pwd-password"
+              name="password"
+              type="password"
+              class="login-input"
+              placeholder="Your password"
+              autocomplete="current-password"
+            >
+            <button type="button" class="trail-btn" aria-label="Show password" tabindex="-1">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <a href="#" class="login-forgot">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="login-secondary-btn">Sign in</button>
+      </form>
+    </div>
+
+    <!-- Meta below card -->
+    <div class="login-meta">
+      <p class="login-meta-line">
+        Trouble signing in? Email <a href="mailto:connect@rentoo.in">connect@rentoo.in</a>
+      </p>
+      <p class="login-meta-line faint">
+        Last sign-in: today 09:14 IST from Jaipur &middot; Chrome on Mac &middot; Demo build
+      </p>
+      <a href="/rentoo/" class="login-back-link">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Back to public site
+      </a>
+    </div>
+
+  </div>
+
+  <footer class="login-footer">
+    &copy; 2026 Rentoo &middot; Jaipur &middot; This area is private
+  </footer>
+
+</body>
+</html>

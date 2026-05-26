@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Audit log · Rentoo Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <link rel="stylesheet" href="/rentoo/admin/_admin.css">
+  <style>
+    .adm-audit-wrap{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:var(--space-lg) var(--space-xl)}
+    @media (max-width:600px){.adm-audit-wrap{padding:var(--space-md) var(--space-lg)}}
+    .adm-audit-list { position: relative; padding-left: 28px; }
+    .adm-audit-list::before { content:""; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: var(--line); }
+    .adm-audit-day-sep { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin: var(--space-md) 0 var(--space-sm); font-weight: 700; padding-left: 4px; }
+    .adm-audit-day-sep:first-child{margin-top:0}
+    .adm-audit-entry { position: relative; padding: 12px 0 12px 18px; }
+    .adm-audit-dot { position: absolute; left: -23px; top: 16px; width: 12px; height: 12px; border-radius: 50%; background: var(--ink-muted); border: 3px solid var(--paper); box-sizing: content-box; }
+    .adm-audit-dot.create { background: var(--terracotta); }
+    .adm-audit-dot.publish { background: var(--ok-green); }
+    .adm-audit-dot.update { background: var(--ink-soft); }
+    .adm-audit-dot.delete { background: #c44; }
+    .adm-audit-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap:wrap }
+    .adm-audit-actor { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .adm-audit-actor .av { width: 20px; height: 20px; border-radius: 50%; background: var(--haze-tint); color: var(--jaipur-navy); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; font-family:var(--font-mono) }
+    .adm-audit-actor strong { color: var(--ink); font-weight: 600; }
+    .adm-audit-time { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.04em; }
+    .adm-audit-action { font-size: 13.5px; color: var(--ink-muted); line-height: 1.55; }
+    .adm-audit-action strong { color: var(--ink); font-weight: 600; }
+    .adm-audit-action .id { font-family: var(--font-mono); color: var(--jaipur-navy); background: var(--haze-tint); padding: 1px 6px; border-radius: 3px; font-weight: 700; font-size: 12px; }
+    .adm-audit-diff { font-size: 12px; color: var(--terracotta); font-weight: 600; margin-top: 4px; cursor: pointer; display:inline-block }
+    .adm-audit-diff:hover { text-decoration: underline; }
+    .adm-load-more{display:flex;justify-content:center;margin-top:var(--space-xl)}
+    .adm-load-more button{padding:8px 18px;background:var(--paper);border:1px solid var(--line);border-radius:6px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em;text-transform:uppercase}
+    .adm-load-more button:hover{background:var(--paper-warm)}
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-preview-banner">
+  Demo build · no real authentication · <a href="/rentoo/">return to public site</a>
+</div>
+
+<div class="adm-shell">
+
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <div class="adm-brand-logo">R</div>
+      <div class="adm-brand-name">
+        <strong>Rentoo</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <nav class="adm-nav" aria-label="Admin navigation">
+      <a href="/rentoo/admin/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Properties
+      </a>
+      <a href="/rentoo/admin/inquiries/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="adm-nav-badge">3</span>
+      </a>
+      <a href="/rentoo/admin/owners/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Owners
+      </a>
+      <a href="/rentoo/admin/analytics/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="adm-nav-section-label">System</div>
+      <a href="/rentoo/admin/imports/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imports
+      </a>
+      <a href="/rentoo/admin/audit/" class="active">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit log
+      </a>
+      <a href="/rentoo/admin/settings/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="adm-user">
+      <div class="adm-user-avatar">R</div>
+      <div class="adm-user-info">
+        <strong>Rishabh</strong>
+        <span>connect@rentoo.in</span>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="adm-mobile-nav" aria-label="Mobile admin nav">
+    <a href="/rentoo/admin/">Properties</a>
+    <a href="/rentoo/admin/inquiries/">Inquiries <span style="background:var(--whatsapp-signal);color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:3px">3</span></a>
+    <a href="/rentoo/admin/owners/">Owners</a>
+    <a href="/rentoo/admin/analytics/">Analytics</a>
+    <a href="/rentoo/admin/imports/">Imports</a>
+    <a href="/rentoo/admin/audit/" class="active">Audit log</a>
+    <a href="/rentoo/admin/settings/">Settings</a>
+  </nav>
+
+  <main class="adm-main">
+
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <h1>Audit log</h1>
+        <div class="meta">All admin actions · last 90 days</div>
+      </div>
+      <div class="adm-topbar-right">
+        <button class="adm-btn adm-btn-ghost">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <select class="adm-select">
+          <option>All users</option>
+          <option>Rishabh</option>
+          <option>Priya</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <div class="adm-filter-bar">
+        <div class="adm-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Property ID, owner, action…">
+        </div>
+        <select class="adm-select">
+          <option>All action types</option>
+          <option>Create</option>
+          <option>Update</option>
+          <option>Delete</option>
+          <option>Publish</option>
+          <option>Unpublish</option>
+          <option>Status change</option>
+          <option>Import</option>
+          <option>Login</option>
+        </select>
+        <select class="adm-select">
+          <option>All users</option>
+          <option>Rishabh</option>
+          <option>Priya</option>
+        </select>
+        <select class="adm-select">
+          <option>Last 7 days</option>
+          <option>Last 30 days</option>
+          <option>All time</option>
+        </select>
+      </div>
+
+      <div class="adm-audit-wrap">
+
+        <div class="adm-audit-list">
+
+          <div class="adm-audit-day-sep">Today</div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot update"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">2 min ago · 14:32</span>
+            </div>
+            <div class="adm-audit-action">
+              Changed status to <strong>Available</strong> on <span class="id">#03</span> (was <strong>Rented out</strong>)
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot publish"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">18 min ago · 14:16</span>
+            </div>
+            <div class="adm-audit-action">
+              Published <span class="id">#43</span> — <strong>2BHK Furnished Bapu Nagar</strong>
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot update"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">1 hr ago · 13:32</span>
+            </div>
+            <div class="adm-audit-action">
+              Edited rent on <span class="id">C-3</span> (was <strong>₹1,80,000</strong>, now <strong>₹2,00,000</strong>)
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot update"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">P</span><strong>Priya</strong></div>
+              <span class="adm-audit-time">3 hr ago · 11:48</span>
+            </div>
+            <div class="adm-audit-action">
+              Uploaded <strong>4 photos</strong> to <span class="id">#07</span>
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-day-sep">Yesterday</div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot create"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">Yesterday · 18:04</span>
+            </div>
+            <div class="adm-audit-action">
+              Added owner <span class="id">#O-15</span> — <strong>Vikash Tiwari</strong>
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot create"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">Yesterday · 12:11</span>
+            </div>
+            <div class="adm-audit-action">
+              Imported <strong>12 properties</strong> from Drive (<span class="id">rentoo-may-batch-2.xlsx</span>)
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-day-sep">Earlier this week</div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot update"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">2 days ago · May 24, 10:22</span>
+            </div>
+            <div class="adm-audit-action">
+              Marked <span class="id">#31</span> as <strong>Rented out</strong> + added lease signed note
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot delete"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">3 days ago · May 23, 16:55</span>
+            </div>
+            <div class="adm-audit-action">
+              Unpublished <span class="id">#28</span> (reason: <strong>"owner pulled listing"</strong>)
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-day-sep">Last week</div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">P</span><strong>Priya</strong></div>
+              <span class="adm-audit-time">5 days ago · May 21, 09:14</span>
+            </div>
+            <div class="adm-audit-action">
+              Logged in from <strong>new device</strong> (Mumbai · Chrome)
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+          <div class="adm-audit-entry">
+            <span class="adm-audit-dot update"></span>
+            <div class="adm-audit-head">
+              <div class="adm-audit-actor"><span class="av">R</span><strong>Rishabh</strong></div>
+              <span class="adm-audit-time">1 week ago · May 19, 18:31</span>
+            </div>
+            <div class="adm-audit-action">
+              Updated <strong>business hours</strong> (was <strong>11–7</strong>, now <strong>10–7:30</strong>)
+            </div>
+            <a class="adm-audit-diff">Show diff ›</a>
+          </div>
+
+        </div>
+
+        <div class="adm-load-more">
+          <button>Load older entries</button>
+        </div>
+
+      </div>
+
+      <p style="margin-top:var(--space-md);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-muted);text-align:center">
+        Append-only log &nbsp;·&nbsp; Entries cannot be edited or deleted
+      </p>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

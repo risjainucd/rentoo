@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Analytics · Rentoo Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <link rel="stylesheet" href="/rentoo/admin/_admin.css">
+  <style>
+    /* Chart grid */
+    .adm-chart-grid { display: grid; gap: var(--space-md); grid-template-columns: 1fr; margin-bottom: var(--space-md); }
+    @media (min-width: 900px) { .adm-chart-grid { grid-template-columns: 2fr 1fr; } }
+
+    /* Chart cards */
+    .adm-chart-card { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: var(--space-lg); }
+    .adm-chart-card h3 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.005em; }
+    .adm-chart-card .chart-sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-muted); margin-bottom: var(--space-md); text-transform: uppercase; }
+    .adm-chart-card svg { width: 100%; height: auto; display: block; }
+    .adm-chart-card.full { margin-bottom: var(--space-md); }
+
+    /* Chart header row with link */
+    .adm-chart-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-md); gap: var(--space-md); flex-wrap: wrap; }
+    .adm-chart-head h3 { margin-bottom: 0; }
+    .adm-chart-head .view-all { font-size: 12px; color: var(--jaipur-navy); font-weight: 600; }
+    .adm-chart-head .view-all:hover { text-decoration: underline; }
+
+    /* SVG common */
+    .adm-axis-label { font-family: var(--font-mono); font-size: 10.5px; fill: var(--ink-soft); letter-spacing: 0.04em; }
+    .adm-grid-line { stroke: var(--line); stroke-width: 1; }
+    .adm-line-stroke { fill: none; stroke: var(--jaipur-navy); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .adm-line-fill { fill: rgba(8, 39, 70, 0.08); }
+    .adm-data-dot { fill: var(--jaipur-navy); }
+    .adm-data-dot.peak { fill: var(--terracotta); }
+    .adm-peak-label { font-family: var(--font-mono); font-size: 11px; font-weight: 700; fill: var(--terracotta); letter-spacing: 0.04em; }
+
+    /* Donut */
+    .adm-donut-wrap { display: flex; flex-direction: column; align-items: center; gap: var(--space-md); }
+    .adm-donut { position: relative; width: 180px; height: 180px; }
+    .adm-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+    .adm-donut-center strong { font-size: 26px; color: var(--ink); font-weight: 700; letter-spacing: -0.01em; line-height: 1; font-variant-numeric: tabular-nums; }
+    .adm-donut-center span { font-size: 11px; color: var(--ink-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+    .adm-donut-legend { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: var(--space-sm); }
+    .adm-donut-legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .adm-donut-legend-row .dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .adm-donut-legend-row .label { color: var(--ink); flex: 1; }
+    .adm-donut-legend-row .pct { font-family: var(--font-mono); font-weight: 700; color: var(--ink); }
+    .adm-donut-legend-row .raw { font-family: var(--font-mono); color: var(--ink-muted); font-size: 11.5px; }
+
+    /* Horizontal bar chart */
+    .adm-bar-row { display: grid; grid-template-columns: 140px minmax(0, 1fr) 50px; gap: 12px; align-items: center; padding: 6px 0; font-size: 13px; }
+    .adm-bar-row .nb { color: var(--ink); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .adm-bar-row .bar { height: 22px; background: var(--paper-warm); border-radius: 4px; overflow: hidden; position: relative; }
+    .adm-bar-row .bar .fill { height: 100%; background: var(--jaipur-navy); border-radius: 4px; transition: width var(--dur-base) var(--ease-out); }
+    .adm-bar-row .ct { font-family: var(--font-mono); font-weight: 700; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+    @media (max-width: 600px) {
+      .adm-bar-row { grid-template-columns: 110px minmax(0, 1fr) 40px; gap: 8px; font-size: 12.5px; }
+    }
+
+    /* Funnel */
+    .adm-funnel { display: flex; flex-direction: column; align-items: stretch; max-width: 720px; margin: 0 auto; }
+    .adm-funnel-stage { background: var(--jaipur-navy); color: var(--paper); padding: 16px var(--space-lg); border-radius: 8px; margin-bottom: 0; position: relative; }
+    .adm-funnel-stage h4 { font-family: var(--font-mono); font-size: 11px; font-weight: 700; opacity: 0.7; margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .adm-funnel-stage .num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; line-height: 1.1; }
+    .adm-funnel-stage .num small { font-size: 12px; font-weight: 500; opacity: 0.75; margin-left: 8px; letter-spacing: 0.02em; font-family: var(--font-mono); }
+    .adm-funnel-stage:nth-child(1) { width: 100%; }
+    .adm-funnel-stage:nth-child(3) { width: 86%; margin-left: 7%; background: #0b3258; }
+    .adm-funnel-stage:nth-child(5) { width: 60%; margin-left: 20%; background: #155080; }
+    .adm-funnel-stage:nth-child(7) { width: 28%; margin-left: 36%; background: var(--terracotta); }
+    .adm-funnel-arrow { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.06em; text-align: center; margin: 6px 0; text-transform: uppercase; font-weight: 600; }
+
+    /* Conversion mini bar (in table) */
+    .adm-mini-conv { display: flex; align-items: center; gap: 8px; min-width: 100px; }
+    .adm-mini-conv .mini-bar { flex: 1; height: 5px; background: var(--paper-warm); border-radius: 3px; overflow: hidden; }
+    .adm-mini-conv .mini-bar .fill { height: 100%; background: var(--whatsapp-signal); border-radius: 3px; }
+    .adm-mini-conv .mini-pct { font-family: var(--font-mono); font-weight: 700; font-size: 11.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+    /* Top-row card titles can be smaller on mobile */
+    @media (max-width: 600px) {
+      .adm-funnel-stage { padding: 12px var(--space-md); }
+      .adm-funnel-stage .num { font-size: 22px; }
+      .adm-funnel-stage:nth-child(3) { width: 92%; margin-left: 4%; }
+      .adm-funnel-stage:nth-child(5) { width: 70%; margin-left: 15%; }
+      .adm-funnel-stage:nth-child(7) { width: 42%; margin-left: 29%; }
+    }
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-preview-banner">
+  Demo build · no real authentication · <a href="/rentoo/">return to public site</a>
+</div>
+
+<div class="adm-shell">
+
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <div class="adm-brand-logo">R</div>
+      <div class="adm-brand-name">
+        <strong>Rentoo</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <nav class="adm-nav" aria-label="Admin navigation">
+      <a href="/rentoo/admin/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Properties
+      </a>
+      <a href="/rentoo/admin/inquiries/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="adm-nav-badge">3</span>
+      </a>
+      <a href="/rentoo/admin/owners/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Owners
+      </a>
+      <a href="/rentoo/admin/analytics/" class="active">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="adm-nav-section-label">System</div>
+      <a href="/rentoo/admin/imports/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imports
+      </a>
+      <a href="/rentoo/admin/audit/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit log
+      </a>
+      <a href="/rentoo/admin/settings/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="adm-user">
+      <div class="adm-user-avatar">R</div>
+      <div class="adm-user-info">
+        <strong>Rishabh</strong>
+        <span>connect@rentoo.in</span>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="adm-mobile-nav" aria-label="Mobile admin nav">
+    <a href="/rentoo/admin/">Properties</a>
+    <a href="/rentoo/admin/inquiries/">Inquiries <span style="background:var(--whatsapp-signal);color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:3px">3</span></a>
+    <a href="/rentoo/admin/owners/">Owners</a>
+    <a href="/rentoo/admin/analytics/" class="active">Analytics</a>
+    <a href="/rentoo/admin/settings/">Settings</a>
+  </nav>
+
+  <main class="adm-main">
+
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <h1>Analytics</h1>
+        <div class="meta">Last 30 days · updated 2 min ago</div>
+      </div>
+      <div class="adm-topbar-right">
+        <button class="adm-btn adm-btn-ghost" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Last 30 days
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <button class="adm-btn adm-btn-ghost">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <!-- Stats strip -->
+      <div class="adm-stats">
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Listings visited</div>
+          <div class="adm-stat-val">1,247</div>
+          <div class="adm-stat-delta">↑ 18% vs prev month</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">WhatsApp inquiries</div>
+          <div class="adm-stat-val">142</div>
+          <div class="adm-stat-delta">↑ 31% vs prev month</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Conversion (visit → inquiry)</div>
+          <div class="adm-stat-val">11.4<span style="font-size:14px;color:var(--ink-muted);font-weight:500">%</span></div>
+          <div class="adm-stat-delta">↑ 1.2pp vs prev month</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Median reply time</div>
+          <div class="adm-stat-val">26<span style="font-size:14px;color:var(--ink-muted);font-weight:500"> min</span></div>
+          <div class="adm-stat-delta" style="color:var(--ink-muted)">→ unchanged</div>
+        </div>
+      </div>
+
+      <!-- Two-column: line + donut -->
+      <div class="adm-chart-grid">
+
+        <!-- Line chart -->
+        <div class="adm-chart-card">
+          <h3>Daily inquiries · last 30 days</h3>
+          <div class="chart-sub">Total: 142 · Daily avg: 4.7 · Peak: 11 on May 14</div>
+
+          <svg viewBox="0 0 640 240" role="img" aria-label="Daily inquiry counts over the last 30 days, peaking at 11 on May 14">
+            <!-- Gridlines (Y) at val 0, 3, 6, 9, 12 → y = 200, 155, 110, 65, 20 -->
+            <line class="adm-grid-line" x1="40" y1="200" x2="620" y2="200"/>
+            <line class="adm-grid-line" x1="40" y1="155" x2="620" y2="155" stroke-dasharray="2 3"/>
+            <line class="adm-grid-line" x1="40" y1="110" x2="620" y2="110" stroke-dasharray="2 3"/>
+            <line class="adm-grid-line" x1="40" y1="65" x2="620" y2="65" stroke-dasharray="2 3"/>
+            <line class="adm-grid-line" x1="40" y1="20" x2="620" y2="20" stroke-dasharray="2 3"/>
+
+            <!-- Y axis labels -->
+            <text class="adm-axis-label" x="32" y="204" text-anchor="end">0</text>
+            <text class="adm-axis-label" x="32" y="159" text-anchor="end">3</text>
+            <text class="adm-axis-label" x="32" y="114" text-anchor="end">6</text>
+            <text class="adm-axis-label" x="32" y="69" text-anchor="end">9</text>
+            <text class="adm-axis-label" x="32" y="24" text-anchor="end">12</text>
+
+            <!-- Area under line -->
+            <path class="adm-line-fill" d="M 40,155 L 60,140 L 80,170 L 100,125 L 120,95 L 140,110 L 160,125 L 180,155 L 200,140 L 220,110 L 240,80 L 260,95 L 280,125 L 300,35 L 320,140 L 340,65 L 360,95 L 380,110 L 400,125 L 420,140 L 440,125 L 460,95 L 480,110 L 500,140 L 520,155 L 540,125 L 560,110 L 580,95 L 600,80 L 620,125 L 620,200 L 40,200 Z"/>
+
+            <!-- Line -->
+            <polyline class="adm-line-stroke" points="40,155 60,140 80,170 100,125 120,95 140,110 160,125 180,155 200,140 220,110 240,80 260,95 280,125 300,35 320,140 340,65 360,95 380,110 400,125 420,140 440,125 460,95 480,110 500,140 520,155 540,125 560,110 580,95 600,80 620,125"/>
+
+            <!-- Data dots -->
+            <circle class="adm-data-dot" cx="40" cy="155" r="3"/>
+            <circle class="adm-data-dot" cx="60" cy="140" r="3"/>
+            <circle class="adm-data-dot" cx="80" cy="170" r="3"/>
+            <circle class="adm-data-dot" cx="100" cy="125" r="3"/>
+            <circle class="adm-data-dot" cx="120" cy="95" r="3"/>
+            <circle class="adm-data-dot" cx="140" cy="110" r="3"/>
+            <circle class="adm-data-dot" cx="160" cy="125" r="3"/>
+            <circle class="adm-data-dot" cx="180" cy="155" r="3"/>
+            <circle class="adm-data-dot" cx="200" cy="140" r="3"/>
+            <circle class="adm-data-dot" cx="220" cy="110" r="3"/>
+            <circle class="adm-data-dot" cx="240" cy="80" r="3"/>
+            <circle class="adm-data-dot" cx="260" cy="95" r="3"/>
+            <circle class="adm-data-dot" cx="280" cy="125" r="3"/>
+            <!-- Peak: May 14 / value 11 -->
+            <circle class="adm-data-dot peak" cx="300" cy="35" r="5"/>
+            <text class="adm-peak-label" x="300" y="22" text-anchor="middle">11</text>
+            <circle class="adm-data-dot" cx="320" cy="140" r="3"/>
+            <circle class="adm-data-dot" cx="340" cy="65" r="3"/>
+            <circle class="adm-data-dot" cx="360" cy="95" r="3"/>
+            <circle class="adm-data-dot" cx="380" cy="110" r="3"/>
+            <circle class="adm-data-dot" cx="400" cy="125" r="3"/>
+            <circle class="adm-data-dot" cx="420" cy="140" r="3"/>
+            <circle class="adm-data-dot" cx="440" cy="125" r="3"/>
+            <circle class="adm-data-dot" cx="460" cy="95" r="3"/>
+            <circle class="adm-data-dot" cx="480" cy="110" r="3"/>
+            <circle class="adm-data-dot" cx="500" cy="140" r="3"/>
+            <circle class="adm-data-dot" cx="520" cy="155" r="3"/>
+            <circle class="adm-data-dot" cx="540" cy="125" r="3"/>
+            <circle class="adm-data-dot" cx="560" cy="110" r="3"/>
+            <circle class="adm-data-dot" cx="580" cy="95" r="3"/>
+            <circle class="adm-data-dot" cx="600" cy="80" r="3"/>
+            <circle class="adm-data-dot" cx="620" cy="125" r="3"/>
+
+            <!-- X axis labels: every 5th day. May 1 (x=40), May 6 (x=140), May 11 (x=240), May 16 (x=340), May 21 (x=440), May 26 (x=540) -->
+            <text class="adm-axis-label" x="40" y="222" text-anchor="middle">May 1</text>
+            <text class="adm-axis-label" x="140" y="222" text-anchor="middle">May 6</text>
+            <text class="adm-axis-label" x="240" y="222" text-anchor="middle">May 11</text>
+            <text class="adm-axis-label" x="340" y="222" text-anchor="middle">May 16</text>
+            <text class="adm-axis-label" x="440" y="222" text-anchor="middle">May 21</text>
+            <text class="adm-axis-label" x="540" y="222" text-anchor="middle">May 26</text>
+          </svg>
+        </div>
+
+        <!-- Donut chart -->
+        <div class="adm-chart-card">
+          <h3>Channels</h3>
+          <div class="chart-sub">How inquiries arrived</div>
+
+          <div class="adm-donut-wrap">
+            <div class="adm-donut">
+              <svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Inquiry channel breakdown: WhatsApp 87 percent, Callback 9 percent, Web form 4 percent">
+                <!-- Background ring (very faint) -->
+                <circle cx="90" cy="90" r="60" fill="none" stroke="var(--paper-warm)" stroke-width="22"/>
+                <!-- Rotate so segments start at 12 o'clock -->
+                <g transform="rotate(-90 90 90)">
+                  <!-- WhatsApp 87% (dash 328, gap 49) -->
+                  <circle cx="90" cy="90" r="60" fill="none" stroke="#25D366" stroke-width="22"
+                          stroke-dasharray="328 49" stroke-dashoffset="0"/>
+                  <!-- Callback 9% (dash 34, gap 343) -->
+                  <circle cx="90" cy="90" r="60" fill="none" stroke="var(--ink-muted)" stroke-width="22"
+                          stroke-dasharray="34 343" stroke-dashoffset="-328"/>
+                  <!-- Web form 4% (dash 15, gap 362) -->
+                  <circle cx="90" cy="90" r="60" fill="none" stroke="var(--haze-tint)" stroke-width="22"
+                          stroke-dasharray="15 362" stroke-dashoffset="-362"/>
+                </g>
+              </svg>
+              <div class="adm-donut-center">
+                <strong>142</strong>
+                <span>inquiries</span>
+              </div>
+            </div>
+
+            <div class="adm-donut-legend">
+              <div class="adm-donut-legend-row">
+                <span class="dot" style="background:#25D366"></span>
+                <span class="label">WhatsApp</span>
+                <span class="pct">87%</span>
+                <span class="raw">124</span>
+              </div>
+              <div class="adm-donut-legend-row">
+                <span class="dot" style="background:var(--ink-muted)"></span>
+                <span class="label">Callback request</span>
+                <span class="pct">9%</span>
+                <span class="raw">13</span>
+              </div>
+              <div class="adm-donut-legend-row">
+                <span class="dot" style="background:var(--haze-tint)"></span>
+                <span class="label">Web form</span>
+                <span class="pct">4%</span>
+                <span class="raw">5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neighbourhood bar chart -->
+      <div class="adm-chart-card full">
+        <h3>Active listings by neighbourhood</h3>
+        <div class="chart-sub">163 active across 9 areas</div>
+
+        <div class="adm-bar-row">
+          <div class="nb">Mansarovar</div>
+          <div class="bar"><div class="fill" style="width:100%"></div></div>
+          <div class="ct">38</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">C-Scheme</div>
+          <div class="bar"><div class="fill" style="width:73.7%"></div></div>
+          <div class="ct">28</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">Bapu Nagar</div>
+          <div class="bar"><div class="fill" style="width:63.2%"></div></div>
+          <div class="ct">24</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">Malviya Nagar</div>
+          <div class="bar"><div class="fill" style="width:50%"></div></div>
+          <div class="ct">19</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">Vaishali Nagar</div>
+          <div class="bar"><div class="fill" style="width:44.7%"></div></div>
+          <div class="ct">17</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">Rajapark</div>
+          <div class="bar"><div class="fill" style="width:28.9%"></div></div>
+          <div class="ct">11</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">Vidhyadhar Nagar</div>
+          <div class="bar"><div class="fill" style="width:23.7%"></div></div>
+          <div class="ct">9</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb">Jagatpura</div>
+          <div class="bar"><div class="fill" style="width:18.4%"></div></div>
+          <div class="ct">7</div>
+        </div>
+        <div class="adm-bar-row">
+          <div class="nb" style="color:var(--ink-muted);font-style:italic">Other</div>
+          <div class="bar"><div class="fill" style="width:28.9%;background:var(--ink-muted);opacity:0.5"></div></div>
+          <div class="ct">11</div>
+        </div>
+      </div>
+
+      <!-- Conversion funnel -->
+      <div class="adm-chart-card full">
+        <h3>Conversion funnel · last 30 days</h3>
+        <div class="chart-sub">1,247 visits · 38 visits scheduled</div>
+
+        <div class="adm-funnel">
+          <div class="adm-funnel-stage">
+            <h4>Listings visited</h4>
+            <div class="num">1,247<small>100%</small></div>
+          </div>
+          <div class="adm-funnel-arrow">↓ 23% click WhatsApp</div>
+          <div class="adm-funnel-stage">
+            <h4>WhatsApp clicked</h4>
+            <div class="num">287<small>23% of visited</small></div>
+          </div>
+          <div class="adm-funnel-arrow">↓ 49% send inquiry</div>
+          <div class="adm-funnel-stage">
+            <h4>Inquiry sent</h4>
+            <div class="num">142<small>49% of clicked · 11% of visited</small></div>
+          </div>
+          <div class="adm-funnel-arrow">↓ 27% schedule visit</div>
+          <div class="adm-funnel-stage">
+            <h4>Visit scheduled</h4>
+            <div class="num">38<small>27% of inquiries · 3% of visited</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top properties table -->
+      <div class="adm-chart-card full" style="padding:0">
+        <div class="adm-chart-head" style="padding:var(--space-lg) var(--space-lg) 0">
+          <h3>Top-viewed properties this month</h3>
+          <a href="/rentoo/admin/" class="view-all">View all →</a>
+        </div>
+        <div class="chart-sub" style="padding:0 var(--space-lg) var(--space-md)">Ranked by listing page views</div>
+
+        <div class="adm-table-wrap" style="border:none;border-top:1px solid var(--line);border-radius:0 0 8px 8px">
+          <table class="adm-table" style="min-width:760px">
+            <thead>
+              <tr>
+                <th style="width:60px"></th>
+                <th>ID</th>
+                <th>Title · Neighbourhood</th>
+                <th>Views</th>
+                <th>Inquiries</th>
+                <th>Conversion</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-3/120/90)"></div></td>
+                <td><span class="adm-cell-id">#04</span></td>
+                <td><div class="adm-cell-title">Royal Arcade<small>Civil Lines · C-Scheme</small></div></td>
+                <td class="adm-cell-rent">184</td>
+                <td class="adm-cell-rent">29</td>
+                <td>
+                  <div class="adm-mini-conv">
+                    <div class="mini-bar"><div class="fill" style="width:100%"></div></div>
+                    <span class="mini-pct">15.8%</span>
+                  </div>
+                </td>
+                <td><button class="adm-btn adm-btn-ghost" style="padding:5px 10px;font-size:11.5px">View listing</button></td>
+              </tr>
+              <tr>
+                <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-2/120/90)"></div></td>
+                <td><span class="adm-cell-id">C-3</span></td>
+                <td><div class="adm-cell-title">Empire Tower<small>Mirza Ismail Rd · C-Scheme</small></div></td>
+                <td class="adm-cell-rent">156</td>
+                <td class="adm-cell-rent">22</td>
+                <td>
+                  <div class="adm-mini-conv">
+                    <div class="mini-bar"><div class="fill" style="width:89%"></div></div>
+                    <span class="mini-pct">14.1%</span>
+                  </div>
+                </td>
+                <td><button class="adm-btn adm-btn-ghost" style="padding:5px 10px;font-size:11.5px">View listing</button></td>
+              </tr>
+              <tr>
+                <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-1/120/90)"></div></td>
+                <td><span class="adm-cell-id">#01</span></td>
+                <td><div class="adm-cell-title">RR Heights<small>Gulab Garh · Mansarovar</small></div></td>
+                <td class="adm-cell-rent">141</td>
+                <td class="adm-cell-rent">18</td>
+                <td>
+                  <div class="adm-mini-conv">
+                    <div class="mini-bar"><div class="fill" style="width:81%"></div></div>
+                    <span class="mini-pct">12.8%</span>
+                  </div>
+                </td>
+                <td><button class="adm-btn adm-btn-ghost" style="padding:5px 10px;font-size:11.5px">View listing</button></td>
+              </tr>
+              <tr>
+                <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-viewed-2/120/90)"></div></td>
+                <td><span class="adm-cell-id">#15</span></td>
+                <td><div class="adm-cell-title">Green Acres<small>Sector 11 · Vidhyadhar Nagar</small></div></td>
+                <td class="adm-cell-rent">119</td>
+                <td class="adm-cell-rent">14</td>
+                <td>
+                  <div class="adm-mini-conv">
+                    <div class="mini-bar"><div class="fill" style="width:74%"></div></div>
+                    <span class="mini-pct">11.8%</span>
+                  </div>
+                </td>
+                <td><button class="adm-btn adm-btn-ghost" style="padding:5px 10px;font-size:11.5px">View listing</button></td>
+              </tr>
+              <tr>
+                <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-2/120/90)"></div></td>
+                <td><span class="adm-cell-id">#03</span></td>
+                <td><div class="adm-cell-title">Krishna Apts<small>Iskcon Temple · Malviya Nagar</small></div></td>
+                <td class="adm-cell-rent">98</td>
+                <td class="adm-cell-rent">12</td>
+                <td>
+                  <div class="adm-mini-conv">
+                    <div class="mini-bar"><div class="fill" style="width:77%"></div></div>
+                    <span class="mini-pct">12.2%</span>
+                  </div>
+                </td>
+                <td><button class="adm-btn adm-btn-ghost" style="padding:5px 10px;font-size:11.5px">View listing</button></td>
+              </tr>
+              <tr>
+                <td><div class="adm-thumb" style="background-image:url(https://picsum.photos/seed/rentoo-prop-3/120/90)"></div></td>
+                <td><span class="adm-cell-id">C-7</span></td>
+                <td><div class="adm-cell-title">Sitapura Industrial<small>Phase 4 · Sitapura</small></div></td>
+                <td class="adm-cell-rent">87</td>
+                <td class="adm-cell-rent">9</td>
+                <td>
+                  <div class="adm-mini-conv">
+                    <div class="mini-bar"><div class="fill" style="width:65%"></div></div>
+                    <span class="mini-pct">10.3%</span>
+                  </div>
+                </td>
+                <td><button class="adm-btn adm-btn-ghost" style="padding:5px 10px;font-size:11.5px">View listing</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p style="margin-top:var(--space-md);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-muted);text-align:center">
+        All charts are sample data &nbsp;·&nbsp;
+        Export PDF compiles this view as a one-page report
+      </p>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

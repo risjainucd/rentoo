@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#082746">
+  <title>Owners · Rentoo Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/rentoo/Rentooicon.png">
+  <link rel="stylesheet" href="/rentoo/styles.css">
+  <link rel="stylesheet" href="/rentoo/admin/_admin.css">
+  <style>
+    .adm-owner-avatar{width:28px;height:28px;border-radius:50%;background:var(--haze-tint);color:var(--jaipur-navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:var(--font-mono);letter-spacing:0.02em;flex-shrink:0}
+    .adm-source-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;font-family:var(--font-mono)}
+    .adm-source-pill.walkin{background:var(--haze-tint);color:var(--jaipur-navy)}
+    .adm-source-pill.referral{background:var(--terracotta-mist);color:var(--terracotta)}
+    .adm-source-pill.whatsapp{background:#dcf7e3;color:var(--whatsapp-deep)}
+    .adm-source-pill.facebook{background:#e0e7ff;color:#3730a3}
+    .adm-source-pill.other{background:var(--rest-mist);color:var(--rest-gray)}
+    .adm-listing-badge{display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+    .adm-listing-badge .pill{font-family:var(--font-mono);font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;letter-spacing:0.04em;text-transform:uppercase;background:var(--ok-mist);color:var(--ok-green)}
+    .adm-listing-badge .pill.mixed{background:var(--terracotta-mist);color:var(--terracotta)}
+    .adm-listing-badge .pill.rented{background:var(--rest-mist);color:var(--rest-gray)}
+    .adm-phone-link{font-family:var(--font-mono);font-size:12.5px;color:var(--jaipur-navy);letter-spacing:0.02em;font-weight:500}
+    .adm-phone-link:hover{text-decoration:underline}
+    .adm-owner-name{font-weight:600;color:var(--ink);line-height:1.3}
+    .adm-owner-name small{display:block;font-family:var(--font-mono);font-size:10.5px;color:var(--ink-muted);letter-spacing:0.04em;font-weight:400;margin-top:2px;text-transform:uppercase}
+    .adm-time-rel{font-size:12.5px;color:var(--ink-muted)}
+    .adm-view-link{font-size:12.5px;color:var(--jaipur-navy);font-weight:600;padding:4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:3px}
+    .adm-view-link:hover{background:var(--paper-warm)}
+  </style>
+</head>
+<body class="adm-body">
+
+<div class="adm-preview-banner">
+  Demo build · no real authentication · <a href="/rentoo/">return to public site</a>
+</div>
+
+<div class="adm-shell">
+
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <div class="adm-brand-logo">R</div>
+      <div class="adm-brand-name">
+        <strong>Rentoo</strong>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <nav class="adm-nav" aria-label="Admin navigation">
+      <a href="/rentoo/admin/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Properties
+      </a>
+      <a href="/rentoo/admin/inquiries/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="adm-nav-badge">3</span>
+      </a>
+      <a href="/rentoo/admin/owners/" class="active">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Owners
+      </a>
+      <a href="/rentoo/admin/analytics/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="adm-nav-section-label">System</div>
+      <a href="/rentoo/admin/imports/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imports
+      </a>
+      <a href="/rentoo/admin/audit/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit log
+      </a>
+      <a href="/rentoo/admin/settings/">
+        <svg class="adm-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="adm-user">
+      <div class="adm-user-avatar">R</div>
+      <div class="adm-user-info">
+        <strong>Rishabh</strong>
+        <span>connect@rentoo.in</span>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="adm-mobile-nav" aria-label="Mobile admin nav">
+    <a href="/rentoo/admin/">Properties</a>
+    <a href="/rentoo/admin/inquiries/">Inquiries <span style="background:var(--whatsapp-signal);color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:3px">3</span></a>
+    <a href="/rentoo/admin/owners/" class="active">Owners</a>
+    <a href="/rentoo/admin/analytics/">Analytics</a>
+    <a href="/rentoo/admin/imports/">Imports</a>
+    <a href="/rentoo/admin/audit/">Audit log</a>
+    <a href="/rentoo/admin/settings/">Settings</a>
+  </nav>
+
+  <main class="adm-main">
+
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <h1>Owners</h1>
+        <div class="meta">104 total · 71% with multiple properties</div>
+      </div>
+      <div class="adm-topbar-right">
+        <button class="adm-btn adm-btn-ghost">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button class="adm-btn adm-btn-primary">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add owner
+        </button>
+      </div>
+    </div>
+
+    <div class="adm-content">
+
+      <div class="adm-stats">
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Active owners</div>
+          <div class="adm-stat-val">104</div>
+          <div class="adm-stat-delta">↑ 6 this month</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Returning</div>
+          <div class="adm-stat-val">71<span style="font-size:14px;color:var(--ink-muted);font-weight:500">%</span></div>
+          <div class="adm-stat-delta">2+ listings on record</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Avg property value</div>
+          <div class="adm-stat-val">₹8.4<span style="font-size:14px;color:var(--ink-muted);font-weight:500">L</span></div>
+          <div class="adm-stat-delta">Across active portfolio</div>
+        </div>
+        <div class="adm-stat">
+          <div class="adm-stat-lbl">Avg listings / owner</div>
+          <div class="adm-stat-val">2.3</div>
+          <div class="adm-stat-delta">↑ 0.2 vs last quarter</div>
+        </div>
+      </div>
+
+      <div class="adm-filter-bar">
+        <div class="adm-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Name, phone, owner ID…">
+        </div>
+        <select class="adm-select">
+          <option>All sources</option>
+          <option>Walk-in</option>
+          <option>Referral</option>
+          <option>WhatsApp inbound</option>
+          <option>Facebook</option>
+          <option>Other</option>
+        </select>
+        <select class="adm-select">
+          <option>All listing counts</option>
+          <option>1 listing</option>
+          <option>2–5 listings</option>
+          <option>5+ listings</option>
+        </select>
+        <select class="adm-select">
+          <option>Any activity</option>
+          <option>This week</option>
+          <option>This month</option>
+          <option>Stale 3mo+</option>
+        </select>
+      </div>
+
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th style="width:44px"></th>
+              <th>Owner ID</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th># Listings</th>
+              <th>Latest activity</th>
+              <th>Source</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="adm-owner-avatar">RG</div></td>
+              <td><span class="adm-cell-id">#O-12</span></td>
+              <td><div class="adm-owner-name">Rajesh Gupta<small>Mansarovar</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919871234567">+91 98712 34567</a></td>
+              <td><span class="adm-listing-badge">4 <span class="pill">3 avail</span></span></td>
+              <td><span class="adm-time-rel">2 days ago</span></td>
+              <td><span class="adm-source-pill walkin">Walk-in</span></td>
+              <td><a href="#owner-12" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">SB</div></td>
+              <td><span class="adm-cell-id">#O-08</span></td>
+              <td><div class="adm-owner-name">Shashi Bhatia<small>Malviya Nagar</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919833445566">+91 98334 45566</a></td>
+              <td><span class="adm-listing-badge">2 <span class="pill">2 avail</span></span></td>
+              <td><span class="adm-time-rel">Last week</span></td>
+              <td><span class="adm-source-pill referral">Referral</span></td>
+              <td><a href="#owner-08" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">AM</div></td>
+              <td><span class="adm-cell-id">#O-03</span></td>
+              <td><div class="adm-owner-name">Anil Mathur<small>C-Scheme · Civil Lines</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919810022211">+91 98100 22211</a></td>
+              <td><span class="adm-listing-badge">7 <span class="pill mixed">5 avail · 2 rented</span></span></td>
+              <td><span class="adm-time-rel">4 hours ago</span></td>
+              <td><span class="adm-source-pill referral">Referral</span></td>
+              <td><a href="#owner-03" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">PS</div></td>
+              <td><span class="adm-cell-id">#O-21</span></td>
+              <td><div class="adm-owner-name">Priya Sharma<small>Bapu Nagar</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919812345670">+91 98123 45670</a></td>
+              <td><span class="adm-listing-badge">1 <span class="pill">1 avail</span></span></td>
+              <td><span class="adm-time-rel">Yesterday</span></td>
+              <td><span class="adm-source-pill whatsapp">WhatsApp</span></td>
+              <td><a href="#owner-21" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">MJ</div></td>
+              <td><span class="adm-cell-id">#O-07</span></td>
+              <td><div class="adm-owner-name">Mohan Joshi<small>C-Scheme · Birla Temple</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919876512340">+91 98765 12340</a></td>
+              <td><span class="adm-listing-badge">3 <span class="pill">3 avail</span></span></td>
+              <td><span class="adm-time-rel">3 days ago</span></td>
+              <td><span class="adm-source-pill walkin">Walk-in</span></td>
+              <td><a href="#owner-07" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">SR</div></td>
+              <td><span class="adm-cell-id">#O-15</span></td>
+              <td><div class="adm-owner-name">Sandeep Rastogi<small>Vidhyadhar Nagar</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919822334455">+91 98223 34455</a></td>
+              <td><span class="adm-listing-badge">2 <span class="pill mixed">1 avail · 1 rented</span></span></td>
+              <td><span class="adm-time-rel">2 weeks ago</span></td>
+              <td><span class="adm-source-pill facebook">Facebook</span></td>
+              <td><a href="#owner-15" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">NA</div></td>
+              <td><span class="adm-cell-id">#O-19</span></td>
+              <td><div class="adm-owner-name">Neha Agarwal<small>Rajapark · Sector 4</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919844556677">+91 98445 56677</a></td>
+              <td><span class="adm-listing-badge">1 <span class="pill">1 avail</span></span></td>
+              <td><span class="adm-time-rel">5 days ago</span></td>
+              <td><span class="adm-source-pill whatsapp">WhatsApp</span></td>
+              <td><a href="#owner-19" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr style="opacity:0.78">
+              <td><div class="adm-owner-avatar">VT</div></td>
+              <td><span class="adm-cell-id">#O-31</span></td>
+              <td><div class="adm-owner-name">Vikash Tiwari<small>Vaishali Nagar</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919711223344">+91 97112 23344</a></td>
+              <td><span class="adm-listing-badge">1 <span class="pill rented">1 rented</span></span></td>
+              <td><span class="adm-time-rel">2 days ago</span></td>
+              <td><span class="adm-source-pill walkin">Walk-in</span></td>
+              <td><a href="#owner-31" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">VK</div></td>
+              <td><span class="adm-cell-id">#O-04</span></td>
+              <td><div class="adm-owner-name">Vijay Khanna<small>C-Scheme · M.I. Road</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919830011223">+91 98300 11223</a></td>
+              <td><span class="adm-listing-badge">5 <span class="pill mixed">4 avail · 1 rented</span></span></td>
+              <td><span class="adm-time-rel">Today</span></td>
+              <td><span class="adm-source-pill referral">Referral</span></td>
+              <td><a href="#owner-04" class="adm-view-link">View ›</a></td>
+            </tr>
+            <tr>
+              <td><div class="adm-owner-avatar">LC</div></td>
+              <td><span class="adm-cell-id">#O-44</span></td>
+              <td><div class="adm-owner-name">Logistics Co. Pvt Ltd<small>Sitapura · Industrial</small></div></td>
+              <td><a class="adm-phone-link" href="tel:+919414567890">+91 94145 67890</a></td>
+              <td><span class="adm-listing-badge">3 <span class="pill">3 avail</span></span></td>
+              <td><span class="adm-time-rel">Last week</span></td>
+              <td><span class="adm-source-pill other">Other</span></td>
+              <td><a href="#owner-44" class="adm-view-link">View ›</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="adm-table-foot">
+          <div>Showing 1–10 of 104 owners</div>
+          <div class="adm-pagination">
+            <button class="adm-page-btn" disabled>‹</button>
+            <button class="adm-page-btn active">1</button>
+            <button class="adm-page-btn">2</button>
+            <button class="adm-page-btn">3</button>
+            <span style="padding:4px">…</span>
+            <button class="adm-page-btn">11</button>
+            <button class="adm-page-btn">›</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:var(--space-md);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--ink-muted);text-align:center">
+        Tap a phone number to dial &nbsp;·&nbsp;
+        Owner IDs map 1:1 to the Excel sheet column A
+      </p>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
