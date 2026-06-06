@@ -744,7 +744,7 @@ p {
 }
 
 .hero-feature .card-image {
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 16 / 10;
 }
 
 .card-body {
