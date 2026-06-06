@@ -779,19 +779,6 @@ p {
   color: var(--ink-muted);
 }
 
-.no-brokerage-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--jaipur-navy);
-  background: var(--haze-tint);
-  padding: 3px var(--space-sm);
-  border-radius: var(--r-sm);
-}
-
 .card-title {
   font-size: 1rem;
   font-weight: 600;
