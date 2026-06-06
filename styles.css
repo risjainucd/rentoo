@@ -617,6 +617,18 @@ p {
   padding-right: var(--space-lg);
 }
 
+/* Mobile: give the search controls a full 44px tap target (the primary
+   action on the page). On desktop the mouse target is fine as-is. */
+@media (max-width: 639px) {
+  .search-field {
+    min-height: 64px;
+  }
+  .search-field input,
+  .search-field select {
+    min-height: 44px;
+  }
+}
+
 .search-field input::placeholder {
   color: var(--ink-muted);
 }
