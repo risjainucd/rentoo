@@ -1,0 +1,5 @@
+# gstack browse/tooling working data (local only)
+.gstack/
+
+# macOS
+.DS_Store
