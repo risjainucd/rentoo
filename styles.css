@@ -1286,7 +1286,7 @@ p {
 .footer-col a {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  min-height: 44px;
   font-size: 0.9375rem;
   color: rgba(255, 255, 255, 0.78);
   transition: color var(--dur-fast) var(--ease-out);
@@ -1638,7 +1638,8 @@ p {
   align-self: center;
 }
 
-.section-marker-meta a {
+.section-marker-meta a,
+a.section-marker-meta {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
