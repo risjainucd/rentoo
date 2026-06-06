@@ -447,6 +447,17 @@ p {
   width: 100%;
 }
 
+/* Calm the sticky-header CTA: the top-right WhatsApp button uses brand navy so the
+   hero headline wins the first fixation. In-content WhatsApp buttons (hero feature,
+   curator sign-off, detail sticky CTA, mobile menu) keep the high-signal green. */
+.site-header .btn-whatsapp:not(.btn-whatsapp--block) {
+  background: var(--jaipur-navy);
+  color: var(--paper);
+}
+.site-header .btn-whatsapp:not(.btn-whatsapp--block):hover {
+  background: var(--midnight-tile);
+}
+
 @media (max-width: 767px) {
   .btn-whatsapp span { /* nav button: keep label visible but tight */
     display: inline;
@@ -1626,8 +1637,11 @@ p {
 }
 
 .section-marker--minor h2 {
-  font-size: 1.125rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
   font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-muted);
 }
 
