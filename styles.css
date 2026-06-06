@@ -373,6 +373,12 @@ p {
   background: var(--paper);
 }
 
+/* Respect the [hidden] attribute — the menu must stay closed on load
+   and only open when the toggle button removes [hidden]. */
+.mobile-menu[hidden] {
+  display: none;
+}
+
 .mobile-menu a {
   padding: var(--space-md) 0;
   font-size: 1rem;
@@ -1125,7 +1131,7 @@ p {
   top: -8px;
   left: -8px;
   z-index: -1;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
 }
 
 .testimonial figcaption {
