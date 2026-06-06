@@ -358,6 +358,26 @@ p {
   background: var(--paper-warm);
 }
 
+/* Hamburger morphs into an X when the menu is open (aria-expanded toggled
+   by the menu script). transform-box keeps the rotation centered on each line. */
+.nav-toggle svg line {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.nav-toggle[aria-expanded="true"] svg line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] svg line:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] svg line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
 @media (min-width: 768px) {
   .primary-nav { display: flex; }
   .nav-toggle { display: none; }
