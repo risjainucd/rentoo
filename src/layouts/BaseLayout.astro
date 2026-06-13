@@ -1,0 +1,52 @@
+---
+import '../styles/globals.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#082746" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/png" href="/Rentooicon.png" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <slot name="header" />
+    <main id="main">
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>
+
+<style>
+  /* Skip link — from styles.css */
+  .skip-link {
+    position: absolute;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    border-radius: var(--r-md);
+    transform: translateY(-200%);
+    transition: transform var(--dur-fast) var(--ease-out);
+    z-index: 100;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+</style>
