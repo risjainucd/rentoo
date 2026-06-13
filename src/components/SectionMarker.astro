@@ -1,0 +1,52 @@
+---
+interface Props {
+  num?: string;
+  label: string;
+  meta?: string;
+}
+
+const { num, label, meta } = Astro.props;
+---
+
+<header class="section-marker">
+  {num && <span class="section-marker-num" aria-hidden="true">{num}</span>}
+  <h2>{label}</h2>
+  {meta && <span class="section-marker-meta">{meta}</span>}
+</header>
+
+<style>
+  .section-marker {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-marker-num {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--terracotta);
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .section-marker h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .section-marker-meta {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    align-self: center;
+  }
+</style>

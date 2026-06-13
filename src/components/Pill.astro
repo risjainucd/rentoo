@@ -1,0 +1,143 @@
+---
+interface Props {
+  variant: 'status-available' | 'status-rented' | 'status-on-hold' | 'verified' | 'display-id';
+  label: string;
+}
+
+const { variant, label } = Astro.props;
+
+const isStatus = variant.startsWith('status-');
+const isVerified = variant === 'verified';
+const isDisplayId = variant === 'display-id';
+---
+
+{isDisplayId && (
+  <span class="display-id-tag display-id-tag--card" aria-hidden="true">{label}</span>
+)}
+
+{isVerified && (
+  <span class="verified-pill">
+    <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+      <path d="M10.28 2.28L4.75 7.81 1.72 4.78a1 1 0 0 0-1.41 1.41l3.75 3.75a1 1 0 0 0 1.41 0l6.25-6.25a1 1 0 0 0-1.41-1.41z"/>
+    </svg>
+    {label}
+  </span>
+)}
+
+{isStatus && variant === 'status-available' && (
+  <span class="status-pill status-pill--available">
+    <span class="dot" aria-hidden="true"></span>{label}
+  </span>
+)}
+
+{isStatus && variant === 'status-rented' && (
+  <span class="status-pill status-pill--rented">
+    <span class="dot" aria-hidden="true"></span>{label}
+  </span>
+)}
+
+{isStatus && variant === 'status-on-hold' && (
+  <span class="status-pill status-pill--on-hold">
+    <span class="dot" aria-hidden="true"></span>{label}
+  </span>
+)}
+
+<style>
+  /* Display ID tag */
+  .display-id-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    padding: 2px var(--space-sm);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    min-width: 38px;
+    height: 22px;
+  }
+
+  .display-id-tag--card {
+    position: absolute;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    z-index: 2;
+    font-size: 0.6875rem;
+    background: var(--paper-snow);
+    color: var(--jaipur-navy);
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 1px 2px rgba(8, 39, 70, 0.12);
+  }
+
+  /* Status pill */
+  .status-pill {
+    position: absolute;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 4px var(--space-sm);
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    bottom: var(--space-sm);
+    top: auto;
+    right: var(--space-sm);
+    background: rgba(255, 255, 255, 0.94);
+  }
+
+  .status-pill--available {
+    color: var(--ok-green);
+  }
+
+  .status-pill--rented {
+    background: rgba(241, 245, 249, 0.94);
+    color: var(--rest-gray);
+  }
+
+  .status-pill--on-hold {
+    background: rgba(245, 228, 218, 0.94);
+    color: var(--focus-clay);
+  }
+
+  .status-pill .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* Verified pill */
+  .verified-pill {
+    position: absolute;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 4px var(--space-sm);
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    top: var(--space-sm);
+    right: var(--space-sm);
+    left: auto;
+    background: rgba(220, 252, 231, 0.94);
+    color: var(--ok-green);
+  }
+
+  .verified-pill svg {
+    fill: currentColor;
+  }
+</style>
