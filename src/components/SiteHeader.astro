@@ -1,0 +1,234 @@
+---
+import { MobileNav } from './MobileNav';
+
+const links = [
+  { label: 'Residential', href: '/rent' },
+  { label: 'Commercial', href: '/commercial' },
+  { label: 'Industrial', href: '/commercial' },
+  { label: 'About', href: '/about' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="site-header" role="banner">
+  <div class="nav-inner">
+    <a href="/" class="logo" aria-label="Rentoo home">
+      <img src="/Rentoo.png" alt="Rentoo" width="120" height="38" />
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      {links.map(link => (
+        <a
+          href={link.href}
+          aria-current={currentPath.startsWith(link.href) && link.href !== '/' ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <a href="https://wa.me/918741800496" class="btn-whatsapp" data-cta="whatsapp-nav">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/>
+      </svg>
+      <span>WhatsApp us</span>
+    </a>
+
+    <MobileNav links={links} client:visible />
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+  }
+
+  @supports (backdrop-filter: blur(0)) {
+    .site-header {
+      background: rgba(250, 247, 238, 0.85);
+    }
+  }
+
+  .nav-inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .logo {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .logo img {
+    height: 28px;
+    width: auto;
+  }
+
+  .primary-nav {
+    display: none;
+    align-items: center;
+    gap: var(--space-xl);
+    margin-left: var(--space-xl);
+    flex: 1;
+  }
+
+  .primary-nav a {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--ink);
+    padding: var(--space-sm) 0;
+    position: relative;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .primary-nav a:hover {
+    color: var(--jaipur-navy);
+  }
+
+  .primary-nav a[aria-current="page"]::after,
+  .primary-nav a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--jaipur-navy);
+    border-radius: 1px;
+  }
+
+  /* WhatsApp button in header — calm navy color */
+  .btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    min-height: 48px;
+    transition: background var(--dur-base) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
+    white-space: nowrap;
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+
+  .btn-whatsapp:hover {
+    background: var(--midnight-tile);
+  }
+
+  @media (max-width: 480px) {
+    .btn-whatsapp span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .btn-whatsapp {
+      padding: 0;
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+      border-radius: 50%;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .primary-nav { display: flex; }
+    .logo img { height: 32px; }
+  }
+
+  /* Hide MobileNav hamburger on desktop via global CSS in sheet component,
+     but we also need to hide the trigger container on md+ */
+  :global(.nav-toggle) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    border-radius: var(--r-md);
+    color: var(--ink);
+    transition: background var(--dur-fast) var(--ease-out);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  :global(.nav-toggle:hover) {
+    background: var(--paper-warm);
+  }
+
+  @media (min-width: 768px) {
+    :global(.nav-toggle) { display: none; }
+  }
+
+  /* Mobile sheet nav styles */
+  :global(.mobile-sheet-content) {
+    padding: 0 !important;
+    gap: 0 !important;
+    background: var(--paper) !important;
+  }
+
+  :global(.mobile-sheet-nav) {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-md) var(--gutter) var(--space-lg);
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    height: 100%;
+  }
+
+  :global(.mobile-sheet-nav a) {
+    padding: var(--space-md) 0;
+    font-size: 1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+    display: block;
+  }
+
+  :global(.mobile-sheet-nav a:last-child) {
+    border-bottom: none;
+    margin-top: var(--space-md);
+  }
+
+  :global(.mobile-sheet-nav .btn-whatsapp) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    min-height: 48px;
+    background: var(--whatsapp-signal);
+    color: var(--paper);
+    width: 100%;
+    justify-content: center;
+  }
+
+  :global(.mobile-sheet-nav .btn-whatsapp:hover) {
+    background: var(--whatsapp-deep);
+  }
+</style>
