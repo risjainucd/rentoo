@@ -1,5 +1,5 @@
 import { expect, test, describe } from 'vitest';
-import { slugify, makeDisplayId, normalizeFurnishing, normalizeSegment, normalizeStatus, rowToProperty } from '../scripts/lib/transform';
+import { slugify, makeDisplayId, normalizeFurnishing, normalizeSegment, normalizeStatus, rowToProperty, r2KeyFor, coverAndOrder } from '../scripts/lib/transform';
 
 describe('slugify', () => {
   test('kebab-cases and strips punctuation', () => expect(slugify('2BHK Furnished, Gulab Garh!')).toBe('2bhk-furnished-gulab-garh'));
@@ -31,5 +31,22 @@ describe('rowToProperty', () => {
     expect(p.area_sqft).toBe(1100);
     expect(p.neighbourhood_slug).toBe('mansarovar');
     expect(p.published).toBe(1);
+  });
+});
+
+describe('r2KeyFor', () => {
+  test('builds base + size path', () => expect(r2KeyFor('2bhk-gulab-garh-01', 0, 'card')).toBe('properties/2bhk-gulab-garh-01/0-card.webp'));
+});
+
+describe('coverAndOrder', () => {
+  test('marks *-cover file as cover, else first file', () => {
+    expect(coverAndOrder(['b.jpg', 'a-cover.jpg', 'c.jpg'])).toEqual([
+      { file: 'a-cover.jpg', index: 0, isCover: true },
+      { file: 'b.jpg', index: 1, isCover: false },
+      { file: 'c.jpg', index: 2, isCover: false },
+    ]);
+  });
+  test('first file is cover when none marked', () => {
+    expect(coverAndOrder(['x.jpg', 'y.jpg'])[0]).toEqual({ file: 'x.jpg', index: 0, isCover: true });
   });
 });
