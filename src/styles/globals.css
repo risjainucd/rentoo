@@ -1,0 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-background:#FAF7EE; --color-foreground:#0F172A;
+  --color-surface-alt:#F2EDE0; --color-surface-card:#FFFFFF; --color-haze:#E4ECF5;
+  --color-primary:#082746; --color-primary-foreground:#FAF7EE; --color-midnight:#133A60;
+  --color-secondary:#16A34A; --color-secondary-foreground:#FFFFFF; --color-ok-mist:#DCFCE7;
+  --color-accent:#B5532E; --color-accent-foreground:#FFFFFF; --color-accent-mist:#F5E4DA;
+  --color-whatsapp:#25D366; --color-whatsapp-deep:#1FB958; --color-focus:#EA580C;
+  --color-muted:#475569; --color-muted-foreground:#94A3B8; --color-rest:#64748B;
+  --color-border:#E5E0D5; --color-input:#F1F5F9; --color-ring:#082746;
+  --font-display:"Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono:ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  --radius:10px; --radius-sm:4px; --radius-md:8px; --radius-lg:12px;
+  --shadow-elev1:0 1px 2px rgba(8,39,70,.04),0 1px 3px rgba(8,39,70,.06);
+  --shadow-elev2:0 4px 8px rgba(8,39,70,.06),0 2px 4px rgba(8,39,70,.04);
+  --shadow-elev3:0 12px 24px rgba(8,39,70,.10);
+  --ease-out:cubic-bezier(0.22,0.61,0.36,1);
+}
+html { background:var(--color-background); color:var(--color-foreground); font-family:var(--font-sans); }
