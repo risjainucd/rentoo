@@ -289,49 +289,41 @@ git add -A && git commit -m "feat(ui): React + shadcn/ui themed to brand tokens"
 
 **Files:** Create `wrangler.jsonc`; Modify `src/env.d.ts`
 
-- [ ] **Step 1: Authenticate + create resources** (you run these; needs the Cloudflare account):
+> **DEPLOY TARGET = CLOUDFLARE WORKERS** (verified: adapter v13 emits `dist/server/entry.mjs` + `dist/server/wrangler.json`, not a Pages `_worker.js`). Deploy headlessly via `wrangler deploy` → `*.workers.dev`. No dashboard/git-integration needed.
+
+- [ ] **Step 1: Authenticate + create resources** (`wrangler login` is the one interactive step; it persists creds so everything after is headless):
 ```bash
 npx wrangler login
 npx wrangler d1 create rentoo-listings        # note the database_id printed
 npx wrangler r2 bucket create rentoo-photos
+npx wrangler kv namespace create SESSION       # note the id printed — adapter needs a SESSION KV
 ```
 
-- [ ] **Step 2: Write `wrangler.jsonc`** (paste the real `database_id`):
+- [ ] **Step 2: Write root `wrangler.jsonc`** (Workers config; the @astrojs/cloudflare adapter merges it into `dist/server/wrangler.json` at build). Paste the real ids:
 ```jsonc
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rentoo",
-  "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-06-13",
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
-    { "binding": "DB", "database_name": "rentoo-listings",
-      "database_id": "<REAL_ID>", "preview_database_id": "rentoo-listings" }
+    { "binding": "DB", "database_name": "rentoo-listings", "database_id": "<REAL_D1_ID>" }
   ],
-  "r2_buckets": [ { "binding": "MEDIA", "bucket_name": "rentoo-photos" } ]
+  "r2_buckets": [ { "binding": "MEDIA", "bucket_name": "rentoo-photos" } ],
+  "kv_namespaces": [ { "binding": "SESSION", "id": "<REAL_KV_ID>" } ]
 }
 ```
+(No `pages_build_output_dir` — that's Pages-only. `main`/`assets` are injected by the adapter.)
 
-- [ ] **Step 3: Type the bindings** in `src/env.d.ts`:
-```ts
-/// <reference types="astro/client" />
-type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
-interface Env { DB: D1Database; MEDIA: R2Bucket; }
-declare namespace App {
-  interface Locals extends Runtime {
-    db: D1Database;
-    siteOrigin: string;
-  }
-}
-```
+- [ ] **Step 3: Binding types** — `src/env.d.ts` already declares `interface Env { DB; MEDIA }` + `App.Locals` (done in Task 1.4) and is correct for adapter v13. No change needed; `SESSION`/`IMAGES` are adapter-managed and need no app types.
 
-- [ ] **Step 4: Verify config parses.**
-Run: `npx wrangler pages download config 2>/dev/null; npx wrangler types`
-Expected: `wrangler types` runs without schema errors. (If `wrangler types` writes `worker-configuration.d.ts`, keep it.)
+- [ ] **Step 4: Verify the adapter merges the bindings into the build.**
+Run: `npm run build && node -e "const c=require('./dist/server/wrangler.json');console.log('d1:',c.d1_databases.length,'r2:',c.r2_buckets.length,'kv:',c.kv_namespaces.map(k=>k.binding))"`
+Expected: `d1: 1 r2: 1 kv: [ 'SESSION' ]`. If empty, the root `wrangler.jsonc` isn't being picked up — check `@astrojs/cloudflare` docs (context7) for the expected config location.
 
 - [ ] **Step 5: Commit.**
 ```bash
-git add wrangler.jsonc src/env.d.ts && git commit -m "chore(cf): wrangler config + D1/R2 binding types"
+git add wrangler.jsonc && git commit -m "chore(cf): wrangler Workers config — D1 + R2 + SESSION KV bindings"
 ```
 
 ### Task 0.6: Vitest setup
@@ -358,7 +350,7 @@ test('vitest runs', () => { expect(1 + 1).toBe(2); });
 
 ### Task 0.7: Walking-skeleton deploy (DE-RISK — do this before building the UI)
 
-Proves Astro SSR reading D1 **and** R2 works end-to-end on `rentoo.pages.dev`.
+Proves Astro SSR reading D1 **and** R2 works end-to-end, deployed live on `*.workers.dev` — before building the UI.
 
 **Files:** Create `migrations/0000_skeleton.sql`, `src/pages/_skeleton.astro` (temporary)
 
@@ -369,19 +361,20 @@ INSERT INTO skeleton (id, note) VALUES (1, 'd1-alive');
 ```
 Apply local + remote:
 ```bash
-npx wrangler d1 execute rentoo-listings --local --file=migrations/0000_skeleton.sql
+npx wrangler d1 execute rentoo-listings --local  --file=migrations/0000_skeleton.sql
 npx wrangler d1 execute rentoo-listings --remote --file=migrations/0000_skeleton.sql
 ```
 
-- [ ] **Step 2: Put one R2 object.** `echo r2-alive > /tmp/ping.txt && npx wrangler r2 object put rentoo-photos/ping.txt --file=/tmp/ping.txt --remote`
+- [ ] **Step 2: Put one R2 object.** `printf r2-alive > /tmp/ping.txt && npx wrangler r2 object put rentoo-photos/ping.txt --file=/tmp/ping.txt --remote`
 
-- [ ] **Step 3: `src/pages/_skeleton.astro`** (verify the `locals.runtime.env` accessor via adapter docs; default shown):
+- [ ] **Step 3: `src/pages/_skeleton.astro`** — access bindings via the Workers env import (`Astro.locals.runtime.env` was removed in Astro v6):
 ```astro
 ---
 export const prerender = false;
-const env = Astro.locals.runtime.env;
-const row = await env.DB.prepare('SELECT note FROM skeleton WHERE id=1').first<{ note: string }>();
-const obj = await env.MEDIA.get('ping.txt');
+import { env } from 'cloudflare:workers';
+const e = env as unknown as Env;
+const row = await e.DB.prepare('SELECT note FROM skeleton WHERE id=1').first<{ note: string }>();
+const obj = await e.MEDIA.get('ping.txt');
 const r2 = obj ? await obj.text() : 'MISSING';
 ---
 <p>D1: {row?.note} · R2: {r2}</p>
@@ -389,21 +382,21 @@ const r2 = obj ? await obj.text() : 'MISSING';
 
 - [ ] **Step 4: Verify locally with real bindings.**
 ```bash
-npm run build && npx wrangler pages dev ./dist
+npm run build && npx wrangler dev
 ```
-Open the printed URL `/_skeleton`. Expected: `D1: d1-alive · R2: r2-alive`.
+Open the printed local URL + `/_skeleton`. Expected: `D1: d1-alive · R2: r2-alive`.
 
-- [ ] **Step 5: Create the Pages project + git integration.** In the Cloudflare dashboard: Workers & Pages → Create → Pages → Connect to Git → `risjainucd/rentoo`, production branch `milestone-1-dynamic` (switch to `main` at launch), build command `npm run build`, output `dist`. **Bindings:** for a git-integrated Pages project the `wrangler.jsonc` `d1_databases`/`r2_buckets`/`compatibility_flags` are the source of truth and are applied automatically at build — you do **not** need to re-add them in the dashboard. If you do add dashboard bindings, the names (`DB`, `MEDIA`) and `nodejs_compat` flag must match `wrangler.jsonc` exactly, or they conflict.
+- [ ] **Step 5: Deploy to Workers (headless — no dashboard).** Run `npx wrangler deploy` (it consumes the adapter's generated `dist/server/wrangler.json`; if wrangler can't locate the entry, pass `-c dist/server/wrangler.json`). Confirm the exact invocation against current `@astrojs/cloudflare` deploy docs (context7) — **this de-risk step exists precisely to nail the deploy command.** It prints the live URL `https://rentoo.<your-subdomain>.workers.dev` (enable workers.dev once in the dashboard if prompted).
 
-- [ ] **Step 6: Trigger the first deploy.** `git push -u origin milestone-1-dynamic`. Watch the Pages build complete.
-The build log prints a preview URL — typically `https://<commit-hash>.rentoo.pages.dev` or `https://milestone-1-dynamic.rentoo.pages.dev`. Visit that URL + `/_skeleton`.
+- [ ] **Step 6: Verify live.** Visit `https://rentoo.<subdomain>.workers.dev/_skeleton`.
 Expected: `D1: d1-alive · R2: r2-alive`. **If this fails, stop and fix the deploy path before any further task.**
 
-- [ ] **Step 7: Remove the skeleton.** Delete `src/pages/_skeleton.astro` and `migrations/0000_skeleton.sql` (leave the table; it's harmless, or `DROP TABLE skeleton` remote). Commit.
+- [ ] **Step 7: Remove the skeleton.**
 ```bash
 git rm src/pages/_skeleton.astro migrations/0000_skeleton.sql
-git commit -m "chore(cf): walking-skeleton deploy verified (D1+R2 SSR on Pages)"
+git commit -m "chore(cf): walking-skeleton deploy verified (D1+R2 SSR on Workers)"
 ```
+(Optionally `DROP TABLE skeleton` on remote D1 — harmless to leave.)
 
 ---
 
@@ -949,9 +942,10 @@ Expected: WebP objects appear in R2 (`npx wrangler r2 object get rentoo-photos/<
 
 **Files:** Create `src/pages/media/[...key].ts`
 
-- [ ] **Step 1: Implement the endpoint** (reuses `isAllowedReferer` from Task 1.2):
+- [ ] **Step 1: Implement the endpoint** (reuses `isAllowedReferer` from Task 1.2). NOTE: bindings are accessed via `import { env } from 'cloudflare:workers'` — `Astro.locals.runtime.env` was removed in Astro v6. `locals.siteOrigin` is still set by the middleware.
 ```ts
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { isAllowedReferer } from '../../lib/media';
 export const prerender = false;
 
@@ -960,7 +954,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
   if (!key) return new Response('Not found', { status: 404 });
   if (!isAllowedReferer(request.headers.get('referer'), locals.siteOrigin))
     return new Response('Forbidden', { status: 403 });
-  const obj = await locals.runtime.env.MEDIA.get(key);
+  const obj = await (env as unknown as Env).MEDIA.get(key);
   if (!obj) return new Response('Not found', { status: 404 });
   return new Response(obj.body, {
     headers: {
@@ -974,7 +968,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
 
 - [ ] **Step 2: Verify against real R2.**
 ```bash
-npm run build && npx wrangler pages dev ./dist
+npm run build && npx wrangler dev   # Workers dev; serves the built worker with R2 binding
 ```
 Open `/media/properties/<a-real-slug>/0-card.webp` in the browser. Expected: the watermarked WebP renders. A `curl -H 'Referer: https://evil.example/' <url>` returns 403; no-referer `curl` returns 200.
 
