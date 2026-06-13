@@ -1,0 +1,344 @@
+---
+export const prerender = false;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import PropertyCard from '../../components/PropertyCard.astro';
+import FilterBar from '../../components/FilterBar.tsx';
+import { parseListingFilters } from '../../lib/sql';
+import { listListings, listNeighbourhoods } from '../../lib/db';
+const filters = parseListingFilters(Astro.url);
+const { items, total } = await listListings(Astro.locals.db, filters);
+const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
+const perPage = filters.perPage ?? 12;
+const page = filters.page ?? 1;
+const totalPages = Math.max(1, Math.ceil(total / perPage));
+function pageHref(p: number) {
+  const u = new URL(Astro.url);
+  u.searchParams.set('page', String(p));
+  return u.pathname + '?' + u.searchParams.toString();
+}
+---
+
+<BaseLayout
+  title="Rent in Jaipur — Hand-verified flats and houses · Rentoo"
+  description="Browse hand-verified residential rentals in Jaipur. 2BHK, 3BHK, furnished apartments, family houses across Mansarovar, C-Scheme, Malviya Nagar, Bapu Nagar."
+>
+  <SiteHeader slot="header" />
+
+  <section class="listings-head">
+    <div class="section-inner">
+      <div class="byline">
+        <span class="byline-label">Catalog</span>
+        <span class="byline-sep" aria-hidden="true">·</span>
+        <span class="byline-meta">Residential rentals · Jaipur</span>
+      </div>
+      <h1>Hand-verified rentals across Jaipur.</h1>
+      <p class="sub">Every flat and house here has been visited by someone on our team. No fake listings, no bait photos, no surprises on the fee. Reach out on WhatsApp and we'll book the visit.</p>
+    </div>
+  </section>
+
+  <section class="listings-layout">
+    <div class="section-inner">
+
+      <!-- Filter bar (React island, loads when visible) -->
+      <FilterBar client:visible neighbourhoods={neighbourhoods} value={filters} />
+
+      <div class="listings-main">
+        <div class="results-bar">
+          <div class="results-count">
+            <strong>{total}</strong> {total === 1 ? 'property' : 'properties'}
+            {page > 1 && <span> · page {page} of {totalPages}</span>}
+          </div>
+        </div>
+
+        {items.length === 0 ? (
+          <div class="empty-state">
+            <p>No listings match your current filters.</p>
+            <a href="/rent" class="btn-secondary">Clear filters</a>
+          </div>
+        ) : (
+          <div class="listing-grid" role="list">
+            {items.map(card => (
+              <div role="listitem">
+                <PropertyCard card={card} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <!-- Pagination -->
+        {totalPages > 1 && (
+          <nav class="pagination" aria-label="Page navigation">
+            {page > 1 ? (
+              <a href={pageHref(page - 1)} class="pagination-btn">← Previous</a>
+            ) : (
+              <span class="pagination-btn pagination-btn--disabled" aria-disabled="true">← Previous</span>
+            )}
+            <span class="pagination-info">Page {page} of {totalPages}</span>
+            {page < totalPages ? (
+              <a href={pageHref(page + 1)} class="pagination-btn">Next →</a>
+            ) : (
+              <span class="pagination-btn pagination-btn--disabled" aria-disabled="true">Next →</span>
+            )}
+          </nav>
+        )}
+
+        <div class="wa-nudge">
+          <a href="https://wa.me/918741800496" class="btn-secondary">Don't see what you're looking for? Tell us on WhatsApp →</a>
+        </div>
+
+        <!-- Browse by neighbourhood -->
+        {neighbourhoods.length > 0 && (
+          <div class="neighbourhood-strip">
+            <h3>Browse by neighbourhood</h3>
+            <div class="nbhd-chips">
+              {neighbourhoods.map(n => (
+                <a href={`/rent?neighbourhood=${n.slug}`}>{n.name}</a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+    </div>
+  </section>
+
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<style>
+  .section-inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ── Page head ── */
+  .listings-head {
+    background: var(--paper);
+    padding-block: var(--space-3xl) var(--space-xl);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .listings-head h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 24ch;
+    margin-top: var(--space-md);
+  }
+
+  .listings-head .sub {
+    margin-top: var(--space-md);
+    font-size: 1rem;
+    color: var(--ink-muted);
+    max-width: 56ch;
+  }
+
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .byline-sep {
+    color: var(--ink-soft);
+  }
+
+  /* ── Layout ── */
+  .listings-layout {
+    padding-block: var(--space-2xl) var(--space-4xl);
+    background: var(--paper);
+  }
+
+  .listings-layout .section-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  .listings-main {
+    min-width: 0;
+  }
+
+  /* ── Results bar ── */
+  .results-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--space-xl);
+  }
+
+  .results-count {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .results-count strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ── Listing grid ── */
+  .listing-grid {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .listing-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .listing-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    padding: var(--space-4xl) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+
+  .empty-state p {
+    font-size: 1rem;
+    color: var(--ink-muted);
+  }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-xl);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    color: var(--jaipur-navy);
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .pagination-btn:hover:not(.pagination-btn--disabled) {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    border-color: var(--jaipur-navy);
+  }
+
+  .pagination-btn--disabled {
+    color: var(--ink-soft);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .pagination-info {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+  }
+
+  /* ── WA nudge ── */
+  .wa-nudge {
+    text-align: center;
+    margin-top: var(--space-2xl);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: transparent;
+    color: var(--jaipur-navy);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--jaipur-navy);
+    min-height: 48px;
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+  }
+
+  .btn-secondary:hover {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+
+  /* ── Neighbourhood strip ── */
+  .neighbourhood-strip {
+    margin-top: var(--space-3xl);
+    padding: var(--space-xl);
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+  }
+
+  .neighbourhood-strip h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    color: var(--ink);
+  }
+
+  .nbhd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .nbhd-chips a {
+    padding: 6px var(--space-md);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--jaipur-navy);
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .nbhd-chips a:hover {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+</style>
