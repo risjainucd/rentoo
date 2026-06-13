@@ -1,0 +1,140 @@
+---
+// SiteFooter — ported from index.html footer markup + styles.css .site-footer rules
+---
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/Rentoo.png" alt="Rentoo" width="120" height="38" class="footer-logo" />
+      <p>Curated rentals across Jaipur — residential, commercial, and industrial. Hand-verified, and fast on WhatsApp.</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Visit us</h4>
+      <address>
+        Mangalam Radiance,<br />
+        Durgapura, Jaipur 302018<br />
+        Rajasthan, India
+      </address>
+    </div>
+
+    <div class="footer-col">
+      <h4>Reach us</h4>
+      <ul>
+        <li><a href="https://wa.me/918741800496">WhatsApp +91 8741800496</a></li>
+        <li><a href="tel:+918741800496">Call +91 8741800496</a></li>
+        <li><a href="mailto:connect@rentoo.in">connect@rentoo.in</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Popular areas</h4>
+      <ul>
+        <li><a href="/rent/?neighbourhood=mansarovar">Mansarovar rentals</a></li>
+        <li><a href="/rent/?neighbourhood=c-scheme">C-Scheme rentals</a></li>
+        <li><a href="/rent/?neighbourhood=bapu-nagar">Bapu Nagar rentals</a></li>
+        <li><a href="/rent/?neighbourhood=malviya-nagar">Malviya Nagar rentals</a></li>
+        <li><a href="/rent/?neighbourhood=vaishali-nagar">Vaishali Nagar rentals</a></li>
+        <li><a href="/commercial/">All commercial spaces</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Site</h4>
+      <ul>
+        <li><a href="/about/">About Rentoo</a></li>
+        <li><a href="/contact/">Contact</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/admin/login/">Admin sign in</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-base">
+    <p>&copy; 2026 Rentoo. Operating in Jaipur since 2021.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--ink);
+    color: rgba(255, 255, 255, 0.78);
+    padding-block: var(--space-4xl) var(--space-xl);
+  }
+
+  .footer-inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+    display: grid;
+    gap: var(--space-2xl);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .footer-inner {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .footer-inner {
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+      gap: var(--space-3xl);
+    }
+  }
+
+  .footer-brand p {
+    margin-top: var(--space-md);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    max-width: 36ch;
+  }
+
+  .footer-logo {
+    filter: brightness(0) invert(1);
+    height: 30px;
+    width: auto;
+  }
+
+  .footer-col h4 {
+    color: var(--paper);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-md);
+  }
+
+  .footer-col address {
+    font-style: normal;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .footer-col ul li {
+    margin-bottom: 2px;
+  }
+
+  .footer-col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.78);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .footer-col a:hover {
+    color: var(--paper);
+  }
+
+  .footer-base {
+    max-width: var(--max-w);
+    margin: var(--space-3xl) auto 0;
+    padding: var(--space-lg) var(--gutter) 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+</style>
