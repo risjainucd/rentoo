@@ -120,7 +120,7 @@ CREATE TABLE property_media (
   id            TEXT PRIMARY KEY,
   property_id   TEXT NOT NULL,
   kind          TEXT NOT NULL DEFAULT 'photo' CHECK (kind IN ('photo','video')),
-  r2_key        TEXT NOT NULL,            -- "properties/<slug>/<n>-gallery.webp"
+  r2_key        TEXT NOT NULL,            -- BASE key "properties/<slug>/<n>"; size suffix (-card/-gallery/-full.webp) appended at read time
   display_order INTEGER NOT NULL DEFAULT 0,
   is_cover      INTEGER NOT NULL DEFAULT 0,
   width         INTEGER,
