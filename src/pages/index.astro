@@ -1,17 +1,728 @@
 ---
-import '../styles/globals.css';
+export const prerender = false;
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SectionMarker from '../components/SectionMarker.astro';
+import PropertyCard from '../components/PropertyCard.astro';
+import { featuredListings, listNeighbourhoods } from '../lib/db';
+const featured = await featuredListings(Astro.locals.db, 6);
+const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Rentoo</title>
-	</head>
-	<body>
-		<h1 class="font-display text-primary">Rentoo</h1>
-	</body>
-</html>
+<BaseLayout title="Rentoo: Curated rentals in Jaipur" description="Hand-verified residential, commercial, and industrial rentals in Jaipur. Transparent brokerage, agreed up front. WhatsApp-first response within 30 minutes.">
+  <SiteHeader slot="header" />
+
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-content">
+      <div class="hero-text">
+        <p class="byline">
+          <span class="byline-label">Curated by</span>
+          <span class="byline-name">Rishabh + the Rentoo team</span>
+          <span class="byline-sep" aria-hidden="true">·</span>
+          <span class="byline-meta">Jaipur, since 2021</span>
+        </p>
+
+        <h1 id="hero-title">We visit every property.<br />Then we send you the ones that fit.</h1>
+
+        <p class="hero-sub">A small Jaipur brokerage. Every listing hand-verified. Most inquiries answered on WhatsApp within 30 minutes.</p>
+
+        <form class="hero-search" role="search" action="/rent" method="get">
+          <div class="search-grid">
+            <label class="search-field">
+              <span class="field-label">Locality</span>
+              <input type="text" name="neighbourhood" placeholder="Mansarovar, C-Scheme..." autocomplete="off" />
+            </label>
+            <label class="search-field">
+              <span class="field-label">BHK</span>
+              <select name="bhk">
+                <option value="">Any</option>
+                <option value="1BHK">1 BHK</option>
+                <option value="2BHK">2 BHK</option>
+                <option value="3BHK">3 BHK</option>
+                <option value="4BHK">4 BHK</option>
+              </select>
+            </label>
+            <label class="search-field">
+              <span class="field-label">Budget</span>
+              <select name="maxRent">
+                <option value="">Any</option>
+                <option value="20000">Under ₹20K</option>
+                <option value="30000">Under ₹30K</option>
+                <option value="50000">Under ₹50K</option>
+                <option value="100000">Under ₹1L</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit" class="btn-primary search-submit">
+            <span>Find homes</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <div class="hero-chips" role="list" aria-label="Popular searches">
+          <a href="/rent?bhk=2BHK&neighbourhood=mansarovar" role="listitem">2BHK in Mansarovar</a>
+          <a href="/commercial?type=office&neighbourhood=c-scheme" role="listitem">Office in C-Scheme</a>
+          <a href="/rent?bhk=3BHK&neighbourhood=bapu-nagar" role="listitem">3BHK in Bapu Nagar</a>
+          <a href="/rent?furnishing=furnished&maxRent=30000" role="listitem">Furnished under ₹30K</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECENTLY ADDED / FEATURED -->
+  <section class="section section--recently-added" aria-labelledby="recently-added-title">
+    <div class="section-inner">
+      <SectionMarker num="01" label="Just added to the catalog" meta={`See all listings ↗`} />
+      {featured.length === 0 ? (
+        <p class="empty-state">No listings yet — check back soon.</p>
+      ) : (
+        <div class="card-grid" role="list">
+          {featured.map(card => (
+            <div role="listitem">
+              <PropertyCard card={card} />
+            </div>
+          ))}
+        </div>
+      )}
+      <div class="section-see-all">
+        <a href="/rent" class="btn-secondary">See all listings &nbsp;↗</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BROWSE BY AREA -->
+  {neighbourhoods.length > 0 && (
+    <section class="section section--areas" aria-labelledby="areas-title">
+      <div class="section-inner">
+        <SectionMarker num="02" label="By neighbourhood" meta="Pick what you know" />
+        <div class="area-chips" role="list">
+          {neighbourhoods.map(n => (
+            <a href={`/rent?neighbourhood=${n.slug}`} role="listitem">
+              <span>{n.name}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- EDITORIAL: WHY RENTOO -->
+  <section class="editorial-section" aria-labelledby="why-title">
+    <div class="section-inner">
+      <p class="editorial-kicker">A note from the team</p>
+      <h2 id="why-title">Most rental sites in Jaipur list whatever the broker sends them. We don't.</h2>
+
+      <div class="editorial-body">
+        <p>Every property on Rentoo has been visited by someone on our team before it shows up here. We meet the owners, walk the place, take the photos ourselves. If something is broken or the rent is unrealistic, we say so or we don't list it.</p>
+
+        <p>Our brokerage is <strong>standard and agreed up front</strong> — no hidden charges, no surprises at signing. You'll know exactly what the rent, the deposit, and our fee are before you ever see the flat.</p>
+
+        <p>Our phone is the same as our WhatsApp. If you message us, you're messaging Rishabh or someone he works with directly, not a call centre. Most inquiries get a reply within 30 minutes during business hours.</p>
+      </div>
+
+      <div class="editorial-proof" role="list">
+        <div class="proof-stat" role="listitem">
+          <span class="stat-num">247</span>
+          <span class="stat-label">Families placed since 2021</span>
+        </div>
+        <div class="proof-stat" role="listitem">
+          <span class="stat-num">26 min</span>
+          <span class="stat-label">Median WhatsApp response (last 30 days)</span>
+        </div>
+        <div class="proof-stat" role="listitem">
+          <span class="stat-num">₹0</span>
+          <span class="stat-label">Brokerage charged to tenants. Ever.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section section--testimonials" aria-labelledby="testimonials-title">
+    <div class="section-inner">
+      <SectionMarker num="03" label="Word of mouth" meta="Recent moves" />
+
+      <div class="testimonial-row" role="list">
+        <figure class="testimonial" role="listitem">
+          <blockquote>
+            <p>Found my Mansarovar apartment in 2 days. Rishabh visited every place with me, no broker games. The photos online were the photos in person.</p>
+          </blockquote>
+          <figcaption>
+            <span class="testimonial-avatar" aria-hidden="true">PS</span>
+            <div>
+              <strong>Priya S.</strong>
+              <span>Software engineer · 2BHK in Mansarovar</span>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="testimonial" role="listitem">
+          <blockquote>
+            <p>We had been searching for office space in C-Scheme for months. Rentoo's listings were the only ones with accurate area numbers and real photos. Signed in a week.</p>
+          </blockquote>
+          <figcaption>
+            <span class="testimonial-avatar" aria-hidden="true">AM</span>
+            <div>
+              <strong>Ankit M.</strong>
+              <span>Startup founder · 900 sqft office in C-Scheme</span>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="testimonial" role="listitem">
+          <blockquote>
+            <p>First time renting in Jaipur from Delhi. Rentoo replied to my WhatsApp at 9pm with everything I needed. Moved in 10 days later. No site visits required from my end.</p>
+          </blockquote>
+          <figcaption>
+            <span class="testimonial-avatar" aria-hidden="true">RK</span>
+            <div>
+              <strong>Rohit K.</strong>
+              <span>Consultant · 3BHK in Vaishali Nagar</span>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURATOR SIGN-OFF -->
+  <section class="curator-signoff" aria-labelledby="signoff-title">
+    <div class="section-inner">
+      <div class="signoff-portrait" aria-hidden="true">RJ</div>
+      <div class="signoff-body">
+        <p id="signoff-title">Hi, I'm Rishabh. If you've made it this far, you probably have something specific in mind.</p>
+
+        <p>Tell me what you're after on WhatsApp. Locality, BHK, budget, move-in date, anything that matters. I'll send you 3 to 5 places I'd actually live in myself, with notes on each one.</p>
+
+        <p>If I don't have something right today, I'll keep an eye out and tell you when something fits.</p>
+
+        <div class="signoff-actions">
+          <a href="https://wa.me/918741800496" class="btn-whatsapp btn-whatsapp--lg">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413" />
+            </svg>
+            Send WhatsApp to Rishabh
+          </a>
+        </div>
+
+        <p class="signoff-meta">+91 8741800496 · connect@rentoo.in · Mangalam Radiance, Durgapura</p>
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<style>
+  /* ── Section wrapper ── */
+  .section-inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    padding-block: var(--space-4xl) var(--space-3xl);
+  }
+
+  .hero-content {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .hero-text {
+    max-width: 56ch;
+  }
+
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(250, 247, 238, 0.6);
+    margin-bottom: var(--space-lg);
+  }
+
+  .byline-name {
+    color: rgba(250, 247, 238, 0.9);
+  }
+
+  .byline-sep {
+    color: rgba(250, 247, 238, 0.3);
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--space-lg);
+    color: var(--paper);
+  }
+
+  .hero-sub {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: rgba(250, 247, 238, 0.75);
+    margin-bottom: var(--space-2xl);
+    max-width: 52ch;
+  }
+
+  /* ── Hero search form ── */
+  .hero-search {
+    background: var(--paper);
+    border-radius: var(--r-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .search-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 640px) {
+    .search-grid {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+
+  .search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .search-field input,
+  .search-field select {
+    padding: 10px var(--space-md);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-size: 0.9375rem;
+    color: var(--ink);
+    background: var(--paper-snow);
+    outline: none;
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .search-field input:focus,
+  .search-field select:focus {
+    border-color: var(--jaipur-navy);
+    box-shadow: 0 0 0 2px rgba(8, 39, 70, 0.12);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    border: none;
+    cursor: pointer;
+    min-height: 48px;
+    transition: background var(--dur-base) var(--ease-out);
+    text-decoration: none;
+  }
+
+  .btn-primary:hover {
+    background: var(--midnight-tile);
+  }
+
+  .search-submit {
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .search-submit {
+      width: auto;
+      align-self: flex-end;
+    }
+  }
+
+  /* ── Hero chips ── */
+  .hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .hero-chips a {
+    padding: 6px var(--space-md);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid rgba(250, 247, 238, 0.2);
+    border-radius: 999px;
+    color: rgba(250, 247, 238, 0.8);
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+
+  .hero-chips a:hover {
+    background: rgba(250, 247, 238, 0.1);
+    color: var(--paper);
+  }
+
+  /* ── Recently Added section ── */
+  .section {
+    padding-block: var(--space-4xl);
+  }
+
+  .section--recently-added {
+    background: var(--paper);
+  }
+
+  .card-grid {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .card-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .card-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .empty-state {
+    padding: var(--space-3xl) 0;
+    color: var(--ink-muted);
+    font-size: 1rem;
+  }
+
+  .section-see-all {
+    margin-top: var(--space-2xl);
+    text-align: center;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: transparent;
+    color: var(--jaipur-navy);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--jaipur-navy);
+    min-height: 48px;
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+  }
+
+  .btn-secondary:hover {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+
+  /* ── Areas section ── */
+  .section--areas {
+    background: var(--paper-warm);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .area-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .area-chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-xl);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--jaipur-navy);
+    text-decoration: none;
+    min-height: 44px;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+
+  .area-chips a:hover {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+
+  /* ── Editorial section ── */
+  .editorial-section {
+    padding-block: var(--space-4xl);
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+
+  .editorial-section .section-inner {
+    max-width: 800px;
+  }
+
+  .editorial-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(250, 247, 238, 0.5);
+    margin-bottom: var(--space-md);
+  }
+
+  .editorial-section h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--paper);
+    margin-bottom: var(--space-2xl);
+    max-width: 28ch;
+  }
+
+  .editorial-body {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .editorial-body p {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: rgba(250, 247, 238, 0.78);
+    margin-bottom: var(--space-lg);
+  }
+
+  .editorial-body strong {
+    color: var(--paper);
+  }
+
+  .editorial-proof {
+    display: grid;
+    gap: var(--space-xl);
+    grid-template-columns: 1fr;
+    border-top: 1px solid rgba(250, 247, 238, 0.12);
+    padding-top: var(--space-2xl);
+  }
+
+  @media (min-width: 640px) {
+    .editorial-proof {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .proof-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: rgba(250, 247, 238, 0.6);
+    line-height: 1.4;
+  }
+
+  /* ── Testimonials section ── */
+  .section--testimonials {
+    background: var(--paper-warm);
+    border-top: 1px solid var(--line);
+  }
+
+  .testimonial-row {
+    display: grid;
+    gap: var(--space-xl);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .testimonial-row {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .testimonial {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--space-xl);
+    box-shadow: var(--elev-1);
+  }
+
+  .testimonial blockquote p {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--ink);
+    font-style: italic;
+    margin-bottom: var(--space-lg);
+  }
+
+  .testimonial figcaption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .testimonial-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: var(--haze-tint);
+    color: var(--jaipur-navy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .testimonial figcaption strong {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--ink);
+  }
+
+  .testimonial figcaption span {
+    font-size: 0.8125rem;
+    color: var(--ink-muted);
+  }
+
+  /* ── Curator sign-off ── */
+  .curator-signoff {
+    padding-block: var(--space-4xl);
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+  }
+
+  .curator-signoff .section-inner {
+    display: flex;
+    gap: var(--space-2xl);
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    .curator-signoff .section-inner {
+      flex-direction: row;
+    }
+  }
+
+  .signoff-portrait {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .signoff-body p {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    margin-bottom: var(--space-md);
+    max-width: 60ch;
+  }
+
+  .signoff-body p:first-child {
+    font-size: 1.125rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .signoff-actions {
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-lg);
+  }
+
+  .btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--whatsapp-signal);
+    color: var(--paper);
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    min-height: 48px;
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out);
+  }
+
+  .btn-whatsapp:hover {
+    background: var(--whatsapp-deep);
+  }
+
+  .btn-whatsapp--lg {
+    padding: var(--space-lg) var(--space-2xl);
+    font-size: 1.0625rem;
+    min-height: 56px;
+  }
+
+  .signoff-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 0 !important;
+  }
+</style>
