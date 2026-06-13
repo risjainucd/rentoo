@@ -1,0 +1,92 @@
+---
+interface Props { images: { gallery: string; full: string; alt: string }[] }
+const { images } = Astro.props;
+const cover = images[0];
+---
+<div class="gallery" data-gallery>
+  <img class="gallery-main" data-gallery-main src={cover?.gallery} alt={cover?.alt} width="1000" height="667" />
+  <div class="gallery-thumbs">
+    {images.map((img, i) => (
+      <button class="gallery-thumb" data-gallery-thumb data-full={img.gallery} aria-label={`Photo ${i + 1}`} aria-current={i === 0}>
+        <img src={img.gallery} alt={img.alt} width="120" height="80" loading="lazy" />
+      </button>
+    ))}
+  </div>
+</div>
+<script>
+  document.querySelectorAll('[data-gallery]').forEach((g) => {
+    const main = g.querySelector('[data-gallery-main]') as HTMLImageElement | null;
+    g.querySelectorAll('[data-gallery-thumb]').forEach((t) => {
+      t.addEventListener('click', () => {
+        const full = t.getAttribute('data-full');
+        if (main && full) main.src = full;
+        g.querySelectorAll('[data-gallery-thumb]').forEach((x) => x.setAttribute('aria-current', 'false'));
+        t.setAttribute('aria-current', 'true');
+      });
+    });
+  });
+</script>
+
+<style>
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm, 8px);
+  }
+
+  .gallery-main {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--r-md, 8px);
+    background: var(--haze-tint, #E4ECF5);
+    display: block;
+  }
+
+  .gallery-thumbs {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-sm, 8px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .gallery-thumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-thumb {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+    border: 2px solid transparent;
+    border-radius: var(--r-sm, 4px);
+    background: var(--haze-tint, #E4ECF5);
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 150ms ease-out;
+    outline: none;
+  }
+
+  .gallery-thumb:hover {
+    border-color: var(--ink-soft, #94A3B8);
+  }
+
+  .gallery-thumb:focus-visible {
+    border-color: var(--jaipur-navy, #082746);
+    box-shadow: 0 0 0 2px var(--jaipur-navy, #082746);
+  }
+
+  .gallery-thumb[aria-current="true"] {
+    border-color: var(--jaipur-navy, #082746);
+  }
+
+  .gallery-thumb img {
+    display: block;
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+</style>
