@@ -1,0 +1,661 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { ContactDialog } from '../components/ContactDialog';
+import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
+---
+
+<BaseLayout
+  title="Contact Rentoo — Talk to us about Jaipur rentals"
+  description="WhatsApp Rentoo for hand-verified Jaipur rentals. Median reply under 30 minutes. Phone, email, and a quick contact form."
+>
+  <SiteHeader slot="header" />
+
+  <section class="contact-hero">
+    <div class="section-inner">
+      <div class="byline">
+        <span class="byline-label">Contact</span>
+        <span class="byline-sep" aria-hidden="true">·</span>
+        <span class="byline-meta">Jaipur, since 2021</span>
+      </div>
+      <h1>Talk to Rentoo.</h1>
+      <p class="lede">
+        WhatsApp is fastest. We reply in under 30 minutes during business hours.
+        Mention the property ID (#01, C-3) so we can pull up the file.
+      </p>
+      <div class="hero-cta">
+        <ContactDialog
+          client:visible
+          whatsappUrl={`https://wa.me/${WHATSAPP_NUMBER}`}
+          phone="+918741800496"
+          email={CONTACT_EMAIL}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-layout">
+    <div class="section-inner">
+
+      <aside class="contact-card-big" aria-labelledby="reach-title">
+        <div class="lbl">01 — Reach us</div>
+        <h2 id="reach-title">Three ways. WhatsApp is the fastest.</h2>
+        <div class="actions">
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} class="btn-whatsapp btn-whatsapp--lg">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+            <span>WhatsApp +91 87418 00496</span>
+          </a>
+          <a href="tel:+918741800496" class="btn-secondary">Call +91 87418 00496</a>
+          <a href={`mailto:${CONTACT_EMAIL}`} class="btn-secondary">Email {CONTACT_EMAIL}</a>
+        </div>
+
+        <dl class="contact-hours">
+          <dt>Open</dt>
+          <dd>All week · 10:00–20:00 IST</dd>
+          <dt>Busiest day</dt>
+          <dd>Sundays — most visits happen then, so we're on</dd>
+          <dt>Median reply on WhatsApp</dt>
+          <dd>26 minutes (last 30 days)</dd>
+          <dt>Visit us</dt>
+          <dd>Mangalam Radiance, Durgapura, Jaipur 302018</dd>
+        </dl>
+      </aside>
+
+      <form class="contact-form" action="#" method="post" aria-labelledby="form-title">
+        <div class="lbl">02 — Or send a note</div>
+        <h2 id="form-title">Tell us what you're looking for.</h2>
+
+        <div class="form-field">
+          <label for="cf-name">Your name</label>
+          <input type="text" id="cf-name" name="name" placeholder="Priya Sharma" autocomplete="name" required>
+        </div>
+
+        <div class="form-field">
+          <label for="cf-phone">Phone or WhatsApp</label>
+          <input type="tel" id="cf-phone" name="phone" placeholder="+91 9XXXXXXXXX" autocomplete="tel" required>
+        </div>
+
+        <div class="form-field">
+          <label for="cf-pid">Property ID <span class="optional">— optional</span></label>
+          <input type="text" id="cf-pid" name="property_id" placeholder="#01, C-3, or leave blank">
+        </div>
+
+        <div class="form-field">
+          <label for="cf-msg">What are you looking for?</label>
+          <textarea id="cf-msg" name="message" placeholder="2BHK in Mansarovar, family of three, move-in by July, budget ₹25–30K…" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          <span>Send to Rentoo</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+        <p class="form-foot">We'll reply within a few business hours. No marketing emails. No call centre.</p>
+      </form>
+
+    </div>
+  </section>
+
+  <section class="help-section">
+    <div class="section-inner">
+      <div class="help-head">
+        <div class="help-num">02</div>
+        <h2>How we usually help</h2>
+        <div class="help-meta">Most messages fall in one of three buckets</div>
+      </div>
+
+      <div class="help-grid">
+        <article class="help-card">
+          <div class="help-kicker">For tenants</div>
+          <h3>Finding the right place.</h3>
+          <p>Tell us BHK, area, budget, move-in date, and anything else that matters — pets, school proximity, parking. We'll send 3 to 5 hand-verified options with photos and notes, then schedule visits. Our fee is agreed up front, before any visit.</p>
+        </article>
+
+        <article class="help-card">
+          <div class="help-kicker">For owners</div>
+          <h3>Listing your property.</h3>
+          <p>We visit the property, take photos, and write the listing ourselves. No upfront fee — we get paid when the place rents. If we don't think we can rent it at your asking, we'll tell you that too, in plain language.</p>
+        </article>
+
+        <article class="help-card">
+          <div class="help-kicker">For returning clients</div>
+          <h3>Renewal &amp; second property.</h3>
+          <p>Lease coming up? Looking for a second place — bigger flat, office, weekend home? Just send a one-line message. We keep your file, so we won't ask the same questions twice.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="curator-signoff">
+    <div class="section-inner">
+      <div class="signoff-portrait" aria-hidden="true">R</div>
+      <div class="signoff-body">
+        <p>Most messages I answer myself, on WhatsApp. There's no shared inbox, no
+        intern, no auto-responder. If you write to us, you're writing to me or to
+        someone I work with directly.</p>
+        <p>If I'm at a site visit and slow to reply, I'll catch up the same evening.
+        If you've already messaged once and haven't heard back in a day, ping again
+        — sometimes a message gets buried.</p>
+        <div class="signoff-actions">
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} class="btn-whatsapp btn-whatsapp--lg">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+            <span>Start a WhatsApp chat</span>
+          </a>
+        </div>
+        <div class="signoff-meta">— Rishabh, Rentoo</div>
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<style>
+  .section-inner {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ── Hero ── */
+  .contact-hero {
+    background: var(--paper);
+    padding-block: var(--space-3xl) var(--space-2xl);
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 768px) {
+    .contact-hero {
+      padding-block: var(--space-4xl) var(--space-3xl);
+    }
+  }
+
+  .contact-hero .section-inner {
+    max-width: 760px;
+  }
+
+  .contact-hero h1 {
+    font-size: clamp(2rem, 5.5vw, 3.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+    max-width: 18ch;
+    margin-top: var(--space-md);
+  }
+
+  .contact-hero .lede {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    margin-top: var(--space-xl);
+    max-width: 56ch;
+  }
+
+  .hero-cta {
+    margin-top: var(--space-xl);
+  }
+
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .byline-sep {
+    color: var(--ink-soft);
+  }
+
+  /* ── Contact layout ── */
+  .contact-layout {
+    padding-block: var(--space-3xl) var(--space-4xl);
+  }
+
+  .contact-layout .section-inner {
+    display: grid;
+    gap: var(--space-2xl);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 1024px) {
+    .contact-layout .section-inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: var(--space-3xl);
+      align-items: start;
+    }
+  }
+
+  /* ── Contact card ── */
+  .contact-card-big {
+    background: var(--paper-snow);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--space-xl);
+    box-shadow: var(--elev-1);
+  }
+
+  .contact-card-big .lbl {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    margin-bottom: var(--space-sm);
+  }
+
+  .contact-card-big h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-lg);
+    letter-spacing: -0.005em;
+  }
+
+  .actions {
+    display: grid;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+  }
+
+  .actions .btn-whatsapp,
+  .actions .btn-secondary {
+    width: 100%;
+    padding-block: var(--space-md);
+    min-height: 48px;
+  }
+
+  .contact-hours {
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--line);
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+
+  .contact-hours dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-top: var(--space-md);
+  }
+
+  .contact-hours dt:first-child {
+    margin-top: 0;
+  }
+
+  .contact-hours dd {
+    margin: 2px 0 0;
+    color: var(--ink);
+    font-size: 0.9375rem;
+  }
+
+  /* ── Contact form ── */
+  .contact-form {
+    background: var(--paper-snow);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--space-xl);
+  }
+
+  .contact-form .lbl {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: var(--space-sm);
+  }
+
+  .contact-form h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-lg);
+    letter-spacing: -0.005em;
+  }
+
+  .form-field {
+    margin-bottom: var(--space-md);
+  }
+
+  .form-field label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .form-field label .optional {
+    font-weight: 400;
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    width: 100%;
+    padding: 10px var(--space-md);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-size: 0.9375rem;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+  }
+
+  .form-field textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .form-field input:focus,
+  .form-field textarea:focus {
+    outline: 2px solid var(--focus-clay);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    margin-top: var(--space-md);
+    padding-block: var(--space-md);
+    min-height: 48px;
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    border: none;
+    cursor: pointer;
+    transition: background var(--dur-base) var(--ease-out);
+  }
+
+  .btn-primary:hover {
+    background: var(--jaipur-navy-deep, #062038);
+  }
+
+  .form-foot {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    margin-top: var(--space-md);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ── Button styles ── */
+  .btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--whatsapp-signal);
+    color: var(--paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    min-height: 44px;
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out);
+  }
+
+  .btn-whatsapp:hover {
+    background: var(--whatsapp-deep);
+  }
+
+  .btn-whatsapp--lg {
+    padding: var(--space-lg) var(--space-2xl);
+    font-size: 1.0625rem;
+    min-height: 56px;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: transparent;
+    color: var(--jaipur-navy);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--line);
+    min-height: 44px;
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--jaipur-navy);
+    background: var(--paper-warm);
+  }
+
+  /* ── Help section ── */
+  .help-section {
+    background: var(--paper-warm);
+    padding-block: var(--space-4xl);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .help-section .section-inner {
+    max-width: var(--max-w);
+  }
+
+  .help-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-xl);
+  }
+
+  .help-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--terracotta);
+    text-transform: uppercase;
+  }
+
+  .help-head h2 {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .help-meta {
+    font-size: 0.9375rem;
+    color: var(--ink-muted);
+  }
+
+  .help-grid {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: 1fr;
+    margin-top: var(--space-xl);
+  }
+
+  @media (min-width: 768px) {
+    .help-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .help-card {
+    background: var(--paper-snow);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--space-xl);
+  }
+
+  .help-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    margin-bottom: var(--space-sm);
+  }
+
+  .help-card h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }
+
+  .help-card p {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+
+  /* ── Curator signoff ── */
+  .curator-signoff {
+    background: var(--paper-warm);
+    padding-block: var(--space-4xl);
+  }
+
+  .curator-signoff .section-inner {
+    display: flex;
+    gap: var(--space-2xl);
+    align-items: flex-start;
+    max-width: 720px;
+  }
+
+  @media (max-width: 640px) {
+    .curator-signoff .section-inner {
+      flex-direction: column;
+    }
+  }
+
+  .signoff-portrait {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .signoff-body p {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .signoff-actions {
+    margin-top: var(--space-lg);
+  }
+
+  .signoff-meta {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-muted);
+    margin-top: var(--space-lg);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── ContactDialog styles (global) ── */
+  :global(.contact-dialog-trigger) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--jaipur-navy);
+    color: var(--paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--r-md);
+    min-height: 44px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out);
+  }
+
+  :global(.contact-dialog-trigger:hover) {
+    background: var(--jaipur-navy-deep, #062038);
+  }
+
+  :global(.contact-dialog-actions) {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  :global(.contact-dialog-btn) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+
+  :global(.contact-dialog-btn--wa) {
+    background: #25d366;
+    color: #fff;
+  }
+
+  :global(.contact-dialog-btn--wa:hover) {
+    background: #1da851;
+  }
+
+  :global(.contact-dialog-btn--secondary) {
+    background: transparent;
+    color: #082746;
+    border: 1.5px solid #d8d2c2;
+  }
+
+  :global(.contact-dialog-btn--secondary:hover) {
+    background: #faf7ee;
+    border-color: #082746;
+  }
+
+  :global(.contact-dialog-meta) {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  :global(.contact-dialog-dismiss) {
+    display: none;
+  }
+</style>
