@@ -11,4 +11,5 @@ dist/
 .wrangler/
 .env.local
 data/
+inventory 2026/
 seed/
