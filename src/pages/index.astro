@@ -232,36 +232,43 @@ const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
   .hero {
     position: relative;
     overflow: hidden;
-    background: var(--jaipur-navy);
     color: var(--paper);
     padding-block: var(--space-4xl) var(--space-3xl);
+    /* A Jaipur dawn over navy: warm terracotta glow upper-right, a deep
+       midnight pool lower-left, on a graded navy ground. */
+    background:
+      radial-gradient(115% 130% at 90% -25%, rgba(181, 83, 46, 0.32), transparent 46%),
+      radial-gradient(90% 95% at 6% 112%, rgba(19, 58, 96, 0.65), transparent 55%),
+      linear-gradient(162deg, #0c3157 0%, #082746 52%, #061d33 100%);
   }
 
-  /* Whisper-quiet depth: a terracotta glow top-left, a deeper navy pool
-     bottom-right. Static; a faint haze drifts only when motion is allowed. */
+  /* Fine dot-grid texture, masked so it fades toward the edges — craft detail
+     you feel more than see. */
   .hero-aura {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background:
-      radial-gradient(58% 80% at 16% -10%, rgba(181, 83, 46, 0.18), transparent 60%),
-      radial-gradient(50% 70% at 102% 108%, rgba(19, 58, 96, 0.6), transparent 55%);
+    background-image: radial-gradient(circle at center, rgba(250, 247, 238, 0.06) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(125% 85% at 50% 0%, #000 32%, transparent 78%);
+    mask-image: radial-gradient(125% 85% at 50% 0%, #000 32%, transparent 78%);
   }
 
+  /* A warm glow that slowly drifts across the hero (motion only). */
   @media (prefers-reduced-motion: no-preference) {
     .hero-aura::before {
       content: "";
       position: absolute;
-      inset: -25%;
-      background: radial-gradient(38% 38% at 50% 50%, rgba(228, 236, 245, 0.07), transparent 70%);
-      animation: hero-drift 19s var(--ease-out) infinite alternate;
+      inset: -30%;
+      background: radial-gradient(40% 40% at 50% 50%, rgba(181, 83, 46, 0.16), transparent 70%);
+      animation: hero-drift 16s var(--ease-out) infinite alternate;
     }
   }
 
   @keyframes hero-drift {
-    from { transform: translate(-6%, -4%); }
-    to   { transform: translate(8%, 6%); }
+    from { transform: translate(-8%, -5%); }
+    to   { transform: translate(10%, 7%); }
   }
 
   .hero-content {
@@ -344,14 +351,14 @@ const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    box-shadow: var(--elev-2);
+    box-shadow: 0 14px 36px rgba(4, 16, 30, 0.30), 0 2px 6px rgba(4, 16, 30, 0.18);
     transition: box-shadow var(--dur-base) var(--ease-out),
                 transform var(--dur-base) var(--ease-out);
   }
 
   .hero-search:focus-within {
-    box-shadow: var(--elev-3);
-    transform: translateY(-2px);
+    box-shadow: 0 22px 50px rgba(4, 16, 30, 0.38), 0 3px 8px rgba(4, 16, 30, 0.20);
+    transform: translateY(-3px);
   }
 
   .search-grid {
@@ -405,7 +412,7 @@ const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
     justify-content: center;
     gap: var(--space-sm);
     padding: var(--space-md) var(--space-xl);
-    background: var(--jaipur-navy);
+    background: linear-gradient(180deg, #0e3358 0%, #082746 100%);
     color: var(--paper);
     font-size: 1rem;
     font-weight: 600;
@@ -413,12 +420,17 @@ const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
     border: none;
     cursor: pointer;
     min-height: 48px;
-    transition: background var(--dur-base) var(--ease-out);
+    box-shadow: 0 6px 16px rgba(8, 39, 70, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: background var(--dur-base) var(--ease-out),
+                box-shadow var(--dur-base) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
     text-decoration: none;
   }
 
   .btn-primary:hover {
-    background: var(--midnight-tile);
+    background: linear-gradient(180deg, #16477b 0%, #0c3055 100%);
+    box-shadow: 0 10px 24px rgba(8, 39, 70, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
   }
 
   .search-submit {
@@ -794,18 +806,23 @@ const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
     justify-content: center;
     gap: var(--space-sm);
     padding: var(--space-md) var(--space-xl);
-    background: var(--whatsapp-signal);
+    background: linear-gradient(180deg, #2ee06d 0%, var(--whatsapp-deep) 100%);
     color: var(--paper);
     font-size: 1rem;
     font-weight: 600;
     border-radius: var(--r-md);
     min-height: 48px;
     text-decoration: none;
-    transition: background var(--dur-base) var(--ease-out);
+    box-shadow: 0 8px 20px rgba(31, 185, 88, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: background var(--dur-base) var(--ease-out),
+                box-shadow var(--dur-base) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
   }
 
   .btn-whatsapp:hover {
-    background: var(--whatsapp-deep);
+    background: linear-gradient(180deg, #28cf63 0%, #189c4b 100%);
+    box-shadow: 0 12px 28px rgba(31, 185, 88, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
   }
 
   .btn-whatsapp--lg {

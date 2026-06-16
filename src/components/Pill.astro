@@ -116,6 +116,19 @@ const isDisplayId = variant === 'display-id';
     background: currentColor;
   }
 
+  /* "Available now" heartbeat — only on available listings, motion only */
+  @media (prefers-reduced-motion: no-preference) {
+    .status-pill--available .dot {
+      animation: dot-pulse 2.4s var(--ease-out) infinite;
+    }
+  }
+
+  @keyframes dot-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5); }
+    70%  { box-shadow: 0 0 0 5px rgba(22, 163, 74, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+  }
+
   /* Verified pill */
   .verified-pill {
     position: absolute;
