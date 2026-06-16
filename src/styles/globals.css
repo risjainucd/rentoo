@@ -221,3 +221,64 @@ html { background:var(--color-background); color:var(--color-foreground); font-f
 @media (min-width: 1024px) {
   :root { --gutter: var(--space-2xl); }
 }
+
+/* ============================================================ */
+/* Polish kit — reusable across all surfaces                    */
+/* (subtle/editorial; everything motion-related is gated behind */
+/*  prefers-reduced-motion so it degrades to a static page)     */
+/* ============================================================ */
+
+/* — Text selection — */
+::selection { background: var(--jaipur-navy); color: var(--paper); }
+
+/* — Consistent, visible focus ring (clay reads on both paper and navy) — */
+:focus-visible {
+  outline: 2px solid var(--focus-clay);
+  outline-offset: 2px;
+}
+
+/* — Scroll reveal: blur + rise + fade, triggered by IntersectionObserver —
+   Hidden state only exists when motion is allowed; under reduced-motion
+   (or if the observer never runs) elements render in their final state.   */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(8px);
+    transition:
+      opacity 600ms var(--ease-out),
+      transform 600ms var(--ease-out),
+      filter 600ms var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* — Button sheen: one light band sweeps across on hover — */
+.btn-sheen { position: relative; overflow: hidden; isolation: isolate; }
+.btn-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn-sheen:hover::after { animation: btn-sheen-sweep 850ms var(--ease-out); }
+}
+@keyframes btn-sheen-sweep {
+  from { transform: translateX(-130%); }
+  to   { transform: translateX(130%); }
+}

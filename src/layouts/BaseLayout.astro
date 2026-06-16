@@ -19,6 +19,11 @@ const { title, description } = Astro.props;
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/png" href="/Rentooicon.png" />
     <meta name="generator" content={Astro.generator} />
+    <noscript>
+      <style>
+        [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
@@ -27,6 +32,35 @@ const { title, description } = Astro.props;
       <slot />
     </main>
     <slot name="footer" />
+
+    <script>
+      // Scroll reveal: add `.is-revealed` to [data-reveal] elements as they
+      // enter the viewport. Honors reduced-motion and degrades gracefully if
+      // IntersectionObserver is unavailable (everything just shows).
+      (() => {
+        const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
+        if (!els.length) return;
+
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce || !('IntersectionObserver' in window)) {
+          els.forEach((el) => el.classList.add('is-revealed'));
+          return;
+        }
+
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-revealed');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+      })();
+    </script>
   </body>
 </html>
 
