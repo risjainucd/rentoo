@@ -28,13 +28,13 @@ function pageHref(p: number) {
 
   <section class="listings-head">
     <div class="section-inner">
-      <div class="byline">
+      <div class="byline" data-reveal>
         <span class="byline-label">Catalog</span>
         <span class="byline-sep" aria-hidden="true">·</span>
         <span class="byline-meta">Residential rentals · Jaipur</span>
       </div>
-      <h1>Hand-verified rentals across Jaipur.</h1>
-      <p class="sub">Every flat and house here has been visited by someone on our team. No fake listings, no bait photos, no surprises on the fee. Reach out on WhatsApp and we'll book the visit.</p>
+      <h1 data-reveal style="--reveal-delay:60ms">Hand-verified rentals across Jaipur.</h1>
+      <p class="sub" data-reveal style="--reveal-delay:120ms">Every flat and house here has been visited by someone on our team. No fake listings, no bait photos, no surprises on the fee. Reach out on WhatsApp and we'll book the visit.</p>
     </div>
   </section>
 
@@ -59,8 +59,8 @@ function pageHref(p: number) {
           </div>
         ) : (
           <div class="listing-grid" role="list">
-            {items.map(card => (
-              <div role="listitem">
+            {items.map((card, i) => (
+              <div role="listitem" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 55}ms`}>
                 <PropertyCard card={card} />
               </div>
             ))}

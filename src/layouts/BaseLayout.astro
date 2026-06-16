@@ -1,5 +1,6 @@
 ---
 import '../styles/globals.css';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -19,6 +20,7 @@ const { title, description } = Astro.props;
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/png" href="/Rentooicon.png" />
     <meta name="generator" content={Astro.generator} />
+    <ClientRouter />
     <noscript>
       <style>
         [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
@@ -36,8 +38,9 @@ const { title, description } = Astro.props;
     <script>
       // Scroll reveal: add `.is-revealed` to [data-reveal] elements as they
       // enter the viewport. Honors reduced-motion and degrades gracefully if
-      // IntersectionObserver is unavailable (everything just shows).
-      (() => {
+      // IntersectionObserver is unavailable (everything just shows). Re-runs on
+      // every View Transitions navigation via `astro:page-load`.
+      function initReveal() {
         const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
         if (!els.length) return;
 
@@ -58,8 +61,12 @@ const { title, description } = Astro.props;
           },
           { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
         );
-        els.forEach((el) => io.observe(el));
-      })();
+        els.forEach((el) => {
+          if (!el.classList.contains('is-revealed')) io.observe(el);
+        });
+      }
+
+      document.addEventListener('astro:page-load', initReveal);
     </script>
   </body>
 </html>

@@ -97,8 +97,8 @@ const currentPath = Astro.url.pathname;
     color: var(--jaipur-navy);
   }
 
-  .primary-nav a[aria-current="page"]::after,
-  .primary-nav a.active::after {
+  /* Animated underline: grows from the left on hover, pinned for the active page. */
+  .primary-nav a::after {
     content: "";
     position: absolute;
     bottom: -3px;
@@ -107,6 +107,15 @@ const currentPath = Astro.url.pathname;
     height: 2px;
     background: var(--jaipur-navy);
     border-radius: 1px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .primary-nav a:hover::after,
+  .primary-nav a[aria-current="page"]::after,
+  .primary-nav a.active::after {
+    transform: scaleX(1);
   }
 
   /* WhatsApp button in header — calm navy color */

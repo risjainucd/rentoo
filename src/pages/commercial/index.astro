@@ -28,13 +28,13 @@ function pageHref(p: number) {
 
   <section class="listings-head">
     <div class="section-inner">
-      <div class="byline">
+      <div class="byline" data-reveal>
         <span class="byline-label">Catalog</span>
         <span class="byline-sep" aria-hidden="true">·</span>
         <span class="byline-meta">Commercial spaces · Jaipur</span>
       </div>
-      <h1>Hand-verified commercial spaces across Jaipur.</h1>
-      <p class="sub">Offices, shops, showrooms, and warehouses — every space here has been walked through by someone on our team. Reach out on WhatsApp and we'll book the visit.</p>
+      <h1 data-reveal style="--reveal-delay:60ms">Hand-verified commercial spaces across Jaipur.</h1>
+      <p class="sub" data-reveal style="--reveal-delay:120ms">Offices, shops, showrooms, and warehouses — every space here has been walked through by someone on our team. Reach out on WhatsApp and we'll book the visit.</p>
     </div>
   </section>
 
@@ -59,8 +59,8 @@ function pageHref(p: number) {
           </div>
         ) : (
           <div class="listing-grid" role="list">
-            {items.map(card => (
-              <div role="listitem">
+            {items.map((card, i) => (
+              <div role="listitem" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 55}ms`}>
                 <PropertyCard card={card} />
               </div>
             ))}
@@ -92,15 +92,15 @@ function pageHref(p: number) {
         <div class="why-commercial">
           <h3>Why lease through Rentoo?</h3>
           <div class="why-grid">
-            <div class="why-item">
+            <div class="why-item" data-reveal>
               <h4>Site-verified</h4>
               <p>We walk through every space ourselves. The photos and measurements you see are ours, not the owner's five-year-old marketing shots.</p>
             </div>
-            <div class="why-item">
+            <div class="why-item" data-reveal style="--reveal-delay:80ms">
               <h4>WhatsApp-first</h4>
               <p>Send us the property ID. Median reply under 30 minutes. We'll coordinate the visit and ride along for tricky buildings.</p>
             </div>
-            <div class="why-item">
+            <div class="why-item" data-reveal style="--reveal-delay:160ms">
               <h4>Fee upfront</h4>
               <p>We're a brokerage and we say so. The brokerage fee is agreed before you visit — no surprise demand at signing.</p>
             </div>
