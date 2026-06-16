@@ -6,7 +6,10 @@ import Pill from './Pill.astro';
 const { card } = Astro.props as { card: ListingCard };
 
 const href = `${card.segment === 'commercial' ? '/commercial' : '/rent'}/${card.slug}`;
-const cover = card.cover_key ? mediaUrl(card.cover_key, 'card') : null;
+const keys = card.photos && card.photos.length ? card.photos : card.cover_key ? [card.cover_key] : [];
+const photoUrls = keys.map((k) => mediaUrl(k, 'card'));
+const cover = photoUrls[0] ?? null;
+const multi = photoUrls.length > 1;
 
 const statusVariant = card.status === 'available'
   ? 'status-available'
@@ -21,23 +24,36 @@ const statusLabel = card.status === 'available'
   : 'On Hold';
 ---
 
-<article class="property-card">
-  <a href={href} class="card-link">
-    <div class="card-image">
-      <Pill variant="display-id" label={card.display_id} />
-      {cover ? (
-        <img
-          src={cover}
-          width={card.cover_w ?? 400}
-          height={card.cover_h ?? 280}
-          loading="lazy"
-          alt={card.title}
-        />
-      ) : (
-        <div class="card-image-placeholder"></div>
-      )}
-      <Pill variant={statusVariant} label={statusLabel} />
-    </div>
+<article class="property-card" data-card-photos={multi ? JSON.stringify(photoUrls) : undefined}>
+  <div class="card-image">
+    <Pill variant="display-id" label={card.display_id} />
+    {cover ? (
+      <img
+        class="card-photo"
+        data-card-img
+        src={cover}
+        width={card.cover_w ?? 400}
+        height={card.cover_h ?? 280}
+        loading="lazy"
+        alt={card.title}
+      />
+    ) : (
+      <div class="card-image-placeholder"></div>
+    )}
+    {multi && (
+      <>
+        <button type="button" class="card-nav card-nav--prev" data-card-prev aria-label="Previous photo">
+          <span aria-hidden="true">&#8249;</span>
+        </button>
+        <button type="button" class="card-nav card-nav--next" data-card-next aria-label="Next photo">
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+        <div class="card-counter" aria-hidden="true"><span data-card-current>1</span> / {photoUrls.length}</div>
+      </>
+    )}
+    <Pill variant={statusVariant} label={statusLabel} />
+  </div>
+  <a href={href} class="card-link" aria-label={card.title}>
     <div class="card-body">
       <div class="price-row">
         <span class="price">
@@ -54,6 +70,29 @@ const statusLabel = card.status === 'available'
     </div>
   </a>
 </article>
+
+<script>
+  document.querySelectorAll('[data-card-photos]').forEach((card) => {
+    const img = card.querySelector('[data-card-img]') as HTMLImageElement | null;
+    const cur = card.querySelector('[data-card-current]');
+    const raw = card.getAttribute('data-card-photos');
+    if (!img || !raw) return;
+    let photos: string[];
+    try { photos = JSON.parse(raw); } catch { return; }
+    if (!Array.isArray(photos) || photos.length < 2) return;
+
+    let i = 0;
+    const show = (n: number) => {
+      i = (n + photos.length) % photos.length; // wrap-around
+      img.src = photos[i];
+      if (cur) cur.textContent = String(i + 1);
+    };
+    // Arrows sit above the stretched card link; stop the click from navigating.
+    const onClick = (fn: () => void) => (e: Event) => { e.preventDefault(); e.stopPropagation(); fn(); };
+    card.querySelector('[data-card-prev]')?.addEventListener('click', onClick(() => show(i - 1)));
+    card.querySelector('[data-card-next]')?.addEventListener('click', onClick(() => show(i + 1)));
+  });
+</script>
 
 <style>
   .property-card {
@@ -81,6 +120,16 @@ const statusLabel = card.status === 'available'
     text-decoration: none;
   }
 
+  /* Stretched link: the whole card navigates to the detail page, while the
+     carousel arrows (higher z-index) stay clickable above this overlay. */
+  .card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--r-md);
+  }
+
   .card-image {
     position: relative;
     aspect-ratio: 4 / 3;
@@ -95,12 +144,6 @@ const statusLabel = card.status === 'available'
     transition: transform 500ms var(--ease-out);
     display: block;
     max-width: 100%;
-    height: auto;
-  }
-
-  /* Override for images inside card-image */
-  .card-image img {
-    height: 100%;
   }
 
   .property-card:hover .card-image img {
@@ -111,6 +154,93 @@ const statusLabel = card.status === 'available'
     width: 100%;
     height: 100%;
     background: var(--haze-tint);
+  }
+
+  /* Decorative overlays pass clicks through to the card link. */
+  .card-image :global(.display-id-tag--card),
+  .card-image :global(.status-pill) {
+    pointer-events: none;
+  }
+
+  /* ── Carousel arrows ── */
+  .card-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--paper, #fff) 84%, transparent);
+    color: var(--jaipur-navy, #082746);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(8, 39, 70, 0.18);
+    opacity: 0;
+    transition: opacity var(--dur-fast, 150ms) var(--ease-out, ease-out),
+                background var(--dur-fast, 150ms) var(--ease-out, ease-out),
+                transform var(--dur-fast, 150ms) var(--ease-out, ease-out);
+    outline: none;
+  }
+
+  .card-nav span {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin-top: -2px;
+  }
+
+  .card-nav--prev { left: 8px; }
+  .card-nav--prev span { margin-right: 2px; }
+  .card-nav--next { right: 8px; }
+  .card-nav--next span { margin-left: 2px; }
+
+  .property-card:hover .card-nav,
+  .property-card:focus-within .card-nav {
+    opacity: 1;
+  }
+
+  .card-nav:hover {
+    background: var(--paper, #fff);
+    transform: translateY(-50%) scale(1.08);
+  }
+
+  .card-nav:focus-visible {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--paper, #fff), 0 0 0 4px var(--jaipur-navy, #082746);
+  }
+
+  /* ── Photo counter (bottom-left; status pill is bottom-right) ── */
+  .card-counter {
+    position: absolute;
+    bottom: var(--space-sm, 8px);
+    left: var(--space-sm, 8px);
+    z-index: 2;
+    padding: 2px 8px;
+    border-radius: var(--r-sm, 4px);
+    background: color-mix(in srgb, var(--jaipur-navy, #082746) 76%, transparent);
+    color: var(--paper, #fff);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur-fast, 150ms) var(--ease-out, ease-out);
+  }
+
+  .property-card:hover .card-counter,
+  .property-card:focus-within .card-counter {
+    opacity: 1;
+  }
+
+  /* Touch devices have no hover: keep the controls visible. */
+  @media (hover: none) {
+    .card-nav,
+    .card-counter { opacity: 1; }
   }
 
   .card-body {

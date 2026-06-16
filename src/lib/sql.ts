@@ -29,6 +29,7 @@ export function mapRowToCard(r: Record<string, any>): ListingCard {
     slug: r.slug, display_id: r.display_id, title, rent_inr: r.rent_inr, landmark: r.landmark,
     segment: r.segment, bhk_type: r.bhk_type, furnishing: r.furnishing, status: r.status,
     neighbourhood_slug: r.neighbourhood_slug, cover_key: r.cover_key, cover_w: r.cover_w, cover_h: r.cover_h,
+    photos: [],
   };
 }
 export function parseListingFilters(url: URL): ListingFilters {
