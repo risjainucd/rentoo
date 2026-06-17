@@ -1,32 +1,87 @@
 ---
-interface Props { images: { gallery: string; full: string; alt: string }[] }
-const { images } = Astro.props;
-const cover = images[0];
-const single = images.length <= 1;
+interface VideoProp { src: string; poster: string; alt: string }
+interface Props {
+  images: { gallery: string; full: string; alt: string }[];
+  video?: VideoProp;
+}
+const { images, video } = Astro.props;
+const hasVideo = !!video;
+const coverImg = images[0];
+const slideCount = (hasVideo ? 1 : 0) + images.length;
+const single = slideCount <= 1;
 ---
 <div class="gallery" data-gallery tabindex="0" role="group" aria-roledescription="carousel" aria-label="Photo gallery">
   <div class="gallery-stage">
-    <img class="gallery-main" data-gallery-main src={cover?.gallery} alt={cover?.alt} width="1000" height="667" />
+    {hasVideo && (
+      <video
+        class="gallery-video"
+        data-gallery-video
+        controls
+        playsinline
+        preload="none"
+        poster={video!.poster}
+        aria-label={video!.alt}
+        width="1000"
+        height="667"
+      >
+        <source src={video!.src} type="video/mp4" />
+      </video>
+    )}
+    <img
+      class="gallery-main"
+      data-gallery-main
+      src={hasVideo ? undefined : coverImg?.gallery}
+      alt={coverImg?.alt}
+      width="1000"
+      height="667"
+      hidden={hasVideo}
+    />
     {!single && (
       <>
-        <button type="button" class="gallery-nav gallery-nav--prev" data-gallery-prev aria-label="Previous photo">
+        <button type="button" class="gallery-nav gallery-nav--prev" data-gallery-prev aria-label="Previous slide">
           <span aria-hidden="true">&#8249;</span>
         </button>
-        <button type="button" class="gallery-nav gallery-nav--next" data-gallery-next aria-label="Next photo">
+        <button type="button" class="gallery-nav gallery-nav--next" data-gallery-next aria-label="Next slide">
           <span aria-hidden="true">&#8250;</span>
         </button>
         <div class="gallery-counter" data-gallery-counter aria-hidden="true">
-          <span data-gallery-current>1</span> / {images.length}
+          <span data-gallery-current>1</span> / {slideCount}
         </div>
       </>
     )}
   </div>
   <div class="gallery-thumbs">
-    {images.map((img, i) => (
-      <button class="gallery-thumb" data-gallery-thumb data-index={i} data-full={img.gallery} aria-label={`Photo ${i + 1}`} aria-current={i === 0}>
-        <img src={img.gallery} alt={img.alt} width="120" height="80" loading="lazy" />
+    {hasVideo && (
+      <button
+        class="gallery-thumb gallery-thumb--video"
+        data-gallery-thumb
+        data-kind="video"
+        data-index="0"
+        aria-label="Play video tour"
+        aria-current="true"
+      >
+        <img src={video!.poster} alt={video!.alt} width="120" height="80" loading="lazy" />
+        <span class="gallery-play-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </span>
       </button>
-    ))}
+    )}
+    {images.map((img, i) => {
+      const slideIndex = hasVideo ? i + 1 : i;
+      return (
+        <button
+          class="gallery-thumb"
+          data-gallery-thumb
+          data-kind="photo"
+          data-index={slideIndex}
+          data-full={img.gallery}
+          aria-label={`Photo ${i + 1}`}
+          aria-current={!hasVideo && i === 0 ? 'true' : 'false'}
+        >
+          <img src={img.gallery} alt={img.alt} width="120" height="80" loading="lazy" />
+        </button>
+      );
+    })}
   </div>
 </div>
 <script>
@@ -38,6 +93,7 @@ const single = images.length <= 1;
       (g as HTMLElement).dataset.galleryReady = 'true';
 
       const main = g.querySelector('[data-gallery-main]') as HTMLImageElement | null;
+      const video = g.querySelector('[data-gallery-video]') as HTMLVideoElement | null;
       const thumbs = Array.from(g.querySelectorAll('[data-gallery-thumb]')) as HTMLButtonElement[];
       const prevBtn = g.querySelector('[data-gallery-prev]');
       const nextBtn = g.querySelector('[data-gallery-next]');
@@ -49,14 +105,28 @@ const single = images.length <= 1;
 
       const show = (next: number) => {
         index = (next + total) % total; // wrap-around
-        const full = thumbs[index].getAttribute('data-full');
-        if (full && main.getAttribute('src') !== full) {
-          // Preload, then crossfade to the new photo.
-          const img = new Image();
-          img.onload = () => { main.src = full; main.style.opacity = '1'; };
-          main.style.opacity = '0';
-          img.src = full;
+        const thumb = thumbs[index];
+        const kind = thumb.getAttribute('data-kind');
+
+        if (kind === 'video') {
+          // Reveal the video; hide the photo <img>. Do NOT touch main.src here.
+          if (video) { video.hidden = false; main.hidden = true; }
+        } else {
+          // Photo slide: pause + hide the video if we are leaving it.
+          if (video && !video.paused) video.pause();
+          if (video) video.hidden = true;
+          main.hidden = false;
+
+          const full = thumb.getAttribute('data-full');
+          if (full && main.getAttribute('src') !== full) {
+            // Preload, then crossfade to the new photo.
+            const img = new Image();
+            img.onload = () => { main.src = full; main.style.opacity = '1'; };
+            main.style.opacity = '0';
+            img.src = full;
+          }
         }
+
         thumbs.forEach((t, i) => t.setAttribute('aria-current', String(i === index)));
         if (current) current.textContent = String(index + 1);
       };
@@ -235,4 +305,32 @@ const single = images.length <= 1;
   .gallery-thumb:hover img {
     transform: scale(1.06);
   }
+
+  /* ── Video slide ── */
+  .gallery-video {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: contain;            /* vertical WhatsApp clip letterboxed, not cropped */
+    background: #000;
+    border-radius: var(--r-md, 8px);
+    display: block;
+    box-shadow: var(--elev-2, 0 4px 8px rgba(8, 39, 70, 0.08));
+  }
+  .gallery-video[hidden] { display: none; }
+  .gallery-main[hidden] { display: none; }
+
+  .gallery-thumb--video { position: relative; }
+
+  .gallery-play-badge {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper, #fff);
+    background: color-mix(in srgb, var(--jaipur-navy, #082746) 28%, transparent);
+    pointer-events: none;           /* clicks fall through to the button */
+  }
+  .gallery-play-badge svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5)); }
 </style>

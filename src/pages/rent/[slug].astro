@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import Gallery from '../../components/Gallery.astro';
-import { mediaUrl } from '../../lib/media';
+import { mediaUrl, videoUrl } from '../../lib/media';
 import { getListingBySlug } from '../../lib/db';
 import { WHATSAPP_NUMBER } from '../../lib/site';
 const data = await getListingBySlug(Astro.locals.db, Astro.params.slug!);
@@ -15,6 +15,15 @@ const images = media.filter(m => m.kind === 'photo').map(m => ({
   full: mediaUrl(m.r2_key, 'full'),
   alt: `${property.display_id} — ${property.bhk_type ?? property.property_type}`,
 }));
+const tourVideo = (() => {
+  const v = media.find(m => m.kind === 'video');
+  if (!v) return undefined;
+  return {
+    src: videoUrl(v.r2_key),                 // /media/properties/<slug>/tour.mp4
+    poster: mediaUrl(v.r2_key, 'gallery'),   // /media/properties/<slug>/tour-gallery.webp
+    alt: `${property.display_id} video tour`,
+  };
+})();
 const waText = encodeURIComponent(`Hi Rentoo, I'm interested in ${property.display_id} (${property.slug}).`);
 const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;
@@ -45,10 +54,10 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
   </nav>
 
   <!-- Gallery -->
-  {images.length > 0 ? (
+  {(images.length > 0 || tourVideo) ? (
     <div class="gallery-section">
       <div class="section-inner">
-        <Gallery images={images} />
+        <Gallery images={images} video={tourVideo} />
       </div>
     </div>
   ) : (
