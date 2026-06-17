@@ -6,7 +6,7 @@
 //     node scripts/video-upload.mjs                  # full run: transcode + upload + seed/video-media.sql
 //
 import sharp from 'sharp';
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -111,9 +111,17 @@ async function transcode(src, wmPng, ow, oh, outMp4) {
 }
 
 // Poster: representative frame ~1s in (skips black first frame), upright via default autorotate.
-function posterPng(src) {
-  return runBuf(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error',
+// Input seek (-ss before -i) is fast but yields 0 bytes on clips shorter than the seek point;
+// fall back to a first-frame grab so a poster is always produced (and never silently dropped).
+async function posterPng(src) {
+  let buf = await runBuf(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error',
     '-ss', '00:00:01', '-i', src, '-frames:v', '1', '-q:v', '2', '-c:v', 'png', '-f', 'image2pipe', 'pipe:1']);
+  if (!buf.length) {
+    buf = await runBuf(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error',
+      '-i', src, '-frames:v', '1', '-q:v', '2', '-c:v', 'png', '-f', 'image2pipe', 'pipe:1']);
+  }
+  if (!buf.length) throw new Error('poster extraction produced 0 bytes');
+  return buf;
 }
 
 // Poster PNG -> 3 watermarked WebP renditions (same look as photos).
@@ -139,18 +147,19 @@ async function upload(key, body, contentType) {
 
 // ---- simple promise pool ----
 async function pool(items, n, worker) {
-  let i = 0, done = 0; const total = items.length;
+  let i = 0, done = 0; const total = items.length; const failures = [];
   async function runOne() {
     while (i < items.length) {
       const idx = i++;
       try { await worker(items[idx], idx); }
-      catch (e) { console.error('  ! failed:', items[idx]?.folder, e.message); }
+      catch (e) { failures.push({ item: items[idx], error: e.message }); console.error('\n  ! failed:', items[idx]?.folder, e.message); }
       done++;
       process.stdout.write(`\r  processed ${done}/${total} videos…`);
     }
   }
   await Promise.all(Array.from({ length: Math.min(n, items.length) }, runOne));
   process.stdout.write('\n');
+  return failures;
 }
 
 // ---- build work list ----
@@ -167,6 +176,8 @@ const skipped = [];
 for (const folder of folders) {
   const slug = slugByDisplay.get(folder);
   if (!slug) { skipped.push(`${folder} (no live listing)`); continue; }
+  // Slugs are interpolated raw into SQL and R2 keys; hard-fail on anything outside [a-z0-9-].
+  if (!/^[a-z0-9-]+$/.test(slug)) throw new Error(`Unsafe slug for SQL/R2 key: '${slug}' (folder ${folder})`);
   const dir = join(INVENTORY, folder);
   const mp4s = readdirSync(dir).filter((f) => VIDEO_RE.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   if (!mp4s.length) { continue; }                       // photo-only listing -> media.sql owns it
@@ -200,18 +211,26 @@ async function processOne(w) {
   }
 
   const mp4Buf = readFileSync(outMp4);
-  await upload(`properties/${w.slug}/tour.mp4`, mp4Buf, 'video/mp4');
+  // Upload posters first; commit the heavy tour.mp4 only once everything else succeeded,
+  // so a mid-upload failure leaves fewer orphaned objects in R2.
   for (const s of SIZES) await upload(`properties/${w.slug}/tour-${s.name}.webp`, poster[s.name], 'image/webp');
+  await upload(`properties/${w.slug}/tour.mp4`, mp4Buf, 'video/mp4');
   rows.set(w.slug, { uuid: randomUUID(), w: ow, h: oh, isCover: w.isCover });
+  try { unlinkSync(outMp4); unlinkSync(wmPng); } catch { /* best-effort temp cleanup */ }
 }
 
 // ---- run ----
 const list = SAMPLE ? work.slice(0, SAMPLE_LIMIT) : work;
-await pool(list, CONCURRENCY, processOne);
+const failures = await pool(list, CONCURRENCY, processOne);
+
+if (failures.length) {
+  console.error(`\n⚠️  ${failures.length} listing(s) FAILED and were dropped (no video row written):`);
+  for (const f of failures) console.error(`   - ${f.item?.folder} → ${f.item?.slug}: ${f.error}`);
+}
 
 if (SAMPLE) {
-  console.log(`\nWrote ${list.length} previews to ${tmpDir}/. Open the *-tour.mp4 to check orientation + watermark, then re-run without --sample.`);
-  process.exit(0);
+  console.log(`\nWrote ${list.length - failures.length} previews to ${tmpDir}/. Open the *-tour.mp4 to check orientation + watermark, then re-run without --sample.`);
+  process.exit(failures.length ? 1 : 0);
 }
 
 // ---- emit seed/video-media.sql ----
@@ -228,3 +247,4 @@ mkdirSync('seed', { recursive: true });
 writeFileSync('seed/video-media.sql', sql);
 console.log(`\nDone. Uploaded ${rows.size} tours. Wrote ${n} video rows to seed/video-media.sql.`);
 console.log('Next: npx wrangler d1 execute rentoo-listings --remote --file=seed/video-media.sql');
+if (failures.length) { console.error(`\n⚠️  Exiting non-zero: ${failures.length} listing(s) failed — see the list above before applying the SQL.`); process.exit(1); }

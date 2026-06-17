@@ -136,6 +136,8 @@ const single = slideCount <= 1;
       nextBtn?.addEventListener('click', () => show(index + 1));
 
       g.addEventListener('keydown', (e) => {
+        // Let the focused <video>'s native controls handle arrow keys (seek), don't hijack to nav.
+        if ((e.target as HTMLElement)?.closest('[data-gallery-video]')) return;
         const key = (e as KeyboardEvent).key;
         if (key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
         else if (key === 'ArrowRight') { e.preventDefault(); show(index + 1); }

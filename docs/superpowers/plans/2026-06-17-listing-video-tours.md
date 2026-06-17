@@ -1141,3 +1141,18 @@ Expected: deploy succeeds; spot-check a video-only listing on the live worker UR
 **Placeholder scan:** No TBD/TODO; all code blocks complete; the only intentionally-blank values are the R2 credentials in Task 9 Step 1 (secrets, supplied at run time) and `<video-only-slug>`/`<size>` in curl examples (runtime values).
 
 **Type consistency:** `parseRange(header, size) -> ParsedRange` (Task 3) ↔ imported + used in Task 4. `videoUrl(base) -> string` (Task 2) ↔ used in Task 7. Gallery `Props { images, video? }` with `video: { src, poster, alt }` (Task 6) ↔ `tourVideo` shape built in Task 7 matches exactly. `makeWatermarkFactory`/`loadWordmarkSvgs`/`setAlpha` (Task 1) ↔ imported in Task 8. R2 row columns in Task 8 SQL match `migrations/0001_init.sql`.
+
+---
+
+## Post-Review Hardening (2026-06-17)
+
+A multi-agent adversarial review of the implementation diff returned **17 findings (10 minor, 7 nits, 0 blockers/majors)** plus 2 rejected false positives. Applied before push:
+
+- **Endpoint** `media/[...key].ts`: no-Range hot path now serves from a single `bucket.get()` (was `head()`+`get()` — halved R2 reads on every image); `Cache-Control: immutable` only on full 200, dropped on 206, `no-store` on 416; corrected the inaccurate "clamp" comment.
+- **Gallery** `keydown`: guard `if (e.target.closest('[data-gallery-video]')) return;` so arrow keys seek the focused video instead of navigating away.
+- **Pipeline** `video-upload.mjs`: poster falls back to a first-frame grab when the `-ss 1` seek yields 0 bytes (and hard-fails if still empty); failed listings are enumerated and the run exits non-zero; posters upload before the heavy `tour.mp4` (fewer orphans on partial failure) with best-effort temp cleanup; slugs asserted `^[a-z0-9-]+$` before SQL/key interpolation.
+
+**Deferred follow-ups (latent only; hold by construction today):**
+- Partial unique index `CREATE UNIQUE INDEX idx_media_one_cover ON property_media(property_id) WHERE is_cover = 1;` to make the "one cover per property" invariant a DB guarantee rather than a cross-script JS convention (prevents inflated card grids / off-by-one pagination if a double-cover ever slips in).
+- HTTP/data-layer tests (attachPhotos kind-scoping, endpoint 206/416/HEAD header arithmetic) — needs a SQLite/Miniflare test harness the repo doesn't have yet.
+- Regenerate the stale gitignored `seed/media.sql` artifact (its DELETEs predate the `kind='photo'` scoping) before any photo reseed; never hand-apply the old copy.
