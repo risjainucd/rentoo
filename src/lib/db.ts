@@ -13,7 +13,7 @@ async function attachPhotos(db: D1Database, cards: ListingCard[]) {
   const r = await db.prepare(
     `SELECT p.slug AS slug, pm.r2_key AS key
      FROM property_media pm JOIN properties p ON p.id = pm.property_id
-     WHERE p.slug IN (${placeholders})
+     WHERE p.slug IN (${placeholders}) AND pm.kind = 'photo'
      ORDER BY pm.display_order ASC`
   ).bind(...slugs).all<{ slug: string; key: string }>();
   const bySlug = new Map<string, string[]>();
