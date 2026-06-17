@@ -907,7 +907,9 @@ function runBuf(bin, args) {
 }
 const probe1 = (src, ent) =>
   run(FFPROBE, ['-v', 'error', '-select_streams', 'v:0', '-show_entries', ent, '-of', 'csv=p=0', src])
-    .then((s) => s.split('\n')[0].trim());
+    // ffprobe csv=p=0 can emit a trailing comma on some containers ("640,"); take the leading
+    // signed integer token so width/height/rotation never parse to NaN. Empty -> '' -> 0 downstream.
+    .then((s) => { const m = s.match(/-?\d+/); return m ? m[0] : ''; });
 
 async function outputDims(src) {
   const cw = +(await probe1(src, 'stream=width'));

@@ -11,10 +11,11 @@
 //     node scripts/watermark-upload.mjs                   # full run: watermark + upload + seed/media.sql
 //
 import sharp from 'sharp';
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { loadWordmarkSvgs, makeWatermarkFactory } from './_watermark.mjs';
 
 // ---- config ----
 const ACCOUNT_ID = process.env.R2_ACCOUNT_ID || 'b572ad0da703afe2e58898eef8444b59';
@@ -31,11 +32,6 @@ const SIZES = [
 ];
 const IMG_RE = /\.(jpe?g|png|webp|heic|heif)$/i;
 const CONCURRENCY = 8;
-
-// Watermark look
-const WORDMARK_FRAC = 0.6; // wordmark width as fraction of image width
-const WHITE_OPACITY = 0.18;
-const SHADOW_OPACITY = 0.22;
 
 // ---- s3 / r2 ----
 const AK = process.env.R2_ACCESS_KEY_ID;
@@ -54,42 +50,8 @@ if (!SAMPLE) {
 }
 
 // ---- watermark builders ----
-const svgRaw = readFileSync(LOGO, 'utf8');
-const svgWhite = svgRaw.replace(/fill="#[0-9A-Fa-f]{3,8}"/g, 'fill="#ffffff"');
-const svgBlack = svgRaw.replace(/fill="#[0-9A-Fa-f]{3,8}"/g, 'fill="#000000"');
-
-async function setAlpha(buf, opacity) {
-  // multiply existing alpha by `opacity` via a uniform dest-in tile
-  return sharp(buf)
-    .composite([{ input: Buffer.from([0, 0, 0, Math.round(255 * opacity)]), raw: { width: 1, height: 1, channels: 4 }, tile: true, blend: 'dest-in' }])
-    .png()
-    .toBuffer();
-}
-
-const wmCache = new Map();
-async function watermarkFor(imgWidth) {
-  const wmW = Math.max(80, Math.round(imgWidth * WORDMARK_FRAC));
-  if (wmCache.has(wmW)) return wmCache.get(wmW);
-  const white = await sharp(Buffer.from(svgWhite)).resize({ width: wmW }).png().toBuffer();
-  const { height: wmH } = await sharp(white).metadata();
-  const blackSharp = sharp(Buffer.from(svgBlack)).resize({ width: wmW });
-  const black = await blackSharp.blur(Math.max(1, wmW / 90)).png().toBuffer();
-  const whiteFaint = await setAlpha(white, WHITE_OPACITY);
-  const shadowFaint = await setAlpha(black, SHADOW_OPACITY);
-  const pad = Math.round(wmW * 0.06);
-  const off = Math.max(2, Math.round(wmW / 300));
-  const canvasW = wmW + pad * 2;
-  const canvasH = wmH + pad * 2;
-  const wm = await sharp({ create: { width: canvasW, height: canvasH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-    .composite([
-      { input: shadowFaint, top: pad + off, left: pad + off },
-      { input: whiteFaint, top: pad, left: pad },
-    ])
-    .png()
-    .toBuffer();
-  wmCache.set(wmW, wm);
-  return wm;
-}
+const { svgWhite, svgBlack } = loadWordmarkSvgs(LOGO);
+const watermarkFor = makeWatermarkFactory(svgWhite, svgBlack);
 
 // ---- image -> renditions ----
 async function renderSizes(srcPath) {
@@ -188,7 +150,7 @@ let rowCount = 0;
 for (const [slug, rows] of perSlug) {
   const present = rows.filter(Boolean);
   if (!present.length) continue;
-  sql += `DELETE FROM property_media WHERE property_id = (SELECT id FROM properties WHERE slug='${slug}');\n`;
+  sql += `DELETE FROM property_media WHERE kind='photo' AND property_id = (SELECT id FROM properties WHERE slug='${slug}');\n`;
   for (const r of present) {
     sql += `INSERT INTO property_media (id,property_id,kind,r2_key,display_order,is_cover,width,height,watermarked) `
       + `SELECT '${r.uuid}', id, 'photo', 'properties/${slug}/${r.idx}', ${r.idx}, ${r.isCover ? 1 : 0}, ${r.w}, ${r.h}, 1 `
