@@ -7,7 +7,7 @@ import PropertyCard from '../../components/PropertyCard.astro';
 import FilterBar from '../../components/FilterBar.tsx';
 import { parseListingFilters } from '../../lib/sql';
 import { listListings, listNeighbourhoods } from '../../lib/db';
-const filters = { ...parseListingFilters(Astro.url), segment: 'commercial' as const };
+const filters = { ...parseListingFilters(Astro.url), segment: 'industrial' as const };
 const { items, total } = await listListings(Astro.locals.db, filters);
 const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
 const perPage = filters.perPage ?? 12;
@@ -21,8 +21,8 @@ function pageHref(p: number) {
 ---
 
 <BaseLayout
-  title="Commercial spaces in Jaipur — Offices, retail & mall shops · Rentoo"
-  description="Hand-verified commercial spaces in Jaipur — office spaces, retail shops, mall shops, and build-to-suit land. C-Scheme, Tonk Road, Malviya Nagar. WhatsApp-first inquiries."
+  title="Industrial spaces in Jaipur — Warehouses, factories, land · Rentoo"
+  description="Hand-verified industrial spaces in Jaipur — warehouses, factories, and industrial land. Sitapura, RIICO, Ajmer Road. WhatsApp-first inquiries."
 >
   <SiteHeader slot="header" />
 
@@ -31,10 +31,10 @@ function pageHref(p: number) {
       <div class="byline" data-reveal>
         <span class="byline-label">Catalog</span>
         <span class="byline-sep" aria-hidden="true">·</span>
-        <span class="byline-meta">Commercial spaces · Jaipur</span>
+        <span class="byline-meta">Industrial spaces · Jaipur</span>
       </div>
-      <h1 data-reveal style="--reveal-delay:60ms">Commercial spaces across Jaipur.</h1>
-      <p class="sub" data-reveal style="--reveal-delay:120ms">Office spaces, retail shops, mall shops, and build-to-suit land — every space here has been walked through by someone on our team. Reach out on WhatsApp and we'll book the visit.</p>
+      <h1 data-reveal style="--reveal-delay:60ms">Industrial spaces across Jaipur.</h1>
+      <p class="sub" data-reveal style="--reveal-delay:120ms">Warehouses, factories, and industrial land — every space here has been walked through by someone on our team. Reach out on WhatsApp and we'll book the visit.</p>
     </div>
   </section>
 
@@ -54,8 +54,8 @@ function pageHref(p: number) {
 
         {items.length === 0 ? (
           <div class="empty-state">
-            <p>No commercial spaces match your current filters.</p>
-            <a href="/commercial" class="btn-secondary">Clear filters</a>
+            <p>No industrial spaces match your current filters.</p>
+            <a href="/industrial" class="btn-secondary">Clear filters</a>
           </div>
         ) : (
           <div class="listing-grid" role="list">
@@ -88,13 +88,13 @@ function pageHref(p: number) {
           <a href="https://wa.me/918740000854" class="btn-secondary">Don't see what you're looking for? Tell us on WhatsApp →</a>
         </div>
 
-        <!-- Why commercial section -->
+        <!-- Why industrial section -->
         <div class="why-commercial">
           <h3>Why lease through Rentoo?</h3>
           <div class="why-grid">
             <div class="why-item" data-reveal>
               <h4>Site-verified</h4>
-              <p>We walk through every space ourselves. The photos and measurements you see are ours, not the owner's five-year-old marketing shots.</p>
+              <p>We walk through every unit ourselves. The photos and measurements you see are ours, not the owner's five-year-old marketing shots.</p>
             </div>
             <div class="why-item" data-reveal style="--reveal-delay:80ms">
               <h4>WhatsApp-first</h4>
@@ -113,7 +113,7 @@ function pageHref(p: number) {
             <h3>Browse by neighbourhood</h3>
             <div class="nbhd-chips">
               {neighbourhoods.map(n => (
-                <a href={`/commercial?neighbourhood=${n.slug}`}>{n.name}</a>
+                <a href={`/industrial?neighbourhood=${n.slug}`}>{n.name}</a>
               ))}
             </div>
           </div>
@@ -319,7 +319,7 @@ function pageHref(p: number) {
     color: var(--paper);
   }
 
-  /* ── Why commercial ── */
+  /* ── Why section ── */
   .why-commercial {
     margin-top: var(--space-3xl);
     padding: var(--space-xl);

@@ -5,7 +5,8 @@ import Pill from './Pill.astro';
 
 const { card } = Astro.props as { card: ListingCard };
 
-const href = `${card.segment === 'commercial' ? '/commercial' : '/rent'}/${card.slug}`;
+const sectionPath = card.segment === 'commercial' ? '/commercial' : card.segment === 'industrial' ? '/industrial' : '/rent';
+const href = `${sectionPath}/${card.slug}`;
 const keys = card.photos && card.photos.length ? card.photos : card.cover_key ? [card.cover_key] : [];
 const photoUrls = keys.map((k) => mediaUrl(k, 'card'));
 const cover = photoUrls[0] ?? null;
