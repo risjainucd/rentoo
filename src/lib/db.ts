@@ -48,6 +48,18 @@ export async function listNeighbourhoods(db: D1Database) {
   const r = await db.prepare('SELECT * FROM neighbourhoods ORDER BY display_order ASC').all<Neighbourhood>();
   return r.results ?? [];
 }
+// Distinct "major areas" that have at least one published listing — the main-area
+// filter options. Optionally scoped to a segment so each section shows only its areas.
+export async function listMajorAreas(db: D1Database, segment?: string) {
+  const sql = `SELECT n.major_slug AS slug, n.major_area AS name, COUNT(*) AS n
+     FROM neighbourhoods n JOIN properties p ON p.neighbourhood_slug = n.slug
+     WHERE p.published = 1 AND n.major_slug IS NOT NULL${segment ? ' AND p.segment = ?' : ''}
+     GROUP BY n.major_slug, n.major_area
+     ORDER BY n.major_area ASC`;
+  const stmt = segment ? db.prepare(sql).bind(segment) : db.prepare(sql);
+  const r = await stmt.all<{ slug: string; name: string; n: number }>();
+  return (r.results ?? []).map((x) => ({ slug: x.slug, name: x.name }));
+}
 export async function getNeighbourhood(db: D1Database, slug: string) {
   return db.prepare('SELECT * FROM neighbourhoods WHERE slug = ?').bind(slug).first<Neighbourhood>();
 }

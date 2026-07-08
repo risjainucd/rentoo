@@ -6,9 +6,9 @@ import SiteFooter from '../components/SiteFooter.astro';
 import SectionMarker from '../components/SectionMarker.astro';
 import PropertyCard from '../components/PropertyCard.astro';
 import { NumberTicker } from '../components/ui/number-ticker';
-import { featuredListings, listNeighbourhoods } from '../lib/db';
+import { featuredListings, listMajorAreas } from '../lib/db';
 const featured = await featuredListings(Astro.locals.db, 6);
-const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
+const areas = await listMajorAreas(Astro.locals.db);
 ---
 
 <BaseLayout title="Rentoo: Curated rentals in Jaipur" description="Hand-verified residential, commercial, and industrial rentals in Jaipur. Transparent brokerage, agreed up front. WhatsApp-first response within 30 minutes.">
@@ -99,14 +99,14 @@ const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
   </section>
 
   <!-- BROWSE BY AREA -->
-  {neighbourhoods.length > 0 && (
+  {areas.length > 0 && (
     <section class="section section--areas" aria-labelledby="areas-title">
       <div class="section-inner">
-        <SectionMarker num="02" label="By neighbourhood" meta="Pick what you know" />
+        <SectionMarker num="02" label="By area" meta="Pick what you know" />
         <div class="area-chips" role="list" data-reveal>
-          {neighbourhoods.map(n => (
-            <a href={`/rent?neighbourhood=${n.slug}`} role="listitem">
-              <span>{n.name}</span>
+          {areas.map(a => (
+            <a href={`/rent?area=${a.slug}`} role="listitem">
+              <span>{a.name}</span>
             </a>
           ))}
         </div>

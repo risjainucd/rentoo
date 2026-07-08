@@ -11,6 +11,7 @@ export function buildListingsQuery(f: ListingFilters): { sql: string; params: un
   const where: string[] = ['p.published = 1'];
   const params: unknown[] = [];
   if (f.segment)        { where.push('p.segment = ?');            params.push(f.segment); }
+  if (f.area)           { where.push('p.neighbourhood_slug IN (SELECT slug FROM neighbourhoods WHERE major_slug = ?)'); params.push(f.area); }
   if (f.neighbourhood)  { where.push('p.neighbourhood_slug = ?'); params.push(f.neighbourhood); }
   if (f.bhk)            { where.push('p.bhk_type = ?');           params.push(f.bhk); }
   if (f.furnishing)     { where.push('p.furnishing = ?');         params.push(f.furnishing); }
@@ -38,6 +39,7 @@ export function parseListingFilters(url: URL): ListingFilters {
   const str = (k: string) => q.get(k) || undefined;
   const f: ListingFilters = {};
   if (str('segment'))       f.segment = str('segment') as Segment;
+  if (str('area'))          f.area = str('area');
   if (str('neighbourhood')) f.neighbourhood = str('neighbourhood');
   if (str('bhk'))           f.bhk = str('bhk');
   if (str('furnishing'))    f.furnishing = str('furnishing') as Furnishing;

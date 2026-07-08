@@ -6,10 +6,10 @@ import SiteFooter from '../../components/SiteFooter.astro';
 import PropertyCard from '../../components/PropertyCard.astro';
 import FilterBar from '../../components/FilterBar.tsx';
 import { parseListingFilters } from '../../lib/sql';
-import { listListings, listNeighbourhoods } from '../../lib/db';
+import { listListings, listMajorAreas } from '../../lib/db';
 const filters = { ...parseListingFilters(Astro.url), segment: 'industrial' as const };
 const { items, total } = await listListings(Astro.locals.db, filters);
-const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
+const areas = await listMajorAreas(Astro.locals.db, 'industrial');
 const perPage = filters.perPage ?? 12;
 const page = filters.page ?? 1;
 const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -42,7 +42,7 @@ function pageHref(p: number) {
     <div class="section-inner">
 
       <!-- Filter bar (React island, loads when visible) -->
-      <FilterBar client:visible neighbourhoods={neighbourhoods} value={filters} />
+      <FilterBar client:visible areas={areas} value={filters} />
 
       <div class="listings-main">
         <div class="results-bar">
@@ -107,13 +107,13 @@ function pageHref(p: number) {
           </div>
         </div>
 
-        <!-- Browse by neighbourhood -->
-        {neighbourhoods.length > 0 && (
+        <!-- Browse by area -->
+        {areas.length > 0 && (
           <div class="neighbourhood-strip">
-            <h3>Browse by neighbourhood</h3>
+            <h3>Browse by area</h3>
             <div class="nbhd-chips">
-              {neighbourhoods.map(n => (
-                <a href={`/industrial?neighbourhood=${n.slug}`}>{n.name}</a>
+              {areas.map(a => (
+                <a href={`/industrial?area=${a.slug}`}>{a.name}</a>
               ))}
             </div>
           </div>

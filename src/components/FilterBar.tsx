@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ListingFilters, Neighbourhood } from '@/lib/types';
+import type { ListingFilters } from '@/lib/types';
 import {
   Select,
   SelectContent,
@@ -10,13 +10,14 @@ import {
 import { Input } from '@/components/ui/input';
 
 interface Props {
-  neighbourhoods: Pick<Neighbourhood, 'slug' | 'name'>[];
+  areas: { slug: string; name: string }[];
   value: ListingFilters;
 }
 
 function applyFilters(next: ListingFilters) {
   const p = new URLSearchParams();
   if (next.segment) p.set('segment', next.segment);
+  if (next.area) p.set('area', next.area);
   if (next.neighbourhood) p.set('neighbourhood', next.neighbourhood);
   if (next.bhk) p.set('bhk', next.bhk);
   if (next.furnishing) p.set('furnishing', next.furnishing);
@@ -26,13 +27,11 @@ function applyFilters(next: ListingFilters) {
   window.location.search = p.toString();
 }
 
-export default function FilterBar({ neighbourhoods, value }: Props) {
+export default function FilterBar({ areas, value }: Props) {
   // BHK only applies to residential; commercial & industrial spaces don't use it.
   const showBhk = value.segment !== 'commercial' && value.segment !== 'industrial';
 
-  const [neighbourhood, setNeighbourhood] = React.useState<string>(
-    value.neighbourhood ?? ''
-  );
+  const [area, setArea] = React.useState<string>(value.area ?? '');
   const [bhk, setBhk] = React.useState<string>(value.bhk ?? '');
   const [furnishing, setFurnishing] = React.useState<string>(
     value.furnishing ?? ''
@@ -44,12 +43,13 @@ export default function FilterBar({ neighbourhoods, value }: Props) {
     value.maxRent != null ? String(value.maxRent) : ''
   );
 
-  function handleNeighbourhoodChange(val: string | null) {
+  function handleAreaChange(val: string | null) {
     const next = val ?? '';
-    setNeighbourhood(next);
+    setArea(next);
     applyFilters({
       ...value,
-      neighbourhood: next || undefined,
+      area: next || undefined,
+      neighbourhood: undefined, // a chosen major area supersedes a deep-linked sub-locality
       bhk: bhk || undefined,
       furnishing: (furnishing as ListingFilters['furnishing']) || undefined,
       minRent: minRent ? Number(minRent) : undefined,
@@ -62,7 +62,7 @@ export default function FilterBar({ neighbourhoods, value }: Props) {
     setBhk(next);
     applyFilters({
       ...value,
-      neighbourhood: neighbourhood || undefined,
+      area: area || undefined,
       bhk: next || undefined,
       furnishing: (furnishing as ListingFilters['furnishing']) || undefined,
       minRent: minRent ? Number(minRent) : undefined,
@@ -75,7 +75,7 @@ export default function FilterBar({ neighbourhoods, value }: Props) {
     setFurnishing(next);
     applyFilters({
       ...value,
-      neighbourhood: neighbourhood || undefined,
+      area: area || undefined,
       bhk: bhk || undefined,
       furnishing: (next as ListingFilters['furnishing']) || undefined,
       minRent: minRent ? Number(minRent) : undefined,
@@ -86,7 +86,7 @@ export default function FilterBar({ neighbourhoods, value }: Props) {
   function handleRentApply() {
     applyFilters({
       ...value,
-      neighbourhood: neighbourhood || undefined,
+      area: area || undefined,
       bhk: bhk || undefined,
       furnishing: (furnishing as ListingFilters['furnishing']) || undefined,
       minRent: minRent ? Number(minRent) : undefined,
@@ -96,18 +96,18 @@ export default function FilterBar({ neighbourhoods, value }: Props) {
 
   return (
     <div className="filter-bar">
-      {/* Neighbourhood */}
+      {/* Area (major areas only) */}
       <div className="filter-group">
-        <label className="filter-legend">Neighbourhood</label>
-        <Select value={neighbourhood || null} onValueChange={handleNeighbourhoodChange}>
+        <label className="filter-legend">Area</label>
+        <Select value={area || null} onValueChange={handleAreaChange}>
           <SelectTrigger className="filter-select-trigger">
             <SelectValue placeholder="All areas" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All areas</SelectItem>
-            {neighbourhoods.map((n) => (
-              <SelectItem key={n.slug} value={n.slug}>
-                {n.name}
+            {areas.map((a) => (
+              <SelectItem key={a.slug} value={a.slug}>
+                {a.name}
               </SelectItem>
             ))}
           </SelectContent>

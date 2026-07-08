@@ -16,7 +16,10 @@ export interface PropertyMedia {
 }
 export interface Neighbourhood {
   slug: string; name: string; display_order: number; cover_r2_key: string | null; short_description: string | null;
+  major_slug?: string | null; major_area?: string | null;
 }
+// A rolled-up "major area" (e.g. Mansarovar) used for the main-area filter.
+export interface MajorArea { slug: string; name: string; }
 export interface ListingCard {
   slug: string; display_id: string; title: string; rent_inr: number; landmark: string | null;
   segment: Segment; bhk_type: string | null; furnishing: Furnishing | null; status: Status;
@@ -24,7 +27,8 @@ export interface ListingCard {
   photos?: string[]; // all photo base r2_keys, display order (photos[0] === cover_key)
 }
 export interface ListingFilters {
-  segment?: Segment; neighbourhood?: string; bhk?: string;
+  segment?: Segment; neighbourhood?: string; area?: string; bhk?: string;
   furnishing?: Furnishing; minRent?: number; maxRent?: number;
+  sort?: string;
   page?: number; perPage?: number;
 }
