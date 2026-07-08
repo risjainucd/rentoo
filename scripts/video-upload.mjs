@@ -141,8 +141,15 @@ async function renderPosterSizes(posterBuf) {
   return out;
 }
 
-async function upload(key, body, contentType) {
-  await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body, ContentType: contentType }));
+async function upload(key, body, contentType, attempt = 1) {
+  try {
+    await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body, ContentType: contentType }));
+  } catch (e) {
+    if (attempt >= 5) throw e;
+    // R2 intermittently 500s under load ("look at cloudflarestatus.com"); back off and retry.
+    await new Promise((r) => setTimeout(r, Math.min(8000, 500 * 2 ** (attempt - 1))));
+    return upload(key, body, contentType, attempt + 1);
+  }
 }
 
 // ---- simple promise pool ----
