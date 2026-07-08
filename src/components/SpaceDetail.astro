@@ -247,6 +247,20 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
   <a href={`tel:+${WHATSAPP_NUMBER}`} class="btn-secondary">Call</a>
 </div>
 
+<div id="view-beacon" data-slug={property.slug} hidden></div>
+<script>
+  // Count one view per session per listing.
+  function beaconView() {
+    const el = document.getElementById('view-beacon');
+    const slug = el?.getAttribute('data-slug');
+    if (!slug) return;
+    const key = 'rentoo:viewed:' + slug;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch { /* ignore */ }
+    fetch('/api/view/' + slug, { method: 'POST', keepalive: true }).catch(() => {});
+  }
+  document.addEventListener('astro:page-load', beaconView);
+</script>
+
 <style>
   .section-inner {
     max-width: var(--max-w);

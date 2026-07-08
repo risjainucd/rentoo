@@ -17,6 +17,7 @@ interface Props {
 function applyFilters(next: ListingFilters) {
   const p = new URLSearchParams();
   if (next.segment) p.set('segment', next.segment);
+  if (next.sort) p.set('sort', next.sort);
   if (next.area) p.set('area', next.area);
   if (next.neighbourhood) p.set('neighbourhood', next.neighbourhood);
   if (next.bhk) p.set('bhk', next.bhk);
@@ -32,6 +33,7 @@ export default function FilterBar({ areas, value }: Props) {
   const showBhk = value.segment !== 'commercial' && value.segment !== 'industrial';
 
   const [area, setArea] = React.useState<string>(value.area ?? '');
+  const [sort, setSort] = React.useState<string>(value.sort ?? '');
   const [bhk, setBhk] = React.useState<string>(value.bhk ?? '');
   const [furnishing, setFurnishing] = React.useState<string>(
     value.furnishing ?? ''
@@ -42,6 +44,20 @@ export default function FilterBar({ areas, value }: Props) {
   const [maxRent, setMaxRent] = React.useState<string>(
     value.maxRent != null ? String(value.maxRent) : ''
   );
+
+  function handleSortChange(val: string | null) {
+    const next = val ?? '';
+    setSort(next);
+    applyFilters({
+      ...value,
+      sort: next || undefined,
+      area: area || undefined,
+      bhk: bhk || undefined,
+      furnishing: (furnishing as ListingFilters['furnishing']) || undefined,
+      minRent: minRent ? Number(minRent) : undefined,
+      maxRent: maxRent ? Number(maxRent) : undefined,
+    });
+  }
 
   function handleAreaChange(val: string | null) {
     const next = val ?? '';
@@ -96,6 +112,23 @@ export default function FilterBar({ areas, value }: Props) {
 
   return (
     <div className="filter-bar">
+      {/* Sort — Featured / Most viewed / Budget / Most liked */}
+      <div className="filter-group">
+        <label className="filter-legend">Show me</label>
+        <Select value={sort || null} onValueChange={handleSortChange}>
+          <SelectTrigger className="filter-select-trigger">
+            <SelectValue placeholder="Newest" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Newest first</SelectItem>
+            <SelectItem value="featured">Featured</SelectItem>
+            <SelectItem value="most-viewed">Most viewed</SelectItem>
+            <SelectItem value="budget">Budget-friendly</SelectItem>
+            <SelectItem value="most-liked">Most liked</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Area (major areas only) */}
       <div className="filter-group">
         <label className="filter-legend">Area</label>

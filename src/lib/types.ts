@@ -9,6 +9,7 @@ export interface Property {
   furnishing: Furnishing | null; status: Status; landmark: string | null;
   neighbourhood_slug: string; map_url: string | null; description: string | null;
   slug: string; published: 0 | 1; created_at: string;
+  views?: number; likes?: number; featured?: 0 | 1;
 }
 export interface PropertyMedia {
   id: string; property_id: string; kind: 'photo' | 'video'; r2_key: string;
@@ -24,6 +25,7 @@ export interface ListingCard {
   slug: string; display_id: string; title: string; rent_inr: number; landmark: string | null;
   segment: Segment; bhk_type: string | null; furnishing: Furnishing | null; status: Status;
   neighbourhood_slug: string; cover_key: string | null; cover_w: number | null; cover_h: number | null;
+  likes: number; featured: 0 | 1;
   photos?: string[]; // all photo base r2_keys, display order (photos[0] === cover_key)
 }
 export interface ListingFilters {
