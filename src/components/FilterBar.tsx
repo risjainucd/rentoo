@@ -27,6 +27,9 @@ function applyFilters(next: ListingFilters) {
 }
 
 export default function FilterBar({ neighbourhoods, value }: Props) {
+  // BHK only applies to residential; commercial & industrial spaces don't use it.
+  const showBhk = value.segment !== 'commercial' && value.segment !== 'industrial';
+
   const [neighbourhood, setNeighbourhood] = React.useState<string>(
     value.neighbourhood ?? ''
   );
@@ -111,22 +114,24 @@ export default function FilterBar({ neighbourhoods, value }: Props) {
         </Select>
       </div>
 
-      {/* BHK */}
-      <div className="filter-group">
-        <label className="filter-legend">BHK</label>
-        <Select value={bhk || null} onValueChange={handleBhkChange}>
-          <SelectTrigger className="filter-select-trigger">
-            <SelectValue placeholder="Any" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Any</SelectItem>
-            <SelectItem value="1BHK">1BHK</SelectItem>
-            <SelectItem value="2BHK">2BHK</SelectItem>
-            <SelectItem value="3BHK">3BHK</SelectItem>
-            <SelectItem value="4BHK">4BHK</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {/* BHK — residential only (hidden for commercial / industrial) */}
+      {showBhk && (
+        <div className="filter-group">
+          <label className="filter-legend">BHK</label>
+          <Select value={bhk || null} onValueChange={handleBhkChange}>
+            <SelectTrigger className="filter-select-trigger">
+              <SelectValue placeholder="Any" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Any</SelectItem>
+              <SelectItem value="1BHK">1BHK</SelectItem>
+              <SelectItem value="2BHK">2BHK</SelectItem>
+              <SelectItem value="3BHK">3BHK</SelectItem>
+              <SelectItem value="4BHK">4BHK</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Furnishing */}
       <div className="filter-group">

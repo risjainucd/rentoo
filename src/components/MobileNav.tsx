@@ -78,7 +78,7 @@ export function MobileNav({ links }: Props) {
             </a>
           ))}
           <a
-            href="https://wa.me/918741800496"
+            href="https://wa.me/918740000854"
             className="btn-whatsapp btn-whatsapp--block"
             onClick={() => setOpen(false)}
           >

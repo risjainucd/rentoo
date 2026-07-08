@@ -13,3 +13,4 @@ dist/
 data/
 inventory 2026/
 seed/
+.claude/

@@ -28,7 +28,7 @@ const waText = encodeURIComponent(`Hi Rentoo, I'm interested in ${property.displ
 const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 const pageTitle = [property.property_type, property.landmark ? `near ${property.landmark}` : null, `· ${property.display_id} — Rentoo`].filter(Boolean).join(' ');
-const statusLabel = property.status === 'available' ? 'Available now' : property.status === 'rented' ? 'Let out' : 'On hold';
+const statusLabel = property.status === 'available' ? 'Available now' : property.status === 'rented' ? 'Rented out' : 'On hold';
 const statusClass = property.status === 'available' ? 'status--available' : property.status === 'rented' ? 'status--rented' : 'status--on-hold';
 const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / property.area_sqft) : null;
 ---
@@ -89,7 +89,6 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
 
         <h1>
           {property.property_type}
-          {property.landmark && ` near ${property.landmark}`}
           {`, ${neighbourhood.name}`}
         </h1>
 
@@ -154,7 +153,7 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
             )}
             <div class="spec-row">
               <span class="spec-k">Status</span>
-              <span class={`spec-v ${property.status === 'available' ? 'spec-v--ok' : ''}`}>{statusLabel}</span>
+              <span class={`spec-v ${property.status === 'available' ? 'spec-v--ok' : property.status === 'rented' ? 'spec-v--rented' : ''}`}>{statusLabel}</span>
             </div>
             {property.landmark && (
               <div class="spec-row">
@@ -220,7 +219,7 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
               </svg>
               <span>Chat on WhatsApp</span>
             </a>
-            <a href="tel:+918741800496" class="btn-secondary">Request a callback</a>
+            <a href="tel:+918740000854" class="btn-secondary">Request a callback</a>
           </div>
           <div class="cta-fineprint">Listed by Rentoo · Visit on request</div>
         </div>
@@ -249,7 +248,7 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
       </svg>
       <span>WhatsApp</span>
     </a>
-    <a href="tel:+918741800496" class="btn-secondary">Call</a>
+    <a href="tel:+918740000854" class="btn-secondary">Call</a>
   </div>
 
   <SiteFooter slot="footer" />
@@ -401,8 +400,8 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
   }
 
   .status--rented {
-    color: var(--ink-muted);
-    border: 1px solid var(--line);
+    color: var(--danger-red);
+    border: 1px solid var(--danger-red);
   }
 
   .status--on-hold {
@@ -413,9 +412,11 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
   /* ── Detail main ── */
   .detail-main h1 {
     font-size: clamp(1.5rem, 3.5vw, 2.125rem);
+    font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.015em;
     margin-bottom: var(--space-sm);
+    text-transform: capitalize;
   }
 
   .detail-landmark {
@@ -583,6 +584,12 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
 
   .spec-v--ok {
     color: var(--ok-green);
+    font-weight: 600;
+  }
+
+  .spec-v--rented {
+    color: var(--danger-red);
+    font-weight: 600;
   }
 
   /* ── Map ── */

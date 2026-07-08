@@ -169,6 +169,8 @@ html { background:var(--color-background); color:var(--color-foreground); font-f
   --paper-snow: #FFFFFF;
   --ok-green: #16A34A;
   --ok-mist: #DCFCE7;
+  --danger-red: #DC2626;
+  --danger-mist: #FEE2E2;
   --rest-gray: #64748B;
   --rest-mist: #F1F5F9;
   --whatsapp-signal: #25D366;

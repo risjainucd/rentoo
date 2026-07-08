@@ -1,4 +1,4 @@
-export type Segment = 'residential' | 'commercial';
+export type Segment = 'residential' | 'commercial' | 'industrial';
 export type Furnishing = 'furnished' | 'semi-furnished' | 'unfurnished';
 export type Status = 'available' | 'rented' | 'on-hold';
 export type MediaSize = 'card' | 'gallery' | 'full';

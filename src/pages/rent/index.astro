@@ -7,7 +7,7 @@ import PropertyCard from '../../components/PropertyCard.astro';
 import FilterBar from '../../components/FilterBar.tsx';
 import { parseListingFilters } from '../../lib/sql';
 import { listListings, listNeighbourhoods } from '../../lib/db';
-const filters = parseListingFilters(Astro.url);
+const filters = { ...parseListingFilters(Astro.url), segment: 'residential' as const };
 const { items, total } = await listListings(Astro.locals.db, filters);
 const neighbourhoods = await listNeighbourhoods(Astro.locals.db);
 const perPage = filters.perPage ?? 12;
@@ -85,7 +85,7 @@ function pageHref(p: number) {
         )}
 
         <div class="wa-nudge">
-          <a href="https://wa.me/918741800496" class="btn-secondary">Don't see what you're looking for? Tell us on WhatsApp →</a>
+          <a href="https://wa.me/918740000854" class="btn-secondary">Don't see what you're looking for? Tell us on WhatsApp →</a>
         </div>
 
         <!-- Browse by neighbourhood -->

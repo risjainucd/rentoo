@@ -84,7 +84,6 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
 
         <h1>
           {[property.bhk_type, property.property_type].filter(Boolean).join(' ')}
-          {property.landmark && ` near ${property.landmark}`}
           {`, ${neighbourhood.name}`}
         </h1>
 
@@ -130,7 +129,7 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
             )}
             <div class="spec-row">
               <span class="spec-k">Status</span>
-              <span class={`spec-v ${property.status === 'available' ? 'spec-v--ok' : ''}`}>{statusLabel}</span>
+              <span class={`spec-v ${property.status === 'available' ? 'spec-v--ok' : property.status === 'rented' ? 'spec-v--rented' : ''}`}>{statusLabel}</span>
             </div>
             {property.landmark && (
               <div class="spec-row">
@@ -196,7 +195,7 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
               </svg>
               <span>Chat on WhatsApp</span>
             </a>
-            <a href="tel:+918741800496" class="btn-secondary">Request a callback</a>
+            <a href="tel:+918740000854" class="btn-secondary">Request a callback</a>
           </div>
           <div class="cta-fineprint">Listed by Rentoo · Visit on request</div>
         </div>
@@ -225,7 +224,7 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
       </svg>
       <span>WhatsApp</span>
     </a>
-    <a href="tel:+918741800496" class="btn-secondary">Call</a>
+    <a href="tel:+918740000854" class="btn-secondary">Call</a>
   </div>
 
   <SiteFooter slot="footer" />
@@ -363,8 +362,8 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
   }
 
   .status--rented {
-    color: var(--ink-muted);
-    border: 1px solid var(--line);
+    color: var(--danger-red);
+    border: 1px solid var(--danger-red);
   }
 
   .status--on-hold {
@@ -485,6 +484,12 @@ const statusClass = property.status === 'available' ? 'status--available' : prop
 
   .spec-v--ok {
     color: var(--ok-green);
+    font-weight: 600;
+  }
+
+  .spec-v--rented {
+    color: var(--danger-red);
+    font-weight: 600;
   }
 
   /* ── Map ── */
