@@ -38,7 +38,7 @@ export async function listListings(db: D1Database, f: ListingFilters) {
   return { items, total };
 }
 export async function getListingBySlug(db: D1Database, slug: string) {
-  const property = await db.prepare('SELECT * FROM properties WHERE slug = ? AND published = 1').bind(slug).first<Property>();
+  const property = await db.prepare("SELECT * FROM properties WHERE slug = ? AND published = 1 AND status <> 'rented'").bind(slug).first<Property>();
   if (!property) return null;
   const media = await db.prepare('SELECT * FROM property_media WHERE property_id = ? ORDER BY display_order ASC').bind(property.id).all<PropertyMedia>();
   const neighbourhood = await db.prepare('SELECT * FROM neighbourhoods WHERE slug = ?').bind(property.neighbourhood_slug).first<Neighbourhood>();
@@ -53,7 +53,7 @@ export async function listNeighbourhoods(db: D1Database) {
 export async function listMajorAreas(db: D1Database, segment?: string) {
   const sql = `SELECT n.major_slug AS slug, n.major_area AS name, COUNT(*) AS n
      FROM neighbourhoods n JOIN properties p ON p.neighbourhood_slug = n.slug
-     WHERE p.published = 1 AND n.major_slug IS NOT NULL${segment ? ' AND p.segment = ?' : ''}
+     WHERE p.published = 1 AND p.status <> 'rented' AND n.major_slug IS NOT NULL${segment ? ' AND p.segment = ?' : ''}
      GROUP BY n.major_slug, n.major_area
      ORDER BY n.major_area ASC`;
   const stmt = segment ? db.prepare(sql).bind(segment) : db.prepare(sql);

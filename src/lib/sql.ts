@@ -19,7 +19,9 @@ function orderByFor(sort?: string): string {
 }
 
 export function buildListingsQuery(f: ListingFilters): { sql: string; params: unknown[]; countSql: string; countParams: unknown[] } {
-  const where: string[] = ['p.published = 1'];
+  // Rented-out listings are hidden from the public site (kept in DB; flip status
+  // back to 'available' to re-list). Available + on-hold remain visible.
+  const where: string[] = ['p.published = 1', "p.status <> 'rented'"];
   const params: unknown[] = [];
   if (f.segment)        { where.push('p.segment = ?');            params.push(f.segment); }
   if (f.area)           { where.push('p.neighbourhood_slug IN (SELECT slug FROM neighbourhoods WHERE major_slug = ?)'); params.push(f.area); }
