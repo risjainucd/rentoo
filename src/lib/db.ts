@@ -63,6 +63,56 @@ export async function listMajorAreas(db: D1Database, segment?: string) {
 export async function getNeighbourhood(db: D1Database, slug: string) {
   return db.prepare('SELECT * FROM neighbourhoods WHERE slug = ?').bind(slug).first<Neighbourhood>();
 }
+// ── Admin (behind Cloudflare Access) ──
+export async function listAllForAdmin(db: D1Database) {
+  const r = await db.prepare(
+    `SELECT p.slug, p.display_id, p.segment, p.bhk_type, p.property_type, p.rent_inr,
+            p.status, p.furnishing, p.published, p.featured, p.neighbourhood_slug,
+            (SELECT COUNT(*) FROM property_media m WHERE m.property_id=p.id AND m.kind='photo') AS photos,
+            (SELECT COUNT(*) FROM property_media m WHERE m.property_id=p.id AND m.kind='video') AS videos
+     FROM properties p ORDER BY p.created_at DESC`,
+  ).all<Record<string, any>>();
+  return r.results ?? [];
+}
+
+export async function getAnyListingBySlug(db: D1Database, slug: string) {
+  const property = await db.prepare('SELECT * FROM properties WHERE slug = ?').bind(slug).first<Property>();
+  if (!property) return null;
+  const media = await db.prepare('SELECT * FROM property_media WHERE property_id = ? ORDER BY kind, display_order ASC').bind(property.id).all<PropertyMedia>();
+  const neighbourhood = await db.prepare('SELECT * FROM neighbourhoods WHERE slug = ?').bind(property.neighbourhood_slug).first<Neighbourhood>();
+  return { property, media: media.results ?? [], neighbourhood };
+}
+
+export interface AdminListingUpdate {
+  rent_inr: number; status: string; furnishing: string | null; bhk_type: string | null;
+  property_type: string; landmark: string | null; description: string | null;
+  map_url: string | null; featured: 0 | 1; published: 0 | 1;
+}
+export async function updateListingFields(db: D1Database, slug: string, f: AdminListingUpdate) {
+  await db.prepare(
+    `UPDATE properties SET rent_inr=?, status=?, furnishing=?, bhk_type=?, property_type=?,
+            landmark=?, description=?, map_url=?, featured=?, published=? WHERE slug=?`,
+  ).bind(f.rent_inr, f.status, f.furnishing, f.bhk_type, f.property_type, f.landmark, f.description, f.map_url, f.featured, f.published, slug).run();
+}
+
+// Set which photo is the cover (and make it lead the gallery: display_order 0).
+export async function setCover(db: D1Database, slug: string, mediaId: string) {
+  const prop = await db.prepare('SELECT id FROM properties WHERE slug=?').bind(slug).first<{ id: string }>();
+  if (!prop) return;
+  const chosen = await db.prepare("SELECT id, display_order FROM property_media WHERE id=? AND property_id=? AND kind='photo'").bind(mediaId, prop.id).first<{ id: string; display_order: number }>();
+  if (!chosen) return;
+  const oldCover = await db.prepare("SELECT id, display_order FROM property_media WHERE property_id=? AND kind='photo' AND is_cover=1").bind(prop.id).first<{ id: string; display_order: number }>();
+  const stmts = [
+    db.prepare("UPDATE property_media SET is_cover=0 WHERE property_id=? AND kind='photo'").bind(prop.id),
+    db.prepare('UPDATE property_media SET is_cover=1, display_order=0 WHERE id=?').bind(mediaId),
+  ];
+  // Bump the previous cover into the chosen photo's old slot so display_order stays unique-ish.
+  if (oldCover && oldCover.id !== mediaId) {
+    stmts.push(db.prepare('UPDATE property_media SET display_order=? WHERE id=?').bind(chosen.display_order || 1, oldCover.id));
+  }
+  await db.batch(stmts);
+}
+
 export async function featuredListings(db: D1Database, limit: number) {
   const { sql, params } = buildListingsQuery({ perPage: limit, page: 1 });
   const r = await db.prepare(sql).bind(...params).all<Record<string, any>>();

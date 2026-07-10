@@ -1,0 +1,166 @@
+---
+export const prerender = false;
+import { getAnyListingBySlug, updateListingFields, setCover } from '../../lib/db';
+import { mediaUrl } from '../../lib/media';
+
+const slug = Astro.params.slug!;
+const db = Astro.locals.db;
+
+// ── Save (POST) ──
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const clean = (k: string) => { const v = form.get(k); const s = v == null ? '' : String(v).trim(); return s === '' ? null : s; };
+  const statusIn = String(form.get('status') || 'available');
+  const status = ['available', 'rented', 'on-hold'].includes(statusIn) ? statusIn : 'available';
+  const furnIn = clean('furnishing');
+  const furnishing = furnIn && ['furnished', 'semi-furnished', 'unfurnished'].includes(furnIn) ? furnIn : null;
+  await updateListingFields(db, slug, {
+    rent_inr: parseInt(String(form.get('rent_inr') || '0'), 10) || 0,
+    status,
+    furnishing,
+    bhk_type: clean('bhk_type'),
+    property_type: clean('property_type') || 'apartment',
+    landmark: clean('landmark'),
+    description: clean('description'),
+    map_url: clean('map_url'),
+    featured: form.get('featured') ? 1 : 0,
+    published: form.get('published') ? 1 : 0,
+  });
+  const cover = form.get('cover');
+  if (cover) await setCover(db, slug, String(cover));
+  return Astro.redirect(`/admin/${slug}?saved=1`);
+}
+
+const data = await getAnyListingBySlug(db, slug);
+if (!data) return Astro.redirect('/admin', 303);
+const { property, media, neighbourhood } = data;
+const photos = media.filter((m) => m.kind === 'photo');
+const saved = Astro.url.searchParams.get('saved') === '1';
+const sel = (v: any, opt: string) => (v === opt ? 'selected' : undefined);
+---
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Edit {property.display_id} — Rentoo Admin</title>
+  <style>
+    :root { --line:#e5e7eb; --ink:#0f172a; --muted:#64748b; --navy:#082746; --ok:#16a34a; }
+    * { box-sizing:border-box; }
+    body { font-family:system-ui,-apple-system,sans-serif; margin:0; color:var(--ink); background:#f8fafc; }
+    header { background:var(--navy); color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; }
+    header a { color:#cbd5e1; text-decoration:none; font-size:.85rem; }
+    .wrap { max-width:760px; margin:0 auto; padding:20px; }
+    .saved { background:#dcfce7; color:#166534; padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:.9rem; }
+    form { background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px; }
+    .row { display:grid; grid-template-columns:150px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid #f1f5f9; }
+    .row:last-of-type { border-bottom:none; }
+    label { font-weight:600; font-size:.85rem; padding-top:8px; }
+    input[type=text], input[type=number], select, textarea { width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:7px; font-size:.9rem; font-family:inherit; }
+    textarea { min-height:80px; resize:vertical; }
+    .hint { font-size:.75rem; color:var(--muted); margin-top:4px; }
+    .checks { display:flex; gap:20px; }
+    .checks label { display:flex; align-items:center; gap:7px; font-weight:500; padding:0; }
+    .photos { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+    .photo { border:2px solid var(--line); border-radius:8px; overflow:hidden; cursor:pointer; position:relative; }
+    .photo img { width:100%; height:90px; object-fit:cover; display:block; }
+    .photo input { position:absolute; top:6px; left:6px; }
+    .photo:has(input:checked) { border-color:var(--ok); box-shadow:0 0 0 2px rgba(22,163,74,.3); }
+    .photo .n { position:absolute; bottom:0; left:0; right:0; background:rgba(8,39,70,.7); color:#fff; font-size:.65rem; text-align:center; padding:2px; }
+    .actions { margin-top:20px; display:flex; gap:12px; align-items:center; }
+    button { background:var(--navy); color:#fff; border:none; padding:11px 24px; border-radius:8px; font-size:.9rem; font-weight:600; cursor:pointer; }
+    button:hover { background:#0c3157; }
+    .meta { font-size:.8rem; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Edit {property.display_id}</strong>
+    <a href="/admin">← All listings</a>
+  </header>
+  <div class="wrap">
+    {saved && <div class="saved">✓ Saved.</div>}
+    <form method="POST">
+      <div class="row">
+        <label>Listing</label>
+        <div class="meta">{[property.bhk_type, property.property_type].filter(Boolean).join(' ')} · {neighbourhood?.name ?? property.neighbourhood_slug} · <code>{property.slug}</code></div>
+      </div>
+      <div class="row">
+        <label for="rent_inr">Rent (₹/mo)</label>
+        <input type="number" id="rent_inr" name="rent_inr" value={property.rent_inr} min="0" />
+      </div>
+      <div class="row">
+        <label for="status">Status</label>
+        <div>
+          <select id="status" name="status">
+            <option value="available" selected={sel(property.status,'available')}>Available</option>
+            <option value="rented" selected={sel(property.status,'rented')}>Rented out (hidden from site)</option>
+            <option value="on-hold" selected={sel(property.status,'on-hold')}>On hold</option>
+          </select>
+          <div class="hint">Rented-out listings are hidden from the public site.</div>
+        </div>
+      </div>
+      <div class="row">
+        <label for="property_type">Type</label>
+        <input type="text" id="property_type" name="property_type" value={property.property_type} />
+      </div>
+      <div class="row">
+        <label for="bhk_type">BHK</label>
+        <input type="text" id="bhk_type" name="bhk_type" value={property.bhk_type ?? ''} placeholder="e.g. 2BHK (residential only)" />
+      </div>
+      <div class="row">
+        <label for="furnishing">Furnishing</label>
+        <select id="furnishing" name="furnishing">
+          <option value="" selected={!property.furnishing}>—</option>
+          <option value="furnished" selected={sel(property.furnishing,'furnished')}>Furnished</option>
+          <option value="semi-furnished" selected={sel(property.furnishing,'semi-furnished')}>Semi-furnished</option>
+          <option value="unfurnished" selected={sel(property.furnishing,'unfurnished')}>Unfurnished</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="landmark">Landmark</label>
+        <input type="text" id="landmark" name="landmark" value={property.landmark ?? ''} />
+      </div>
+      <div class="row">
+        <label for="description">Description</label>
+        <textarea id="description" name="description">{property.description ?? ''}</textarea>
+      </div>
+      <div class="row">
+        <label for="map_url">Map URL</label>
+        <div>
+          <input type="text" id="map_url" name="map_url" value={property.map_url ?? ''} placeholder="Google Maps 'Embed a map' src, or blank for area map" />
+          <div class="hint">Paste the <code>src</code> from Google Maps → Share → <b>Embed a map</b>. Blank = auto area map.</div>
+        </div>
+      </div>
+      <div class="row">
+        <label>Flags</label>
+        <div class="checks">
+          <label><input type="checkbox" name="featured" checked={property.featured === 1} /> Featured</label>
+          <label><input type="checkbox" name="published" checked={property.published === 1} /> Published</label>
+        </div>
+      </div>
+      {photos.length > 0 && (
+        <div class="row">
+          <label>Cover photo</label>
+          <div>
+            <div class="photos">
+              {photos.map((m, i) => (
+                <label class="photo">
+                  <input type="radio" name="cover" value={m.id} checked={m.is_cover === 1} />
+                  <img src={mediaUrl(m.r2_key, 'card')} alt={`photo ${i}`} loading="lazy" />
+                  <span class="n">{m.is_cover === 1 ? 'cover' : `#${i}`}</span>
+                </label>
+              ))}
+            </div>
+            <div class="hint">Pick the photo shown on the card + first in the gallery.</div>
+          </div>
+        </div>
+      )}
+      <div class="actions">
+        <button type="submit">Save changes</button>
+        <span class="meta">Changes go live immediately.</span>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
