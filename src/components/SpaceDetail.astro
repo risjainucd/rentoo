@@ -4,6 +4,7 @@
 import Gallery from './Gallery.astro';
 import { mediaUrl, videoUrl } from '../lib/media';
 import { WHATSAPP_NUMBER } from '../lib/site';
+import { mapEmbed } from '../lib/utils';
 import type { Property, PropertyMedia, Neighbourhood } from '../lib/types';
 
 interface Props { property: Property; media: PropertyMedia[]; neighbourhood: Neighbourhood; }
@@ -33,6 +34,7 @@ const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 const statusLabel = property.status === 'available' ? 'Available now' : property.status === 'rented' ? 'Rented out' : 'On hold';
 const statusClass = property.status === 'available' ? 'status--available' : property.status === 'rented' ? 'status--rented' : 'status--on-hold';
 const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / property.area_sqft) : null;
+const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_slug });
 ---
 
 <!-- Breadcrumb -->
@@ -175,27 +177,23 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
       <!-- Location -->
       <div class="detail-section" data-reveal>
         <h2>Location</h2>
-        {property.map_url ? (
-          <div class="map-embed-wrapper">
-            <iframe
-              src={property.map_url}
-              width="100%"
-              height="280"
-              style="border:0;border-radius:var(--r-md)"
-              allowfullscreen
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              title={`Map showing ${neighbourhood.name}`}
-            ></iframe>
-          </div>
-        ) : (
-          <div class="map-placeholder">
-            <div class="map-pin">{neighbourhood.name}</div>
-          </div>
-        )}
+        <div class="map-embed-wrapper">
+          <iframe
+            src={map.src}
+            width="100%"
+            height="280"
+            style="border:0;border-radius:var(--r-md)"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title={`Map — ${neighbourhood.name}, Jaipur`}
+          ></iframe>
+        </div>
         <div class="map-meta">
           <span>{neighbourhood.name}, Jaipur</span>
-          {property.landmark && <span>{property.landmark}</span>}
+          {map.exact
+            ? (property.landmark && <span>{property.landmark}</span>)
+            : <span class="map-approx">Approximate · area view</span>}
         </div>
       </div>
 
@@ -638,6 +636,11 @@ const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / propert
     margin-top: var(--space-md);
     font-size: 0.875rem;
     color: var(--ink-muted);
+  }
+
+  .map-approx {
+    font-style: italic;
+    color: var(--ink-soft);
   }
 
   /* ── Sticky sidebar CTA ── */
