@@ -53,7 +53,8 @@ tokens, fonts (Geist Variable + Space Grotesk), radii, shadows, or focus/polish 
    WebP-encodes; the Worker only validates + writes. No `sharp`, no WASM, no Cloudflare Images,
    no new paid product, no change to the `/media` serving path.
 3. **Cover = first photo (unified).** Reorder is the single ordering operation; position 0 is the
-   cover. This **replaces** the separate radio cover-picker in the editor.
+   cover. This **replaces** the separate radio cover-picker in the editor — there is no separate
+   "Set as cover" affordance; you drag a photo to the front to make it the cover.
 4. **HEIC not supported client-side.** Desktop browsers can't decode iPhone HEIC/HEIF in Canvas.
    The client rejects HEIC/HEIF with a clear "export as JPEG first" message. JPEG/PNG/WebP accepted.
 5. **`r2_key` is a permanent opaque id; `display_order` is the sole ordering source of truth.**
@@ -103,9 +104,11 @@ sample from the sharp pipeline before calling it done.
   this listing's photo ids). Rewrites `display_order` to the array index for each id and sets
   `is_cover=1` on index 0, `0` on the rest, in one batched `db.batch(...)`. Ignores ids that
   don't belong to the listing.
-- **`POST /api/admin/photos/[slug]/delete`** — JSON `{ id }`. Deletes the `property_media` row and
-  `bucket.delete()`s its three renditions. If the deleted photo was `display_order 0`, promotes the
-  next photo to cover (re-run the same normalize-order logic as reorder over the remaining ids).
+- **`POST /api/admin/photos/[slug]/delete`** — JSON `{ id }`. **Soft delete: removes the
+  `property_media` row only; the R2 objects are intentionally left in place** (cheap to keep,
+  avoids destructive deletes, and lets a mistaken delete be recovered by re-inserting a row with
+  the same `r2_key`). If the deleted photo was `display_order 0`, promotes the next photo to cover
+  (re-run the same normalize-order logic as reorder over the remaining ids).
 
 All three return JSON (`{ ok: true, ... }` / `{ ok: false, error }`) and appropriate status codes.
 
@@ -113,8 +116,8 @@ All three return JSON (`{ ok: true, ... }` / `{ ok: false, error }`) and appropr
 
 - `addPhoto(db, slug, { r2_key, width, height }): Promise<PropertyMedia>` — insert at
   `max(display_order)+1`, `kind='photo'`, `watermarked=1`, returns the row.
-- `deletePhoto(db, slug, id): Promise<string[]>` — delete the row, return the base `r2_key`(s) the
-  caller must remove from R2, and renormalize remaining `display_order`/`is_cover`.
+- `deletePhoto(db, slug, id): Promise<void>` — delete the row and renormalize the remaining
+  `display_order`/`is_cover`. Does **not** touch R2 (soft delete).
 - `reorderPhotos(db, slug, ids): Promise<void>` — set `display_order = index`, `is_cover = index===0`.
 
 These wrap D1 `prepare/bind/batch`; they own the `display_order`/`is_cover` invariant so routes
@@ -190,8 +193,8 @@ Inside the editor, a single **ordered, drag-reorderable grid**:
   `image/webp` or exceeds the size cap; put all three renditions before the DB insert so a partial
   R2 failure can't orphan a row; return a JSON error the client can show.
 - **Reorder/delete:** ignore ids that aren't the listing's; keep the `display_order`/`is_cover`
-  invariant in the db helper (single source of truth); delete removes R2 objects best-effort and
-  still returns ok if the row is gone (R2 delete is idempotent).
+  invariant in the db helper (single source of truth); delete is a soft delete (row only, R2
+  untouched) and is idempotent (deleting an already-gone id returns ok).
 
 ## Testing (vitest, matching `test/media.test.ts` / `test/range.test.ts` style)
 
@@ -200,8 +203,8 @@ Inside the editor, a single **ordered, drag-reorderable grid**:
   around the sizing math.)
 - **reorder invariant**: after `reorderPhotos`, `display_order` is `0..n-1` and exactly the index-0
   row has `is_cover=1`.
-- **delete invariant**: `deletePhoto` removes the row, returns the R2 base key(s), and renormalizes
-  remaining order + cover; deleting the cover promotes the next photo.
+- **delete invariant**: `deletePhoto` removes the row and renormalizes remaining order + cover
+  (deleting the cover promotes the next photo); R2 objects are left untouched (soft delete).
 - **upload endpoint**: rejects non-webp / missing parts / unknown slug; on success inserts one row
   at `max+1` and reports the three expected R2 keys.
 - Manual verification: watermark visual parity vs. a `--sample` from the sharp pipeline; end-to-end
