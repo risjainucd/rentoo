@@ -1,6 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { ListingFilters, ListingCard, Property, PropertyMedia, Neighbourhood } from './types';
 import { buildListingsQuery, mapRowToCard } from './sql';
+import { normalizePhotoOrder } from './admin-photos';
 
 export function getDb(locals: App.Locals): D1Database { return locals.db; }
 
@@ -111,6 +112,50 @@ export async function setCover(db: D1Database, slug: string, mediaId: string) {
     stmts.push(db.prepare('UPDATE property_media SET display_order=? WHERE id=?').bind(chosen.display_order || 1, oldCover.id));
   }
   await db.batch(stmts);
+}
+
+// Insert a photo at the end of the listing's photo order (never cover; caller reorders to promote).
+export async function addPhoto(
+  db: D1Database, slug: string, r2_key: string, width: number | null, height: number | null,
+): Promise<PropertyMedia | null> {
+  const prop = await db.prepare('SELECT id FROM properties WHERE slug=?').bind(slug).first<{ id: string }>();
+  if (!prop) return null;
+  const next = await db
+    .prepare("SELECT COALESCE(MAX(display_order), -1) + 1 AS n FROM property_media WHERE property_id=? AND kind='photo'")
+    .bind(prop.id).first<{ n: number }>();
+  const display_order = next?.n ?? 0;
+  const id = crypto.randomUUID();
+  await db.prepare(
+    "INSERT INTO property_media (id, property_id, kind, r2_key, display_order, is_cover, width, height, watermarked) VALUES (?, ?, 'photo', ?, ?, 0, ?, ?, 1)",
+  ).bind(id, prop.id, r2_key, display_order, width, height).run();
+  return { id, property_id: prop.id, kind: 'photo', r2_key, display_order, is_cover: 0, width, height, watermarked: 1 };
+}
+
+// Apply an explicit order (array index = display_order; index 0 = cover). Ignores ids not on this listing.
+export async function reorderPhotos(db: D1Database, slug: string, ids: string[]): Promise<void> {
+  const prop = await db.prepare('SELECT id FROM properties WHERE slug=?').bind(slug).first<{ id: string }>();
+  if (!prop) return;
+  const owned = await db.prepare("SELECT id FROM property_media WHERE property_id=? AND kind='photo'").bind(prop.id).all<{ id: string }>();
+  const valid = new Set((owned.results ?? []).map((r) => r.id));
+  const plan = normalizePhotoOrder(ids.filter((i) => valid.has(i)));
+  if (!plan.length) return;
+  await db.batch(plan.map((p) =>
+    db.prepare('UPDATE property_media SET display_order=?, is_cover=? WHERE id=? AND property_id=?').bind(p.display_order, p.is_cover, p.id, prop.id),
+  ));
+}
+
+// Soft delete: remove the row only (R2 objects retained), then renormalize the remaining order + cover.
+export async function deletePhoto(db: D1Database, slug: string, id: string): Promise<void> {
+  const prop = await db.prepare('SELECT id FROM properties WHERE slug=?').bind(slug).first<{ id: string }>();
+  if (!prop) return;
+  await db.prepare("DELETE FROM property_media WHERE id=? AND property_id=? AND kind='photo'").bind(id, prop.id).run();
+  const rest = await db.prepare("SELECT id FROM property_media WHERE property_id=? AND kind='photo' ORDER BY display_order ASC").bind(prop.id).all<{ id: string }>();
+  const plan = normalizePhotoOrder((rest.results ?? []).map((r) => r.id));
+  if (plan.length) {
+    await db.batch(plan.map((p) =>
+      db.prepare('UPDATE property_media SET display_order=?, is_cover=? WHERE id=?').bind(p.display_order, p.is_cover, p.id),
+    ));
+  }
 }
 
 export async function featuredListings(db: D1Database, limit: number) {
