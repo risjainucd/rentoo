@@ -4,6 +4,10 @@
   "account_id": "b572ad0da703afe2e58898eef8444b59",
   "compatibility_date": "2026-06-13",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "rentoo.cloudflareaccess.com",
+    "ACCESS_AUD": "9fa29aca0c658f01ab13ae7c87184acba5c8004c108159c15ef157cda516d04c"
+  },
   "d1_databases": [
     {
       "binding": "DB",
