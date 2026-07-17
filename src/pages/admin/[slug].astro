@@ -1,12 +1,12 @@
 ---
 export const prerender = false;
-import { getAnyListingBySlug, updateListingFields, setCover } from '../../lib/db';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAnyListingBySlug, updateListingFields } from '../../lib/db';
 import { mediaUrl } from '../../lib/media';
 
 const slug = Astro.params.slug!;
 const db = Astro.locals.db;
 
-// ── Save (POST) ──
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const clean = (k: string) => { const v = form.get(k); const s = v == null ? '' : String(v).trim(); return s === '' ? null : s; };
@@ -16,8 +16,7 @@ if (Astro.request.method === 'POST') {
   const furnishing = furnIn && ['furnished', 'semi-furnished', 'unfurnished'].includes(furnIn) ? furnIn : null;
   await updateListingFields(db, slug, {
     rent_inr: parseInt(String(form.get('rent_inr') || '0'), 10) || 0,
-    status,
-    furnishing,
+    status, furnishing,
     bhk_type: clean('bhk_type'),
     property_type: clean('property_type') || 'apartment',
     landmark: clean('landmark'),
@@ -26,8 +25,6 @@ if (Astro.request.method === 'POST') {
     featured: form.get('featured') ? 1 : 0,
     published: form.get('published') ? 1 : 0,
   });
-  const cover = form.get('cover');
-  if (cover) await setCover(db, slug, String(cover));
   return Astro.redirect(`/admin/${slug}?saved=1`);
 }
 
@@ -37,130 +34,105 @@ const { property, media, neighbourhood } = data;
 const photos = media.filter((m) => m.kind === 'photo');
 const saved = Astro.url.searchParams.get('saved') === '1';
 const sel = (v: any, opt: string) => (v === opt ? 'selected' : undefined);
+const email = Astro.locals.adminEmail;
 ---
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Edit {property.display_id} — Rentoo Admin</title>
-  <style>
-    :root { --line:#e5e7eb; --ink:#0f172a; --muted:#64748b; --navy:#082746; --ok:#16a34a; }
-    * { box-sizing:border-box; }
-    body { font-family:system-ui,-apple-system,sans-serif; margin:0; color:var(--ink); background:#f8fafc; }
-    header { background:var(--navy); color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; }
-    header a { color:#cbd5e1; text-decoration:none; font-size:.85rem; }
-    .wrap { max-width:760px; margin:0 auto; padding:20px; }
-    .saved { background:#dcfce7; color:#166534; padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:.9rem; }
-    form { background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px; }
-    .row { display:grid; grid-template-columns:150px 1fr; gap:14px; align-items:start; padding:11px 0; border-bottom:1px solid #f1f5f9; }
-    .row:last-of-type { border-bottom:none; }
-    label { font-weight:600; font-size:.85rem; padding-top:8px; }
-    input[type=text], input[type=number], select, textarea { width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:7px; font-size:.9rem; font-family:inherit; }
-    textarea { min-height:80px; resize:vertical; }
-    .hint { font-size:.75rem; color:var(--muted); margin-top:4px; }
-    .checks { display:flex; gap:20px; }
-    .checks label { display:flex; align-items:center; gap:7px; font-weight:500; padding:0; }
-    .photos { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
-    .photo { border:2px solid var(--line); border-radius:8px; overflow:hidden; cursor:pointer; position:relative; }
-    .photo img { width:100%; height:90px; object-fit:cover; display:block; }
-    .photo input { position:absolute; top:6px; left:6px; }
-    .photo:has(input:checked) { border-color:var(--ok); box-shadow:0 0 0 2px rgba(22,163,74,.3); }
-    .photo .n { position:absolute; bottom:0; left:0; right:0; background:rgba(8,39,70,.7); color:#fff; font-size:.65rem; text-align:center; padding:2px; }
-    .actions { margin-top:20px; display:flex; gap:12px; align-items:center; }
-    button { background:var(--navy); color:#fff; border:none; padding:11px 24px; border-radius:8px; font-size:.9rem; font-weight:600; cursor:pointer; }
-    button:hover { background:#0c3157; }
-    .meta { font-size:.8rem; color:var(--muted); }
-  </style>
-</head>
-<body>
-  <header>
-    <strong>Edit {property.display_id}</strong>
-    <a href="/admin">← All listings</a>
-  </header>
-  <div class="wrap">
-    {saved && <div class="saved">✓ Saved.</div>}
-    <form method="POST">
-      <div class="row">
-        <label>Listing</label>
-        <div class="meta">{[property.bhk_type, property.property_type].filter(Boolean).join(' ')} · {neighbourhood?.name ?? property.neighbourhood_slug} · <code>{property.slug}</code></div>
-      </div>
-      <div class="row">
-        <label for="rent_inr">Rent (₹/mo)</label>
-        <input type="number" id="rent_inr" name="rent_inr" value={property.rent_inr} min="0" />
-      </div>
-      <div class="row">
-        <label for="status">Status</label>
-        <div>
-          <select id="status" name="status">
-            <option value="available" selected={sel(property.status,'available')}>Available</option>
-            <option value="rented" selected={sel(property.status,'rented')}>Rented out (hidden from site)</option>
-            <option value="on-hold" selected={sel(property.status,'on-hold')}>On hold</option>
-          </select>
-          <div class="hint">Rented-out listings are hidden from the public site.</div>
-        </div>
-      </div>
-      <div class="row">
-        <label for="property_type">Type</label>
-        <input type="text" id="property_type" name="property_type" value={property.property_type} />
-      </div>
-      <div class="row">
-        <label for="bhk_type">BHK</label>
-        <input type="text" id="bhk_type" name="bhk_type" value={property.bhk_type ?? ''} placeholder="e.g. 2BHK (residential only)" />
-      </div>
-      <div class="row">
-        <label for="furnishing">Furnishing</label>
-        <select id="furnishing" name="furnishing">
-          <option value="" selected={!property.furnishing}>—</option>
-          <option value="furnished" selected={sel(property.furnishing,'furnished')}>Furnished</option>
-          <option value="semi-furnished" selected={sel(property.furnishing,'semi-furnished')}>Semi-furnished</option>
-          <option value="unfurnished" selected={sel(property.furnishing,'unfurnished')}>Unfurnished</option>
+<AdminLayout title={`Edit ${property.display_id} — Rentoo Admin`} email={email} back={true}>
+  {saved && <div class="toast">✓ Saved.</div>}
+
+  <h1 class="page-title">Edit {property.display_id}</h1>
+  <p class="sub">{[property.bhk_type, property.property_type].filter(Boolean).join(' ')} · {neighbourhood?.name ?? property.neighbourhood_slug} · <code>{property.slug}</code></p>
+
+  <form method="POST" class="card">
+    <div class="row"><label for="rent_inr">Rent (₹/mo)</label><input type="number" id="rent_inr" name="rent_inr" value={property.rent_inr} min="0" /></div>
+    <div class="row"><label for="status">Status</label>
+      <div>
+        <select id="status" name="status">
+          <option value="available" selected={sel(property.status,'available')}>Available</option>
+          <option value="rented" selected={sel(property.status,'rented')}>Rented out (hidden from site)</option>
+          <option value="on-hold" selected={sel(property.status,'on-hold')}>On hold</option>
         </select>
+        <p class="hint">Rented-out listings are hidden from the public site.</p>
       </div>
-      <div class="row">
-        <label for="landmark">Landmark</label>
-        <input type="text" id="landmark" name="landmark" value={property.landmark ?? ''} />
+    </div>
+    <div class="row"><label for="property_type">Type</label><input type="text" id="property_type" name="property_type" value={property.property_type} /></div>
+    <div class="row"><label for="bhk_type">BHK</label><input type="text" id="bhk_type" name="bhk_type" value={property.bhk_type ?? ''} placeholder="e.g. 2BHK (residential only)" /></div>
+    <div class="row"><label for="furnishing">Furnishing</label>
+      <select id="furnishing" name="furnishing">
+        <option value="" selected={!property.furnishing}>—</option>
+        <option value="furnished" selected={sel(property.furnishing,'furnished')}>Furnished</option>
+        <option value="semi-furnished" selected={sel(property.furnishing,'semi-furnished')}>Semi-furnished</option>
+        <option value="unfurnished" selected={sel(property.furnishing,'unfurnished')}>Unfurnished</option>
+      </select>
+    </div>
+    <div class="row"><label for="landmark">Landmark</label><input type="text" id="landmark" name="landmark" value={property.landmark ?? ''} /></div>
+    <div class="row"><label for="description">Description</label><textarea id="description" name="description">{property.description ?? ''}</textarea></div>
+    <div class="row"><label for="map_url">Map URL</label>
+      <div>
+        <input type="text" id="map_url" name="map_url" value={property.map_url ?? ''} placeholder="Google Maps 'Embed a map' src, or blank for area map" />
+        <p class="hint">Paste the <code>src</code> from Google Maps → Share → <b>Embed a map</b>. Blank = auto area map.</p>
       </div>
-      <div class="row">
-        <label for="description">Description</label>
-        <textarea id="description" name="description">{property.description ?? ''}</textarea>
+    </div>
+    <div class="row"><label>Flags</label>
+      <div class="checks">
+        <label class="chk"><input type="checkbox" name="featured" checked={property.featured === 1} /> Featured</label>
+        <label class="chk"><input type="checkbox" name="published" checked={property.published === 1} /> Published</label>
       </div>
-      <div class="row">
-        <label for="map_url">Map URL</label>
-        <div>
-          <input type="text" id="map_url" name="map_url" value={property.map_url ?? ''} placeholder="Google Maps 'Embed a map' src, or blank for area map" />
-          <div class="hint">Paste the <code>src</code> from Google Maps → Share → <b>Embed a map</b>. Blank = auto area map.</div>
+    </div>
+    <div class="actions"><button type="submit" class="btn-sheen">Save changes</button><span class="hint">Changes go live immediately.</span></div>
+  </form>
+
+  <section class="card photos-card" data-photos data-slug={property.slug}>
+    <h2 class="section-title">Photos</h2>
+    <p class="hint">Drag to reorder. The first photo is the <b>cover</b>. JPEG/PNG/WebP — iPhone HEIC must be exported as JPEG first.</p>
+    <div class="ph-grid" data-grid>
+      {photos.map((m) => (
+        <div class="ph-tile" data-id={m.id} draggable="true">
+          <img src={mediaUrl(m.r2_key, 'card')} alt="" loading="lazy" />
+          <span class="cover-badge">Cover</span>
+          <button type="button" class="del" data-del aria-label="Delete photo">×</button>
         </div>
-      </div>
-      <div class="row">
-        <label>Flags</label>
-        <div class="checks">
-          <label><input type="checkbox" name="featured" checked={property.featured === 1} /> Featured</label>
-          <label><input type="checkbox" name="published" checked={property.published === 1} /> Published</label>
-        </div>
-      </div>
-      {photos.length > 0 && (
-        <div class="row">
-          <label>Cover photo</label>
-          <div>
-            <div class="photos">
-              {photos.map((m, i) => (
-                <label class="photo">
-                  <input type="radio" name="cover" value={m.id} checked={m.is_cover === 1} />
-                  <img src={mediaUrl(m.r2_key, 'card')} alt={`photo ${i}`} loading="lazy" />
-                  <span class="n">{m.is_cover === 1 ? 'cover' : `#${i}`}</span>
-                </label>
-              ))}
-            </div>
-            <div class="hint">Pick the photo shown on the card + first in the gallery.</div>
-          </div>
-        </div>
-      )}
-      <div class="actions">
-        <button type="submit">Save changes</button>
-        <span class="meta">Changes go live immediately.</span>
-      </div>
-    </form>
-  </div>
-</body>
-</html>
+      ))}
+    </div>
+    <label class="drop" data-drop>
+      <input type="file" accept="image/jpeg,image/png,image/webp" multiple data-file hidden />
+      <span>Drop photos here or <b>click to choose</b></span>
+    </label>
+    <p class="status" data-status aria-live="polite"></p>
+  </section>
+
+  <style>
+    .toast { background: var(--ok-mist); color: var(--ok-green); padding: 10px 14px; border-radius: var(--r-md); margin-bottom: var(--space-lg); font-size: .9rem; font-weight: 600; }
+    .page-title { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 var(--space-xs); }
+    .sub { color: var(--ink-muted); font-size: .85rem; margin: 0 0 var(--space-lg); }
+    .card { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--r-lg); box-shadow: var(--elev-1); padding: var(--space-xl); margin-bottom: var(--space-xl); }
+    .row { display: grid; grid-template-columns: 150px 1fr; gap: var(--space-lg); align-items: start; padding: 11px 0; border-bottom: 1px solid var(--color-border); }
+    .row:last-of-type { border-bottom: none; }
+    label { font-family: var(--font-display); font-weight: 600; font-size: .85rem; padding-top: 8px; }
+    input[type=text], input[type=number], select, textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--color-border); background: var(--color-input); border-radius: var(--r-sm); font-size: .9rem; font-family: inherit; color: var(--color-foreground); }
+    textarea { min-height: 84px; resize: vertical; }
+    .hint { font-size: .75rem; color: var(--ink-muted); margin: 4px 0 0; }
+    .checks { display: flex; gap: var(--space-xl); }
+    .chk { display: flex; align-items: center; gap: 7px; font-weight: 500; font-family: var(--font-sans); padding: 0; }
+    .actions { margin-top: var(--space-lg); display: flex; gap: var(--space-lg); align-items: center; }
+    button[type=submit] { background: var(--color-primary); color: var(--color-primary-foreground); border: none; padding: 11px 24px; border-radius: var(--r-md); font-size: .9rem; font-weight: 600; font-family: var(--font-display); cursor: pointer; }
+    .section-title { font-family: var(--font-display); font-size: 1.1rem; margin: 0 0 var(--space-xs); }
+    .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--space-md); margin: var(--space-md) 0; }
+    .ph-tile { position: relative; border: 2px solid var(--color-border); border-radius: var(--r-md); overflow: hidden; cursor: grab; background: var(--color-surface-alt); }
+    .ph-tile img { width: 100%; height: 96px; object-fit: cover; display: block; }
+    .ph-tile.dragging { opacity: .4; }
+    .cover-badge { display: none; position: absolute; top: 6px; left: 6px; background: var(--color-secondary); color: #fff; font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 6px; border-radius: 99px; }
+    .ph-tile.is-cover { border-color: var(--color-secondary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-secondary) 30%, transparent); }
+    .ph-tile.is-cover .cover-badge { display: block; }
+    .del { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border: none; border-radius: 50%; background: rgba(15,23,42,.72); color: #fff; font-size: 15px; line-height: 1; cursor: pointer; }
+    .del:hover { background: var(--danger-red); }
+    .drop { display: block; text-align: center; padding: var(--space-xl); border: 2px dashed var(--color-border); border-radius: var(--r-md); color: var(--ink-muted); font-size: .9rem; cursor: pointer; }
+    .drop.over { border-color: var(--focus-clay); color: var(--color-foreground); }
+    .status { font-size: .8rem; color: var(--ink-muted); margin-top: var(--space-sm); min-height: 1em; }
+  </style>
+
+  <script>
+    import { initPhotoManager } from '../../lib/admin-photos-client';
+    const root = document.querySelector<HTMLElement>('[data-photos]');
+    if (root) initPhotoManager(root);
+  </script>
+</AdminLayout>
