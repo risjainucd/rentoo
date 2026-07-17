@@ -1,0 +1,40 @@
+---
+import '../styles/globals.css';
+interface Props { title: string; email?: string | null; back?: boolean; }
+const { title, email = null, back = false } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="/Rentooicon.png" />
+    <title>{title}</title>
+  </head>
+  <body class="admin-body">
+    <header class="admin-bar">
+      <div class="brand">
+        {back && <a class="back" href="/admin">← All listings</a>}
+        <img src="/Rentoo.svg" alt="Rentoo" class="logo" />
+        <span class="tag">Admin</span>
+      </div>
+      {email && <span class="who">{email}</span>}
+    </header>
+    <main class="admin-main"><slot /></main>
+    <style>
+      .admin-body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); margin: 0; }
+      .admin-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg);
+        background: var(--color-primary); color: var(--color-primary-foreground);
+        padding: var(--space-md) var(--space-xl); }
+      .brand { display: flex; align-items: center; gap: var(--space-md); }
+      .back { color: var(--color-primary-foreground); opacity: .8; text-decoration: none; font-size: .85rem; margin-right: var(--space-sm); }
+      .back:hover { opacity: 1; }
+      .logo { height: 26px; width: auto; display: block; }
+      .tag { font-family: var(--font-display); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,.35); border-radius: 99px; padding: 2px 9px; }
+      .who { font-size: .8rem; opacity: .85; }
+      .admin-main { max-width: var(--max-w); margin: 0 auto; padding: var(--space-xl) var(--gutter); }
+    </style>
+  </body>
+</html>
