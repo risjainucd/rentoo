@@ -29,6 +29,11 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     parts.push({ name: r.name, buf: await blob.arrayBuffer() });
   }
 
+  // Confirm the listing exists BEFORE writing to R2 — a bad slug must not orphan objects
+  // (delete is soft, so orphaned renditions would linger in the bucket forever).
+  const exists = await locals.db.prepare('SELECT 1 AS ok FROM properties WHERE slug=?').bind(slug).first<{ ok: number }>();
+  if (!exists) return json({ ok: false, error: 'listing not found' }, 404);
+
   const bucket = (env as unknown as Env).MEDIA;
   // Put all objects first, then insert the row — a failed put never orphans a DB row.
   for (const p of parts) {

@@ -114,7 +114,8 @@ export async function setCover(db: D1Database, slug: string, mediaId: string) {
   await db.batch(stmts);
 }
 
-// Insert a photo at the end of the listing's photo order (never cover; caller reorders to promote).
+// Insert a photo at the end of the listing's photo order. The first photo (display_order 0)
+// becomes the cover, so the "exactly one is_cover=1 when >=1 photo" invariant always holds.
 export async function addPhoto(
   db: D1Database, slug: string, r2_key: string, width: number | null, height: number | null,
 ): Promise<PropertyMedia | null> {
@@ -124,38 +125,46 @@ export async function addPhoto(
     .prepare("SELECT COALESCE(MAX(display_order), -1) + 1 AS n FROM property_media WHERE property_id=? AND kind='photo'")
     .bind(prop.id).first<{ n: number }>();
   const display_order = next?.n ?? 0;
+  const is_cover: 0 | 1 = display_order === 0 ? 1 : 0;
   const id = crypto.randomUUID();
   await db.prepare(
-    "INSERT INTO property_media (id, property_id, kind, r2_key, display_order, is_cover, width, height, watermarked) VALUES (?, ?, 'photo', ?, ?, 0, ?, ?, 1)",
-  ).bind(id, prop.id, r2_key, display_order, width, height).run();
-  return { id, property_id: prop.id, kind: 'photo', r2_key, display_order, is_cover: 0, width, height, watermarked: 1 };
+    "INSERT INTO property_media (id, property_id, kind, r2_key, display_order, is_cover, width, height, watermarked) VALUES (?, ?, 'photo', ?, ?, ?, ?, ?, 1)",
+  ).bind(id, prop.id, r2_key, display_order, is_cover, width, height).run();
+  return { id, property_id: prop.id, kind: 'photo', r2_key, display_order, is_cover, width, height, watermarked: 1 };
 }
 
-// Apply an explicit order (array index = display_order; index 0 = cover). Ignores ids not on this listing.
+// Apply an explicit order (array index = display_order; index 0 = cover). Ignores ids not on this
+// listing, and appends any owned photos the caller omitted (keeping their current order) so the
+// FULL set is always renormalized — a partial list can never leave stale/duplicate display_order.
 export async function reorderPhotos(db: D1Database, slug: string, ids: string[]): Promise<void> {
   const prop = await db.prepare('SELECT id FROM properties WHERE slug=?').bind(slug).first<{ id: string }>();
   if (!prop) return;
-  const owned = await db.prepare("SELECT id FROM property_media WHERE property_id=? AND kind='photo'").bind(prop.id).all<{ id: string }>();
-  const valid = new Set((owned.results ?? []).map((r) => r.id));
-  const plan = normalizePhotoOrder(ids.filter((i) => valid.has(i)));
+  const owned = await db.prepare("SELECT id FROM property_media WHERE property_id=? AND kind='photo' ORDER BY display_order ASC").bind(prop.id).all<{ id: string }>();
+  const ownedIds = (owned.results ?? []).map((r) => r.id);
+  const valid = new Set(ownedIds);
+  const requested = ids.filter((i) => valid.has(i));
+  const seen = new Set(requested);
+  const full = [...requested, ...ownedIds.filter((i) => !seen.has(i))];
+  const plan = normalizePhotoOrder(full);
   if (!plan.length) return;
   await db.batch(plan.map((p) =>
     db.prepare('UPDATE property_media SET display_order=?, is_cover=? WHERE id=? AND property_id=?').bind(p.display_order, p.is_cover, p.id, prop.id),
   ));
 }
 
-// Soft delete: remove the row only (R2 objects retained), then renormalize the remaining order + cover.
+// Soft delete: remove the row only (R2 objects retained). The DELETE and the renormalize run in
+// ONE atomic db.batch, so a failure can never leave display_order gaps or a coverless listing.
 export async function deletePhoto(db: D1Database, slug: string, id: string): Promise<void> {
   const prop = await db.prepare('SELECT id FROM properties WHERE slug=?').bind(slug).first<{ id: string }>();
   if (!prop) return;
-  await db.prepare("DELETE FROM property_media WHERE id=? AND property_id=? AND kind='photo'").bind(id, prop.id).run();
-  const rest = await db.prepare("SELECT id FROM property_media WHERE property_id=? AND kind='photo' ORDER BY display_order ASC").bind(prop.id).all<{ id: string }>();
-  const plan = normalizePhotoOrder((rest.results ?? []).map((r) => r.id));
-  if (plan.length) {
-    await db.batch(plan.map((p) =>
-      db.prepare('UPDATE property_media SET display_order=?, is_cover=? WHERE id=?').bind(p.display_order, p.is_cover, p.id),
-    ));
+  const all = await db.prepare("SELECT id FROM property_media WHERE property_id=? AND kind='photo' ORDER BY display_order ASC").bind(prop.id).all<{ id: string }>();
+  const remaining = (all.results ?? []).map((r) => r.id).filter((x) => x !== id);
+  const plan = normalizePhotoOrder(remaining);
+  const stmts = [db.prepare("DELETE FROM property_media WHERE id=? AND property_id=? AND kind='photo'").bind(id, prop.id)];
+  for (const p of plan) {
+    stmts.push(db.prepare('UPDATE property_media SET display_order=?, is_cover=? WHERE id=?').bind(p.display_order, p.is_cover, p.id));
   }
+  await db.batch(stmts);
 }
 
 export async function featuredListings(db: D1Database, limit: number) {

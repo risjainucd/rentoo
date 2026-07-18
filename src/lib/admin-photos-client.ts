@@ -2,18 +2,20 @@ import { renditionPlan, watermarkLayout, WHITE_OPACITY, SHADOW_OPACITY } from '.
 
 const ACCEPT = /^image\/(jpeg|png|webp)$/;
 
-// Load the wordmark once as a white SVG image (mirrors _watermark.mjs loadWordmarkSvgs).
-let whiteLogo: Promise<HTMLImageElement> | null = null;
-function loadWhiteLogo(): Promise<HTMLImageElement> {
-  if (whiteLogo) return whiteLogo;
-  whiteLogo = fetch('/Rentoo.svg')
+// Load the wordmark once as white + black SVG images (mirrors _watermark.mjs loadWordmarkSvgs):
+// white is the faint mark, black (blurred, offset) is its soft shadow.
+let logos: Promise<{ white: HTMLImageElement; black: HTMLImageElement }> | null = null;
+function loadLogos(): Promise<{ white: HTMLImageElement; black: HTMLImageElement }> {
+  if (logos) return logos;
+  logos = fetch('/Rentoo.svg')
     .then((r) => r.text())
-    .then((svg) => {
+    .then(async (svg) => {
       const white = svg.replace(/fill="#[0-9A-Fa-f]{3,8}"/g, 'fill="#ffffff"');
-      const url = `data:image/svg+xml;utf8,${encodeURIComponent(white)}`;
-      return loadImg(url);
+      const black = svg.replace(/fill="#[0-9A-Fa-f]{3,8}"/g, 'fill="#000000"');
+      const toImg = (s: string) => loadImg(`data:image/svg+xml;utf8,${encodeURIComponent(s)}`);
+      return { white: await toImg(white), black: await toImg(black) };
     });
-  return whiteLogo;
+  return logos;
 }
 
 function loadImg(src: string): Promise<HTMLImageElement> {
@@ -26,23 +28,35 @@ function loadImg(src: string): Promise<HTMLImageElement> {
 }
 
 // Render one watermarked WebP rendition at the given width.
-async function renderRendition(bitmap: ImageBitmap, targetW: number, quality: number, logo: HTMLImageElement): Promise<Blob> {
+async function renderRendition(
+  bitmap: ImageBitmap, targetW: number, quality: number, logo: { white: HTMLImageElement; black: HTMLImageElement },
+): Promise<Blob> {
   const scale = targetW / bitmap.width;
   const w = Math.round(bitmap.width * scale);
   const h = Math.round(bitmap.height * scale);
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high'; // high-quality downscale (closer to sharp)
   ctx.drawImage(bitmap, 0, 0, w, h);
 
-  const aspect = logo.naturalWidth / logo.naturalHeight;
+  const aspect = logo.white.naturalWidth / logo.white.naturalHeight;
   const box = watermarkLayout(w, h, aspect);
+  const off = Math.max(2, Math.round(box.w / 300));
+  const blur = Math.max(1, Math.round(box.w / 90));
+
+  // Draw the shadow and the mark in SEPARATE passes so each keeps its own opacity.
+  // (A single globalAlpha would multiply into the canvas drop-shadow and wash it out.)
+  ctx.save();
+  ctx.globalAlpha = SHADOW_OPACITY;
+  ctx.filter = `blur(${blur}px)`;
+  ctx.drawImage(logo.black, box.left + off, box.top + off, box.w, box.h);
+  ctx.restore();
+
   ctx.save();
   ctx.globalAlpha = WHITE_OPACITY;
-  ctx.shadowColor = `rgba(0,0,0,${SHADOW_OPACITY})`;
-  ctx.shadowBlur = Math.max(2, Math.round(box.w / 90));
-  ctx.shadowOffsetX = ctx.shadowOffsetY = Math.max(1, Math.round(box.w / 300));
-  ctx.drawImage(logo, box.left, box.top, box.w, box.h);
+  ctx.drawImage(logo.white, box.left, box.top, box.w, box.h);
   ctx.restore();
 
   return await new Promise<Blob>((res, rej) =>
@@ -52,14 +66,17 @@ async function renderRendition(bitmap: ImageBitmap, targetW: number, quality: nu
 
 async function processFile(file: File): Promise<{ form: FormData; width: number; height: number }> {
   const bitmap = await createImageBitmap(file);
-  const logo = await loadWhiteLogo();
+  const logo = await loadLogos();
   const plan = renditionPlan(bitmap.width);
   const form = new FormData();
   let galleryDims = { w: bitmap.width, h: bitmap.height };
   for (const r of plan) {
     const blob = await renderRendition(bitmap, r.width, r.quality, logo);
     form.set(r.name, blob, `${r.name}.webp`);
-    if (r.name === 'gallery') galleryDims = { w: Math.round(bitmap.width * (r.width / bitmap.width)), h: Math.round(bitmap.height * (r.width / bitmap.width)) };
+    if (r.name === 'gallery') {
+      const s = r.width / bitmap.width;
+      galleryDims = { w: Math.round(bitmap.width * s), h: Math.round(bitmap.height * s) };
+    }
   }
   bitmap.close();
   form.set('width', String(galleryDims.w));
@@ -132,9 +149,14 @@ export function initPhotoManager(root: HTMLElement): void {
     else setStatus('Deleted.');
   });
 
-  // ---- drag reorder (optimistic + revert) ----
+  // ---- drag reorder (optimistic + revert-on-error) ----
   let dragEl: HTMLElement | null = null;
-  grid.addEventListener('dragstart', (e) => { dragEl = (e.target as HTMLElement).closest('[data-id]'); dragEl?.classList.add('dragging'); });
+  let orderBeforeDrag: string[] = [];
+  grid.addEventListener('dragstart', (e) => {
+    dragEl = (e.target as HTMLElement).closest('[data-id]');
+    orderBeforeDrag = orderedIds();
+    dragEl?.classList.add('dragging');
+  });
   grid.addEventListener('dragend', () => { dragEl?.classList.remove('dragging'); dragEl = null; });
   grid.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -147,10 +169,18 @@ export function initPhotoManager(root: HTMLElement): void {
   grid.addEventListener('drop', async (e) => {
     e.preventDefault();
     markCover();
-    const before = Array.from(grid.querySelectorAll<HTMLElement>('[data-id]'));
-    const ids = before.map((el) => el.dataset.id!);
+    const ids = orderedIds();
+    if (ids.join() === orderBeforeDrag.join()) return; // no net change → nothing to persist
+    const prev = orderBeforeDrag.slice();
     const ok = await postJson(`/api/admin/photos/${slug}/reorder`, { ids });
-    setStatus(ok ? 'Order saved.' : 'Reorder failed.');
+    if (ok) { setStatus('Order saved.'); return; }
+    // Revert the DOM to the pre-drag order (re-append each tile in the old sequence).
+    for (const id of prev) {
+      const el = grid.querySelector<HTMLElement>(`[data-id="${id}"]`);
+      if (el) grid.appendChild(el);
+    }
+    markCover();
+    setStatus('Reorder failed — restored.');
   });
 
   markCover();
