@@ -157,12 +157,12 @@ export function AdminListingForm(props: AdminListingFormProps) {
       <Row label="Flags">
         <div className="flex flex-col gap-3 pt-1">
           <div className="flex items-center gap-2.5">
-            <Switch name="featured" defaultChecked={props.featured} />
-            <span className="text-sm font-medium">Featured</span>
+            <Switch id="featured" name="featured" aria-label="Featured" defaultChecked={props.featured} />
+            <label htmlFor="featured" className="cursor-pointer text-sm font-medium">Featured</label>
           </div>
           <div className="flex items-center gap-2.5">
-            <Switch name="published" defaultChecked={props.published} />
-            <span className="text-sm font-medium">Published</span>
+            <Switch id="published" name="published" aria-label="Published" defaultChecked={props.published} />
+            <label htmlFor="published" className="cursor-pointer text-sm font-medium">Published</label>
           </div>
         </div>
       </Row>

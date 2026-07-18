@@ -25,7 +25,7 @@ const statusBadge = (s: string) => (s === 'available' ? 'badge--ok' : s === 'ren
             <td><span class={`badge seg-${r.segment}`}>{r.segment}</span></td>
             <td class="muted">{r.neighbourhood_slug}</td>
             <td class="num">{rupees(r.rent_inr)}</td>
-            <td><span class={`badge ${statusBadge(r.status)}`}>{r.status}</span></td>
+            <td><span class={`badge st ${statusBadge(r.status)}`}>{r.status}</span></td>
             <td>{r.published ? <span class="badge badge--ok">Live</span> : <span class="badge badge--muted">Draft</span>}</td>
             <td>{r.featured ? <span class="badge badge--accent">★ Featured</span> : <span class="dash">—</span>}</td>
             <td>{r.photos > 0 ? <span class="muted mono">{r.photos}📷 {r.videos ? `${r.videos}🎬` : ''}</span> : <span class="needs">needs photos</span>}</td>
@@ -41,7 +41,9 @@ const statusBadge = (s: string) => (s === 'available' ? 'badge--ok' : s === 'ren
   <style>
     .page-title { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 var(--space-xs); }
     .count { color: var(--ink-muted); font-size: .85rem; margin: 0 0 var(--space-lg); }
-    .table-wrap { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--r-lg); box-shadow: var(--elev-1); overflow: auto; }
+    /* Bounded height makes .table-wrap the scroll container the sticky <th> can pin within
+       (a sticky header trapped by an unbounded overflow:auto ancestor never pins). */
+    .table-wrap { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--r-lg); box-shadow: var(--elev-1); overflow: auto; max-height: calc(100vh - 160px); }
     table { width: 100%; border-collapse: collapse; font-size: .875rem; }
     th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--color-border); white-space: nowrap; vertical-align: middle; }
     th { position: sticky; top: 0; z-index: 1; font-family: var(--font-display); background: var(--color-surface-alt); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); }
@@ -53,6 +55,7 @@ const statusBadge = (s: string) => (s === 'available' ? 'badge--ok' : s === 'ren
     .mono { font-family: var(--font-mono); font-size: .8rem; }
     .num { font-variant-numeric: tabular-nums; }
     .dash { color: var(--ink-soft); }
+    .st { text-transform: capitalize; }
     /* Segment badges layer brand colors on the global .badge base. */
     .seg-residential { background: var(--haze-tint); color: var(--jaipur-navy); border-color: color-mix(in srgb, var(--jaipur-navy) 18%, transparent); text-transform: capitalize; }
     .seg-commercial { background: var(--ok-mist); color: var(--ok-green); border-color: #C6E9D2; text-transform: capitalize; }
