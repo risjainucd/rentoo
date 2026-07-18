@@ -174,3 +174,17 @@ export async function featuredListings(db: D1Database, limit: number) {
   await attachPhotos(db, cards);
   return cards;
 }
+
+// The single admin-flagged listing to spotlight on the home page. Uses the existing
+// 'featured' sort (p.featured DESC, p.created_at DESC) + LIMIT 1 and the shared WHERE
+// (published = 1 AND status <> 'rented'), so an unpublished/rented flagged listing never
+// surfaces. Returns null when nothing is flagged: with no featured=1 rows the top row
+// comes back featured:0, which the guard rejects — so the home page renders no hero.
+export async function getFeaturedListing(db: D1Database): Promise<ListingCard | null> {
+  const { sql, params } = buildListingsQuery({ sort: 'featured', perPage: 1, page: 1 });
+  const r = await db.prepare(sql).bind(...params).all<Record<string, any>>();
+  const card = (r.results ?? []).map(mapRowToCard)[0];
+  if (!card || card.featured !== 1) return null;
+  await attachPhotos(db, [card]);
+  return card;
+}
