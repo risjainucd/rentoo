@@ -8,7 +8,7 @@ interface Props {
 const { num, label, meta } = Astro.props;
 ---
 
-<header class="section-marker">
+<header class="section-marker" data-reveal>
   {num && <span class="section-marker-num" aria-hidden="true">{num}</span>}
   <h2>{label}</h2>
   {meta && <span class="section-marker-meta">{meta}</span>}

@@ -39,6 +39,25 @@ const currentPath = Astro.url.pathname;
   </div>
 </header>
 
+<script>
+  // Condense the sticky header once the page scrolls past the top. The window
+  // listener is bound once (module-level guard survives View Transitions); the
+  // per-navigation astro:page-load re-applies state to the freshly swapped header.
+  let bound = false;
+  function applyHeaderScroll() {
+    const header = document.querySelector('.site-header');
+    if (header) header.toggleAttribute('data-scrolled', window.scrollY > 8);
+  }
+  function initHeaderScroll() {
+    applyHeaderScroll();
+    if (!bound) {
+      bound = true;
+      window.addEventListener('scroll', applyHeaderScroll, { passive: true });
+    }
+  }
+  document.addEventListener('astro:page-load', initHeaderScroll);
+</script>
+
 <style>
   .site-header {
     position: sticky;
@@ -48,11 +67,27 @@ const currentPath = Astro.url.pathname;
     border-bottom: 1px solid var(--line);
     backdrop-filter: saturate(180%) blur(8px);
     -webkit-backdrop-filter: saturate(180%) blur(8px);
+    transition: box-shadow var(--dur-base) var(--ease-out),
+                background var(--dur-base) var(--ease-out),
+                border-color var(--dur-base) var(--ease-out);
   }
 
   @supports (backdrop-filter: blur(0)) {
     .site-header {
       background: rgba(250, 247, 238, 0.85);
+    }
+  }
+
+  /* Condense on scroll — deepen the shadow and firm up the backdrop past the top.
+     Shadow/background/border only (no size change), so it never shifts layout. */
+  .site-header[data-scrolled] {
+    box-shadow: 0 2px 14px rgba(8, 39, 70, 0.09);
+    border-bottom-color: transparent;
+  }
+
+  @supports (backdrop-filter: blur(0)) {
+    .site-header[data-scrolled] {
+      background: rgba(250, 247, 238, 0.94);
     }
   }
 

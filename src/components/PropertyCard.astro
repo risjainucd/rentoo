@@ -28,6 +28,7 @@ const statusLabel = card.status === 'available'
 <article class="property-card" data-card-photos={multi ? JSON.stringify(photoUrls) : undefined}>
   <div class="card-image">
     <Pill variant="display-id" label={card.display_id} />
+    {card.featured === 1 && <Pill variant="featured" label="Featured" />}
     {cover ? (
       <img
         class="card-photo"
@@ -127,6 +128,12 @@ const statusLabel = card.status === 'available'
         e.stopPropagation();
         const nowLiked = btn.getAttribute('aria-pressed') !== 'true';
         btn.setAttribute('aria-pressed', nowLiked ? 'true' : 'false');
+        if (nowLiked) {
+          // Restart the pop keyframe on each like (reflow forces re-trigger).
+          btn.classList.remove('is-pop');
+          void btn.offsetWidth;
+          btn.classList.add('is-pop');
+        }
         if (countEl) {
           const c = Math.max(0, (parseInt(countEl.textContent || '0', 10) || 0) + (nowLiked ? 1 : -1));
           countEl.textContent = c ? String(c) : '';
@@ -234,8 +241,18 @@ const statusLabel = card.status === 'available'
 
   /* Decorative overlays pass clicks through to the card link. */
   .card-image :global(.display-id-tag--card),
-  .card-image :global(.status-pill) {
+  .card-image :global(.status-pill),
+  .card-image :global(.featured-pill) {
     pointer-events: none;
+  }
+
+  /* Featured ribbon: sits just under the display-id tag, top-left. */
+  .card-image :global(.featured-pill) {
+    position: absolute;
+    top: calc(var(--space-sm) + 28px);
+    left: var(--space-sm);
+    z-index: 2;
+    box-shadow: 0 1px 2px rgba(8, 39, 70, 0.12);
   }
 
   /* ── Carousel arrows ── */
@@ -353,6 +370,16 @@ const statusLabel = card.status === 'available'
 
   .card-like[aria-pressed="true"] { color: var(--danger-red, #dc2626); }
   .card-like[aria-pressed="true"] svg { fill: var(--danger-red, #dc2626); stroke: var(--danger-red, #dc2626); }
+
+  /* Heart "pop" on like — a single spring-eased bump, only when actually liked. */
+  @media (prefers-reduced-motion: no-preference) {
+    .card-like.is-pop svg { animation: heart-pop 240ms var(--ease-spring); }
+  }
+  @keyframes heart-pop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
 
   .card-like-count {
     font-size: 0.75rem;
