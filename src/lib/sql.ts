@@ -47,6 +47,14 @@ export function mapRowToCard(r: Record<string, any>): ListingCard {
     photos: [],
   };
 }
+// URL slug from free text: lowercase, non-alphanumerics collapsed to a single hyphen,
+// trimmed. Output always matches /^[a-z0-9-]*$/ (empty for all-symbol input).
+export function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 export function parseListingFilters(url: URL): ListingFilters {
   const q = url.searchParams;
   const num = (k: string) => { const v = q.get(k); const n = v == null ? NaN : parseInt(v, 10); return Number.isFinite(n) ? n : undefined; };

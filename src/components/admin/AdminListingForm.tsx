@@ -26,6 +26,8 @@ export interface AdminListingFormProps {
   published: boolean
   /** True when the page loaded with ?saved=1 (post-save redirect). */
   saved?: boolean
+  /** True when the page loaded with ?created=1 (redirected here from the new-listing flow). */
+  created?: boolean
 }
 
 function Row({
@@ -53,19 +55,23 @@ function Row({
 }
 
 export function AdminListingForm(props: AdminListingFormProps) {
-  // Surface the post-save redirect as a Sonner toast, then strip ?saved=1 so a
-  // reload doesn't re-toast. sonner is dynamically imported so it never loads
-  // during SSR (its module top-level breaks React in the Cloudflare/workerd SSR);
+  // Surface the post-save / post-create redirect as a Sonner toast, then strip the
+  // query flag so a reload doesn't re-toast. sonner is dynamically imported so it never
+  // loads during SSR (its module top-level breaks React in the Cloudflare/workerd SSR);
   // the effect runs client-only. The <Toaster/> lives in AdminLayout (client:only).
   React.useEffect(() => {
-    if (!props.saved) return
-    void import("sonner").then(({ toast }) => {
-      toast.success("Changes saved", { description: "Your edits are live on the site." })
-    })
+    const msg = props.created
+      ? { title: "Listing created", description: "Add photos below, then flip Published when ready." }
+      : props.saved
+        ? { title: "Changes saved", description: "Your edits are live on the site." }
+        : null
+    if (!msg) return
+    void import("sonner").then(({ toast }) => toast.success(msg.title, { description: msg.description }))
     const url = new URL(window.location.href)
     url.searchParams.delete("saved")
+    url.searchParams.delete("created")
     window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""))
-  }, [props.saved])
+  }, [props.saved, props.created])
 
   return (
     <form

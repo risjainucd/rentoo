@@ -10,8 +10,18 @@ const viewPath = (r: any) => (r.segment === 'commercial' ? 'commercial' : r.segm
 const statusBadge = (s: string) => (s === 'available' ? 'badge--ok' : s === 'rented' ? 'badge--rest' : 'badge--warn');
 ---
 <AdminLayout title="Rentoo Admin — Listings" email={adminEmail}>
-  <h1 class="page-title">Listings</h1>
-  <p class="count">{rows.length} listings</p>
+  <div class="head">
+    <div>
+      <h1 class="page-title">Listings</h1>
+      <p class="count">{rows.length} listings</p>
+    </div>
+    <a class="new-btn btn-sheen" href="/admin/new">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      New listing
+    </a>
+  </div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -39,8 +49,11 @@ const statusBadge = (s: string) => (s === 'available' ? 'badge--ok' : s === 'ren
     </table>
   </div>
   <style>
+    .head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-lg); margin-bottom: var(--space-lg); }
     .page-title { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 var(--space-xs); }
-    .count { color: var(--ink-muted); font-size: .85rem; margin: 0 0 var(--space-lg); }
+    .count { color: var(--ink-muted); font-size: .85rem; margin: 0; }
+    .new-btn { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; background: var(--color-primary); color: var(--color-primary-foreground); font-family: var(--font-display); font-weight: 600; font-size: .875rem; padding: 9px 16px; border-radius: var(--r-md); text-decoration: none; box-shadow: var(--elev-1); transition: background var(--dur-base) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+    .new-btn:hover { background: var(--midnight-tile); transform: translateY(-1px); }
     /* Bounded height makes .table-wrap the scroll container the sticky <th> can pin within
        (a sticky header trapped by an unbounded overflow:auto ancestor never pins). */
     .table-wrap { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--r-lg); box-shadow: var(--elev-1); overflow: auto; max-height: calc(100vh - 160px); }

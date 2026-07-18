@@ -34,6 +34,7 @@ if (!data) return Astro.redirect('/admin', 303);
 const { property, media, neighbourhood } = data;
 const photos = media.filter((m) => m.kind === 'photo');
 const saved = Astro.url.searchParams.get('saved') === '1';
+const created = Astro.url.searchParams.get('created') === '1';
 const email = Astro.locals.adminEmail;
 ---
 <AdminLayout title={`Edit ${property.display_id} — Rentoo Admin`} email={email} back={true}>
@@ -53,6 +54,7 @@ const email = Astro.locals.adminEmail;
     featured={property.featured === 1}
     published={property.published === 1}
     saved={saved}
+    created={created}
   />
 
   <section class="card photos-card" data-photos data-slug={property.slug}>

@@ -84,6 +84,49 @@ export async function getAnyListingBySlug(db: D1Database, slug: string) {
   return { property, media: media.results ?? [], neighbourhood };
 }
 
+// Next free "#NN" display id: max numeric part across all listings + 1, zero-padded to 2
+// digits ("#01" when there are none). Single-admin tool, so a create race is negligible.
+export async function suggestNextDisplayId(db: D1Database): Promise<string> {
+  const r = await db.prepare('SELECT display_id FROM properties').all<{ display_id: string }>();
+  let max = 0;
+  for (const row of r.results ?? []) {
+    const m = /(\d+)/.exec(row.display_id ?? '');
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return '#' + String(max + 1).padStart(2, '0');
+}
+
+async function slugTaken(db: D1Database, slug: string): Promise<boolean> {
+  const row = await db.prepare('SELECT 1 AS x FROM properties WHERE slug = ?').bind(slug).first();
+  return row != null;
+}
+// A slug not already in use: `base`, else base-2, base-3, … Falls back to 'listing' if empty.
+export async function uniqueSlug(db: D1Database, base: string): Promise<string> {
+  const clean = base || 'listing';
+  let slug = clean;
+  for (let i = 2; await slugTaken(db, slug); i++) slug = `${clean}-${i}`;
+  return slug;
+}
+
+export interface NewListingInput {
+  display_id: string; segment: string; bhk_type: string | null; property_type: string;
+  rent_inr: number; area_sqft: number | null; furnishing: string | null; status: string;
+  landmark: string | null; neighbourhood_slug: string; map_url: string | null;
+  description: string | null; slug: string; published: 0 | 1; featured: 0 | 1;
+}
+// Insert a new listing. Caller resolves display_id (suggestNextDisplayId) and a unique slug
+// (uniqueSlug) first, and validates segment/status/furnishing/neighbourhood.
+export async function createListing(db: D1Database, f: NewListingInput): Promise<void> {
+  await db.prepare(
+    `INSERT INTO properties (id, display_id, segment, bhk_type, property_type, rent_inr, area_sqft,
+       furnishing, status, landmark, neighbourhood_slug, map_url, description, slug, published, featured)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  ).bind(
+    crypto.randomUUID(), f.display_id, f.segment, f.bhk_type, f.property_type, f.rent_inr, f.area_sqft,
+    f.furnishing, f.status, f.landmark, f.neighbourhood_slug, f.map_url, f.description, f.slug, f.published, f.featured,
+  ).run();
+}
+
 export interface AdminListingUpdate {
   rent_inr: number; status: string; furnishing: string | null; bhk_type: string | null;
   property_type: string; landmark: string | null; description: string | null;
