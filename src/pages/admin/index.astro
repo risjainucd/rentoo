@@ -7,6 +7,7 @@ const adminEmail = Astro.locals.adminEmail;
 const rupees = (n: any) => `₹${Number(n).toLocaleString('en-IN')}`;
 const title = (r: any) => [r.bhk_type, r.property_type].filter(Boolean).join(' ');
 const viewPath = (r: any) => (r.segment === 'commercial' ? 'commercial' : r.segment === 'industrial' ? 'industrial' : 'rent');
+const statusBadge = (s: string) => (s === 'available' ? 'badge--ok' : s === 'rented' ? 'badge--rest' : 'badge--warn');
 ---
 <AdminLayout title="Rentoo Admin — Listings" email={adminEmail}>
   <h1 class="page-title">Listings</h1>
@@ -21,13 +22,13 @@ const viewPath = (r: any) => (r.segment === 'commercial' ? 'commercial' : r.segm
           <tr>
             <td class="muted mono">{r.display_id}</td>
             <td class="strong">{title(r) || r.property_type}</td>
-            <td><span class={`pill seg-${r.segment}`}>{r.segment}</span></td>
+            <td><span class={`badge seg-${r.segment}`}>{r.segment}</span></td>
             <td class="muted">{r.neighbourhood_slug}</td>
-            <td>{rupees(r.rent_inr)}</td>
-            <td><span class={`st st-${r.status}`}>{r.status}</span></td>
-            <td>{r.published ? <span class="yes">✓</span> : <span class="no">✕</span>}</td>
-            <td>{r.featured ? <span class="yes">★</span> : <span class="no">—</span>}</td>
-            <td>{r.photos > 0 ? <span class="muted">{r.photos}📷 {r.videos ? `${r.videos}🎬` : ''}</span> : <span class="needs">needs photos</span>}</td>
+            <td class="num">{rupees(r.rent_inr)}</td>
+            <td><span class={`badge ${statusBadge(r.status)}`}>{r.status}</span></td>
+            <td>{r.published ? <span class="badge badge--ok">Live</span> : <span class="badge badge--muted">Draft</span>}</td>
+            <td>{r.featured ? <span class="badge badge--accent">★ Featured</span> : <span class="dash">—</span>}</td>
+            <td>{r.photos > 0 ? <span class="muted mono">{r.photos}📷 {r.videos ? `${r.videos}🎬` : ''}</span> : <span class="needs">needs photos</span>}</td>
             <td class="actions">
               <a class="edit" href={`/admin/${r.slug}`}>Edit</a>
               <a class="view" href={`/${viewPath(r)}/${r.slug}`} target="_blank">view ↗</a>
@@ -42,23 +43,20 @@ const viewPath = (r: any) => (r.segment === 'commercial' ? 'commercial' : r.segm
     .count { color: var(--ink-muted); font-size: .85rem; margin: 0 0 var(--space-lg); }
     .table-wrap { background: var(--color-surface-card); border: 1px solid var(--color-border); border-radius: var(--r-lg); box-shadow: var(--elev-1); overflow: auto; }
     table { width: 100%; border-collapse: collapse; font-size: .875rem; }
-    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
-    th { font-family: var(--font-display); background: var(--color-surface-alt); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); }
+    th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--color-border); white-space: nowrap; vertical-align: middle; }
+    th { position: sticky; top: 0; z-index: 1; font-family: var(--font-display); background: var(--color-surface-alt); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted); }
     tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface-alt) 45%, transparent); }
     tbody tr:hover td { background: var(--color-surface-alt); }
     .strong { font-weight: 600; }
     .muted { color: var(--ink-muted); }
     .mono { font-family: var(--font-mono); font-size: .8rem; }
-    .pill { font-size: .68rem; padding: 2px 9px; border-radius: 99px; font-weight: 600; text-transform: capitalize; }
-    .seg-residential { background: var(--haze-tint); color: var(--jaipur-navy); }
-    .seg-commercial { background: var(--ok-mist); color: var(--ok-green); }
-    .seg-industrial { background: var(--terracotta-mist); color: var(--terracotta); }
-    .st { font-weight: 600; text-transform: capitalize; }
-    .st-available { color: var(--ok-green); }
-    .st-rented { color: var(--danger-red); }
-    .st-on-hold { color: #b45309; }
-    .yes { color: var(--ok-green); font-weight: 700; }
-    .no { color: var(--ink-soft); }
+    .num { font-variant-numeric: tabular-nums; }
+    .dash { color: var(--ink-soft); }
+    /* Segment badges layer brand colors on the global .badge base. */
+    .seg-residential { background: var(--haze-tint); color: var(--jaipur-navy); border-color: color-mix(in srgb, var(--jaipur-navy) 18%, transparent); text-transform: capitalize; }
+    .seg-commercial { background: var(--ok-mist); color: var(--ok-green); border-color: #C6E9D2; text-transform: capitalize; }
+    .seg-industrial { background: var(--terracotta-mist); color: var(--terracotta); border-color: #E7CBBB; text-transform: capitalize; }
     .needs { color: var(--terracotta); font-weight: 600; font-size: .8rem; }
     .actions { display: flex; gap: var(--space-md); }
     .edit { color: var(--jaipur-navy); font-weight: 600; text-decoration: none; }

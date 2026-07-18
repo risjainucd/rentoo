@@ -1,5 +1,6 @@
 ---
 import '../styles/globals.css';
+import { SonnerToaster } from '../components/admin/SonnerToaster';
 interface Props { title: string; email?: string | null; back?: boolean; }
 const { title, email = null, back = false } = Astro.props;
 ---
@@ -22,6 +23,7 @@ const { title, email = null, back = false } = Astro.props;
       {email && <span class="who">{email}</span>}
     </header>
     <main class="admin-main"><slot /></main>
+    <SonnerToaster client:only="react" />
     <style>
       .admin-body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); margin: 0; }
       .admin-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg);
