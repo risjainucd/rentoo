@@ -7,6 +7,16 @@ const SELECT_CARD = `
   FROM properties p
   LEFT JOIN property_media pm ON pm.property_id = p.id AND pm.is_cover = 1`;
 
+// Normalize free text into a hyphen-slug so typed localities ("C Scheme",
+// "Malviya  Nagar") line up with the stored slug/major_slug ("c-scheme", ...).
+function slugify(s: string): string {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+// Escape LIKE wildcards so a typed % or _ is matched literally (paired with ESCAPE '\').
+function escapeLike(s: string): string {
+  return s.replace(/[\\%_]/g, (c) => '\\' + c);
+}
+
 // Sort options exposed in the UI. Keys match the ?sort= query param.
 function orderByFor(sort?: string): string {
   switch (sort) {
@@ -26,6 +36,19 @@ export function buildListingsQuery(f: ListingFilters): { sql: string; params: un
   if (f.segment)        { where.push('p.segment = ?');            params.push(f.segment); }
   if (f.area)           { where.push('p.neighbourhood_slug IN (SELECT slug FROM neighbourhoods WHERE major_slug = ?)'); params.push(f.area); }
   if (f.neighbourhood)  { where.push('p.neighbourhood_slug = ?'); params.push(f.neighbourhood); }
+  // Free-text locality search (hero box): resolve typed text to matching neighbourhoods
+  // by display name / major area (raw) and slug / major_slug (slugified), case-insensitively.
+  const qText = f.q?.trim();
+  if (qText) {
+    const like = `%${escapeLike(qText.toLowerCase())}%`;
+    const slugLike = `%${escapeLike(slugify(qText))}%`;
+    where.push(
+      "p.neighbourhood_slug IN (SELECT slug FROM neighbourhoods" +
+      " WHERE lower(name) LIKE ? ESCAPE '\\' OR lower(major_area) LIKE ? ESCAPE '\\'" +
+      " OR slug LIKE ? ESCAPE '\\' OR major_slug LIKE ? ESCAPE '\\')"
+    );
+    params.push(like, like, slugLike, slugLike);
+  }
   if (f.bhk)            { where.push('p.bhk_type = ?');           params.push(f.bhk); }
   if (f.furnishing)     { where.push('p.furnishing = ?');         params.push(f.furnishing); }
   if (f.minRent != null){ where.push('p.rent_inr >= ?');          params.push(f.minRent); }
@@ -55,6 +78,7 @@ export function parseListingFilters(url: URL): ListingFilters {
   if (str('segment'))       f.segment = str('segment') as Segment;
   if (str('area'))          f.area = str('area');
   if (str('neighbourhood')) f.neighbourhood = str('neighbourhood');
+  if (str('q'))             f.q = str('q');
   if (str('bhk'))           f.bhk = str('bhk');
   if (str('sort'))          f.sort = str('sort');
   if (str('furnishing'))    f.furnishing = str('furnishing') as Furnishing;

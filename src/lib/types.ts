@@ -29,7 +29,7 @@ export interface ListingCard {
   photos?: string[]; // all photo base r2_keys, display order (photos[0] === cover_key)
 }
 export interface ListingFilters {
-  segment?: Segment; neighbourhood?: string; area?: string; bhk?: string;
+  segment?: Segment; neighbourhood?: string; area?: string; q?: string; bhk?: string;
   furnishing?: Furnishing; minRent?: number; maxRent?: number;
   sort?: string;
   page?: number; perPage?: number;

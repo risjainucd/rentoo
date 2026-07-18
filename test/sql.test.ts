@@ -17,6 +17,22 @@ describe('buildListingsQuery', () => {
     expect(sql).toContain('p.rent_inr <= ?');
     expect(params).toEqual(['residential', 'mansarovar', 10000, 40000, 10, 10]);
   });
+  test('free-text locality (q) fuzzy-matches neighbourhoods, not strict slug equality', () => {
+    const { sql, params } = buildListingsQuery({ q: 'Mansarovar' });
+    expect(sql).toContain('p.neighbourhood_slug IN (SELECT slug FROM neighbourhoods');
+    expect(sql).not.toContain('p.neighbourhood_slug = ?');
+    // matches display name/major_area AND slug/major_slug, case-insensitively
+    expect(params).toContain('%mansarovar%');
+  });
+  test('q slugifies spaced/cased input so "C Scheme" resolves to c-scheme', () => {
+    const { params } = buildListingsQuery({ q: 'C Scheme' });
+    expect(params).toContain('%c scheme%'); // raw, lower-cased, for name/major_area LIKE
+    expect(params).toContain('%c-scheme%'); // slugified, for slug/major_slug LIKE
+  });
+  test('blank/whitespace q is ignored (no locality clause)', () => {
+    const { sql } = buildListingsQuery({ q: '   ' });
+    expect(sql).not.toContain('neighbourhoods WHERE');
+  });
 });
 describe('mapRowToCard', () => {
   test('builds a ListingCard incl. title + segment', () => {
@@ -33,5 +49,8 @@ describe('parseListingFilters', () => {
   });
   test('omits absent params and ignores junk numbers', () => {
     expect(parseListingFilters(new URL('https://x/rent?minRent=abc'))).toEqual({});
+  });
+  test('reads the free-text locality search param q', () => {
+    expect(parseListingFilters(new URL('https://x/rent?q=Mansarovar'))).toEqual({ q: 'Mansarovar' });
   });
 });

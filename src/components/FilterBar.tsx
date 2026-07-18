@@ -20,6 +20,8 @@ function applyFilters(next: ListingFilters) {
   if (next.sort) p.set('sort', next.sort);
   if (next.area) p.set('area', next.area);
   if (next.neighbourhood) p.set('neighbourhood', next.neighbourhood);
+  if (next.q) p.set('q', next.q); // keep the hero locality search sticky while refining
+
   if (next.bhk) p.set('bhk', next.bhk);
   if (next.furnishing) p.set('furnishing', next.furnishing);
   if (next.minRent != null) p.set('minRent', String(next.minRent));
