@@ -12,5 +12,6 @@ dist/
 .env.local
 data/
 inventory 2026/
+RENTOO/
 seed/
 .claude/
