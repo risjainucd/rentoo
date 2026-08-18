@@ -6,36 +6,42 @@ interface Props {
 }
 const { images, video } = Astro.props;
 const hasVideo = !!video;
-const coverImg = images[0];
 const slideCount = (hasVideo ? 1 : 0) + images.length;
 const single = slideCount <= 1;
 ---
 <div class="gallery" data-gallery tabindex="0" role="group" aria-roledescription="carousel" aria-label="Photo gallery">
   <div class="gallery-stage">
-    {hasVideo && (
-      <video
-        class="gallery-video"
-        data-gallery-video
-        controls
-        playsinline
-        preload="none"
-        poster={video!.poster}
-        aria-label={video!.alt}
-        width="1000"
-        height="667"
-      >
-        <source src={video!.src} type="video/mp4" />
-      </video>
-    )}
-    <img
-      class="gallery-main"
-      data-gallery-main
-      src={hasVideo ? undefined : coverImg?.gallery}
-      alt={coverImg?.alt}
-      width="1000"
-      height="667"
-      hidden={hasVideo}
-    />
+    <div class="gallery-track" data-gallery-track>
+      {hasVideo && (
+        <div class="gallery-slide" data-kind="video">
+          <video
+            class="gallery-video"
+            data-gallery-video
+            controls
+            playsinline
+            preload="none"
+            poster={video!.poster}
+            aria-label={video!.alt}
+            width="1000"
+            height="667"
+          >
+            <source src={video!.src} type="video/mp4" />
+          </video>
+        </div>
+      )}
+      {images.map((img, i) => (
+        <div class="gallery-slide" data-kind="photo">
+          <img
+            class="gallery-main"
+            src={img.gallery}
+            alt={img.alt}
+            width="1000"
+            height="667"
+            loading={i === 0 && !hasVideo ? 'eager' : 'lazy'}
+          />
+        </div>
+      ))}
+    </div>
     {!single && (
       <>
         <button type="button" class="gallery-nav gallery-nav--prev" data-gallery-prev aria-label="Previous slide">
@@ -85,6 +91,8 @@ const single = slideCount <= 1;
   </div>
 </div>
 <script>
+  import { slideIndexFromScroll } from '../lib/swipe';
+
   // Wired on every page load, including View Transitions navigations
   // (raw <script> tags don't re-execute on client-side nav).
   function initGalleries() {
@@ -92,55 +100,56 @@ const single = slideCount <= 1;
       if ((g as HTMLElement).dataset.galleryReady) return;
       (g as HTMLElement).dataset.galleryReady = 'true';
 
-      const main = g.querySelector('[data-gallery-main]') as HTMLImageElement | null;
+      const track = g.querySelector('[data-gallery-track]') as HTMLElement | null;
+      const slides = Array.from(g.querySelectorAll('.gallery-slide')) as HTMLElement[];
       const video = g.querySelector('[data-gallery-video]') as HTMLVideoElement | null;
       const thumbs = Array.from(g.querySelectorAll('[data-gallery-thumb]')) as HTMLButtonElement[];
       const prevBtn = g.querySelector('[data-gallery-prev]');
       const nextBtn = g.querySelector('[data-gallery-next]');
       const current = g.querySelector('[data-gallery-current]');
-      const total = thumbs.length;
-      if (!main || total === 0) return;
+      const total = slides.length;
+      if (!track || total === 0) return;
 
       let index = 0;
+      const slideWidth = () => slides[0].getBoundingClientRect().width;
 
-      const show = (next: number) => {
-        index = (next + total) % total; // wrap-around
-        const thumb = thumbs[index];
-        const kind = thumb.getAttribute('data-kind');
-
-        if (kind === 'video') {
-          // Reveal the video; hide the photo <img>. Do NOT touch main.src here.
-          if (video) { video.hidden = false; main.hidden = true; }
-        } else {
-          // Photo slide: pause + hide the video if we are leaving it.
-          if (video && !video.paused) video.pause();
-          if (video) video.hidden = true;
-          main.hidden = false;
-
-          const full = thumb.getAttribute('data-full');
-          if (full && main.getAttribute('src') !== full) {
-            // Preload, then crossfade to the new photo.
-            const img = new Image();
-            img.onload = () => { main.src = full; main.style.opacity = '1'; };
-            main.style.opacity = '0';
-            img.src = full;
-          }
-        }
-
+      // The track is the source of truth: the browser moves it (finger, momentum, scrollTo) and
+      // everything else follows from where it landed.
+      const sync = () => {
+        const next = slideIndexFromScroll(track.scrollLeft, slideWidth(), total);
+        if (next === index) return;
+        index = next;
+        // Leaving the video slide stops it playing off-screen.
+        if (video && !video.paused && slides[index].dataset.kind !== 'video') video.pause();
         thumbs.forEach((t, i) => t.setAttribute('aria-current', String(i === index)));
         if (current) current.textContent = String(index + 1);
       };
 
-      thumbs.forEach((t, i) => t.addEventListener('click', () => show(i)));
-      prevBtn?.addEventListener('click', () => show(index - 1));
-      nextBtn?.addEventListener('click', () => show(index + 1));
+      let ticking = false;
+      track.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => { ticking = false; sync(); });
+      }, { passive: true });
+
+      const goTo = (n: number) => {
+        const to = (n + total) % total;
+        // Smooth for a step, instant for the wrap — animating back across every slide to reach
+        // the first one reads as a glitch rather than as navigation.
+        const wrapped = Math.abs(to - index) > 1;
+        track.scrollTo({ left: to * slideWidth(), behavior: wrapped ? 'auto' : 'smooth' });
+      };
+
+      thumbs.forEach((t, i) => t.addEventListener('click', () => goTo(i)));
+      prevBtn?.addEventListener('click', () => goTo(index - 1));
+      nextBtn?.addEventListener('click', () => goTo(index + 1));
 
       g.addEventListener('keydown', (e) => {
         // Let the focused <video>'s native controls handle arrow keys (seek), don't hijack to nav.
         if ((e.target as HTMLElement)?.closest('[data-gallery-video]')) return;
         const key = (e as KeyboardEvent).key;
-        if (key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
-        else if (key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
+        if (key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1); }
+        else if (key === 'ArrowRight') { e.preventDefault(); goTo(index + 1); }
       });
     });
   }
@@ -162,9 +171,30 @@ const single = slideCount <= 1;
     border-radius: var(--r-md, 8px);
   }
 
-  /* ── Stage (main image + overlaid controls) ── */
+  /* ── Stage (snap track + overlaid controls) ── */
   .gallery-stage {
     position: relative;
+  }
+
+  /* Native horizontal scrolling is the carousel: the finger drags the photo, momentum and
+     snapping come from the browser, and the arrows just scrollTo. */
+  .gallery-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    border-radius: var(--r-md, 8px);
+    box-shadow: var(--elev-2, 0 4px 8px rgba(8, 39, 70, 0.08));
+    /* Keep a swipe inside the gallery from triggering the browser's back gesture. */
+    overscroll-behavior-x: contain;
+  }
+
+  .gallery-track::-webkit-scrollbar { display: none; }
+
+  .gallery-slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: center;
   }
 
   .gallery-main {
@@ -172,11 +202,8 @@ const single = slideCount <= 1;
     height: auto;
     aspect-ratio: 3 / 2;
     object-fit: cover;
-    border-radius: var(--r-md, 8px);
     background: var(--haze-tint, #E4ECF5);
     display: block;
-    box-shadow: var(--elev-2, 0 4px 8px rgba(8, 39, 70, 0.08));
-    transition: opacity 260ms var(--ease-out, ease-out);
   }
 
   /* ── Nav arrows ── */
@@ -315,12 +342,8 @@ const single = slideCount <= 1;
     aspect-ratio: 3 / 2;
     object-fit: contain;            /* vertical WhatsApp clip letterboxed, not cropped */
     background: #000;
-    border-radius: var(--r-md, 8px);
     display: block;
-    box-shadow: var(--elev-2, 0 4px 8px rgba(8, 39, 70, 0.08));
   }
-  .gallery-video[hidden] { display: none; }
-  .gallery-main[hidden] { display: none; }
 
   .gallery-thumb--video { position: relative; }
 

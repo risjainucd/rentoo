@@ -80,6 +80,8 @@ const statusLabel = card.status === 'available'
 </article>
 
 <script>
+  import { swipeDirection } from '../lib/swipe';
+
   // Re-wired on every page load so the carousel survives View Transitions navs.
   function initCardCarousels() {
     document.querySelectorAll('[data-card-photos]').forEach((card) => {
@@ -104,6 +106,38 @@ const statusLabel = card.status === 'available'
       const onClick = (fn: () => void) => (e: Event) => { e.preventDefault(); e.stopPropagation(); fn(); };
       card.querySelector('[data-card-prev]')?.addEventListener('click', onClick(() => show(i - 1)));
       card.querySelector('[data-card-next]')?.addEventListener('click', onClick(() => show(i + 1)));
+
+      // ── Swipe ── the arrows are small targets on a phone.
+      // Listen on the card, NOT on .card-image: a stretched <a class="card-link"> is painted
+      // over the photo, so it — not the image — is the touch target, and .card-image is not on
+      // that event's path. Which photo area the gesture started in is decided by hit-testing the
+      // frame instead, so a drag over the text body still scrolls the page normally.
+      const frame = card.querySelector('.card-image');
+      if (!frame) return;
+      let startX = 0, startY = 0, fromPhoto = false, swiped = false;
+      card.addEventListener('touchstart', (e) => {
+        const t = (e as TouchEvent).changedTouches[0];
+        const r = frame.getBoundingClientRect();
+        fromPhoto = t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom;
+        startX = t.clientX; startY = t.clientY; swiped = false;
+      }, { passive: true });
+      card.addEventListener('touchend', (e) => {
+        if (!fromPhoto) return;
+        const t = (e as TouchEvent).changedTouches[0];
+        const dir = swipeDirection(t.clientX - startX, t.clientY - startY);
+        if (!dir) return; // a tap or a vertical scroll — leave it to the link and the page
+        swiped = true;
+        e.preventDefault(); // suppress the click this touch would otherwise synthesise
+        show(dir === 'next' ? i + 1 : i - 1);
+      }, { passive: false });
+      // preventDefault on touchend does not reliably cancel the click everywhere, and here a
+      // stray click opens the listing. Capture on the card so it runs before the link's own.
+      card.addEventListener('click', (e) => {
+        if (!swiped) return;
+        swiped = false;
+        e.preventDefault();
+        e.stopPropagation();
+      }, true);
     });
   }
 
