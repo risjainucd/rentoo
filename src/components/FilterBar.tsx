@@ -9,6 +9,33 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
+// Value → label for every filter select. Passed to <Select items> AND used to render the
+// options, so the list and the label lookup can never drift. Base UI's <Select.Value> can only
+// resolve an item's label from `items`: the options live in a Portal that is not mounted during
+// SSR (nor while the popup is closed), so without this the trigger renders the raw value
+// ("most-viewed" instead of "Most viewed") and the server/client disagreement surfaces as a
+// React hydration mismatch.
+const SORT_ITEMS: Record<string, string> = {
+  '': 'Newest first',
+  featured: 'Featured',
+  'most-viewed': 'Most viewed',
+  budget: 'Budget-friendly',
+  'most-liked': 'Most liked',
+};
+const BHK_ITEMS: Record<string, string> = {
+  '': 'Any',
+  '1BHK': '1BHK',
+  '2BHK': '2BHK',
+  '3BHK': '3BHK',
+  '4BHK': '4BHK',
+};
+const FURNISHING_ITEMS: Record<string, string> = {
+  '': 'Any',
+  furnished: 'Furnished',
+  'semi-furnished': 'Semi-furnished',
+  unfurnished: 'Unfurnished',
+};
+
 interface Props {
   areas: { slug: string; name: string }[];
   value: ListingFilters;
@@ -43,6 +70,12 @@ export default function FilterBar({ areas, value }: Props) {
   );
   const [maxRent, setMaxRent] = React.useState<string>(
     value.maxRent != null ? String(value.maxRent) : ''
+  );
+
+  // Built from props, so the label lookup always matches the options actually rendered.
+  const areaItems = React.useMemo<Record<string, string>>(
+    () => ({ '': 'All areas', ...Object.fromEntries(areas.map((a) => [a.slug, a.name])) }),
+    [areas]
   );
 
   function handleSortChange(val: string | null) {
@@ -115,16 +148,16 @@ export default function FilterBar({ areas, value }: Props) {
       {/* Sort — Featured / Most viewed / Budget / Most liked */}
       <div className="filter-group">
         <label className="filter-legend">Show me</label>
-        <Select value={sort || null} onValueChange={handleSortChange}>
+        <Select items={SORT_ITEMS} value={sort || null} onValueChange={handleSortChange}>
           <SelectTrigger className="filter-select-trigger">
             <SelectValue placeholder="Newest" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Newest first</SelectItem>
-            <SelectItem value="featured">Featured</SelectItem>
-            <SelectItem value="most-viewed">Most viewed</SelectItem>
-            <SelectItem value="budget">Budget-friendly</SelectItem>
-            <SelectItem value="most-liked">Most liked</SelectItem>
+            {Object.entries(SORT_ITEMS).map(([val, label]) => (
+              <SelectItem key={val} value={val}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -132,15 +165,14 @@ export default function FilterBar({ areas, value }: Props) {
       {/* Area (major areas only) */}
       <div className="filter-group">
         <label className="filter-legend">Area</label>
-        <Select value={area || null} onValueChange={handleAreaChange}>
+        <Select items={areaItems} value={area || null} onValueChange={handleAreaChange}>
           <SelectTrigger className="filter-select-trigger">
             <SelectValue placeholder="All areas" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All areas</SelectItem>
-            {areas.map((a) => (
-              <SelectItem key={a.slug} value={a.slug}>
-                {a.name}
+            {Object.entries(areaItems).map(([val, label]) => (
+              <SelectItem key={val} value={val}>
+                {label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -151,16 +183,16 @@ export default function FilterBar({ areas, value }: Props) {
       {showBhk && (
         <div className="filter-group">
           <label className="filter-legend">BHK</label>
-          <Select value={bhk || null} onValueChange={handleBhkChange}>
+          <Select items={BHK_ITEMS} value={bhk || null} onValueChange={handleBhkChange}>
             <SelectTrigger className="filter-select-trigger">
               <SelectValue placeholder="Any" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any</SelectItem>
-              <SelectItem value="1BHK">1BHK</SelectItem>
-              <SelectItem value="2BHK">2BHK</SelectItem>
-              <SelectItem value="3BHK">3BHK</SelectItem>
-              <SelectItem value="4BHK">4BHK</SelectItem>
+              {Object.entries(BHK_ITEMS).map(([val, label]) => (
+                <SelectItem key={val} value={val}>
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -169,15 +201,16 @@ export default function FilterBar({ areas, value }: Props) {
       {/* Furnishing */}
       <div className="filter-group">
         <label className="filter-legend">Furnishing</label>
-        <Select value={furnishing || null} onValueChange={handleFurnishingChange}>
+        <Select items={FURNISHING_ITEMS} value={furnishing || null} onValueChange={handleFurnishingChange}>
           <SelectTrigger className="filter-select-trigger">
             <SelectValue placeholder="Any" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Any</SelectItem>
-            <SelectItem value="furnished">Furnished</SelectItem>
-            <SelectItem value="semi-furnished">Semi-furnished</SelectItem>
-            <SelectItem value="unfurnished">Unfurnished</SelectItem>
+            {Object.entries(FURNISHING_ITEMS).map(([val, label]) => (
+              <SelectItem key={val} value={val}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
