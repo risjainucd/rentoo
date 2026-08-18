@@ -14,6 +14,28 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+// Value → label for every select. Passed to <Select items> AND used to render the options,
+// so the two can never drift. Base UI's <Select.Value> can only resolve an item's label from
+// `items`: the options live in a Portal that isn't mounted during SSR, so without this the
+// trigger renders the raw value ("c-scheme") on the server and React reports a hydration
+// mismatch when the client renders the label ("C Scheme").
+const SEGMENT_ITEMS: Record<string, string> = {
+  residential: "Residential",
+  commercial: "Commercial",
+  industrial: "Industrial",
+}
+const FURNISHING_ITEMS: Record<string, string> = {
+  "": "—",
+  furnished: "Furnished",
+  "semi-furnished": "Semi-furnished",
+  unfurnished: "Unfurnished",
+}
+const STATUS_ITEMS: Record<string, string> = {
+  available: "Available",
+  "on-hold": "On hold",
+  rented: "Rented out (hidden from site)",
+}
+
 export interface AdminNewListingFormProps {
   neighbourhoods: { slug: string; name: string }[]
   /** Server-computed next "#NN" — shown read-only; the server assigns it on submit. */
@@ -52,6 +74,11 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
   const [slug, setSlug] = React.useState("")
   const [slugEdited, setSlugEdited] = React.useState(false)
 
+  const neighbourhoodItems = React.useMemo(
+    () => Object.fromEntries(props.neighbourhoods.map((n) => [n.slug, n.name])),
+    [props.neighbourhoods]
+  )
+
   const isResidential = segment === "residential"
   // Live slug suggestion from the fields, unless the admin has typed their own.
   const derivedSlug = slugify(
@@ -72,14 +99,21 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       </Row>
 
       <Row label="Segment" htmlFor="segment">
-        <Select name="segment" value={segment} onValueChange={(v) => setSegment(String(v))}>
+        <Select
+          name="segment"
+          items={SEGMENT_ITEMS}
+          value={segment}
+          onValueChange={(v) => setSegment(String(v))}
+        >
           <SelectTrigger id="segment" className="h-9 w-full max-w-72">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="residential">Residential</SelectItem>
-            <SelectItem value="commercial">Commercial</SelectItem>
-            <SelectItem value="industrial">Industrial</SelectItem>
+            {Object.entries(SEGMENT_ITEMS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </Row>
@@ -87,6 +121,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       <Row label="Neighbourhood" htmlFor="neighbourhood" hint="Determines the area map and browse filters.">
         <Select
           name="neighbourhood_slug"
+          items={neighbourhoodItems}
           value={neighbourhood}
           onValueChange={(v) => setNeighbourhood(String(v))}
         >
@@ -137,28 +172,31 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       </Row>
 
       <Row label="Furnishing" htmlFor="furnishing">
-        <Select name="furnishing" defaultValue="">
+        <Select name="furnishing" items={FURNISHING_ITEMS} defaultValue="">
           <SelectTrigger id="furnishing" className="h-9 w-full max-w-72">
             <SelectValue placeholder="—" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">—</SelectItem>
-            <SelectItem value="furnished">Furnished</SelectItem>
-            <SelectItem value="semi-furnished">Semi-furnished</SelectItem>
-            <SelectItem value="unfurnished">Unfurnished</SelectItem>
+            {Object.entries(FURNISHING_ITEMS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </Row>
 
       <Row label="Status" htmlFor="status">
-        <Select name="status" defaultValue="available">
+        <Select name="status" items={STATUS_ITEMS} defaultValue="available">
           <SelectTrigger id="status" className="h-9 w-full max-w-72">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="available">Available</SelectItem>
-            <SelectItem value="on-hold">On hold</SelectItem>
-            <SelectItem value="rented">Rented out (hidden from site)</SelectItem>
+            {Object.entries(STATUS_ITEMS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </Row>

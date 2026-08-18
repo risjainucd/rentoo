@@ -13,6 +13,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+// Value → label for the selects, passed to <Select items> and used to render the options.
+// Without `items`, Base UI's <Select.Value> falls back to the raw value ("semi-furnished"),
+// and SSR/client disagree once the popup registers the real labels (hydration mismatch).
+const FURNISHING_ITEMS: Record<string, string> = {
+  "": "—",
+  furnished: "Furnished",
+  "semi-furnished": "Semi-furnished",
+  unfurnished: "Unfurnished",
+}
+const STATUS_ITEMS: Record<string, string> = {
+  available: "Available",
+  rented: "Rented out (hidden from site)",
+  "on-hold": "On hold",
+}
+
 export interface AdminListingFormProps {
   rentInr: number
   status: string
@@ -94,14 +109,16 @@ export function AdminListingForm(props: AdminListingFormProps) {
         htmlFor="status"
         hint="Rented-out listings are hidden from the public site."
       >
-        <Select name="status" defaultValue={props.status}>
+        <Select name="status" items={STATUS_ITEMS} defaultValue={props.status}>
           <SelectTrigger id="status" className="h-9 w-full max-w-72">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="available">Available</SelectItem>
-            <SelectItem value="rented">Rented out (hidden from site)</SelectItem>
-            <SelectItem value="on-hold">On hold</SelectItem>
+            {Object.entries(STATUS_ITEMS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </Row>
@@ -121,15 +138,16 @@ export function AdminListingForm(props: AdminListingFormProps) {
       </Row>
 
       <Row label="Furnishing" htmlFor="furnishing">
-        <Select name="furnishing" defaultValue={props.furnishing}>
+        <Select name="furnishing" items={FURNISHING_ITEMS} defaultValue={props.furnishing}>
           <SelectTrigger id="furnishing" className="h-9 w-full max-w-72">
             <SelectValue placeholder="—" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">—</SelectItem>
-            <SelectItem value="furnished">Furnished</SelectItem>
-            <SelectItem value="semi-furnished">Semi-furnished</SelectItem>
-            <SelectItem value="unfurnished">Unfurnished</SelectItem>
+            {Object.entries(FURNISHING_ITEMS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </Row>
