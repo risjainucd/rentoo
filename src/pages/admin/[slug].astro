@@ -2,7 +2,7 @@
 export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { AdminListingForm } from '../../components/admin/AdminListingForm';
-import { getAnyListingBySlug, updateListingFields } from '../../lib/db';
+import { getAnyListingBySlug, updateListingFields, listNeighbourhoods } from '../../lib/db';
 import { mediaUrl } from '../../lib/media';
 
 const slug = Astro.params.slug!;
@@ -15,7 +15,19 @@ if (Astro.request.method === 'POST') {
   const status = ['available', 'rented', 'on-hold'].includes(statusIn) ? statusIn : 'available';
   const furnIn = clean('furnishing');
   const furnishing = furnIn && ['furnished', 'semi-furnished', 'unfurnished'].includes(furnIn) ? furnIn : null;
+  // segment / neighbourhood are constrained (CHECK and FK), so an unrecognised value would throw
+  // a bare 500 — fall back to what the listing already has instead.
+  const existing = await getAnyListingBySlug(db, slug);
+  if (!existing) return Astro.redirect('/admin', 303);
+  const segIn = String(form.get('segment') || '');
+  const segment = ['residential', 'commercial', 'industrial'].includes(segIn) ? segIn : existing.property.segment;
+  const nbhdIn = String(form.get('neighbourhood_slug') || '');
+  const nbhdOk = (await listNeighbourhoods(db)).some((n) => n.slug === nbhdIn);
+  const neighbourhood_slug = nbhdOk ? nbhdIn : existing.property.neighbourhood_slug;
+  const areaIn = parseInt(String(form.get('area_sqft') || ''), 10);
+  const area_sqft = Number.isFinite(areaIn) && areaIn > 0 ? areaIn : null;
   await updateListingFields(db, slug, {
+    segment, neighbourhood_slug, area_sqft,
     rent_inr: parseInt(String(form.get('rent_inr') || '0'), 10) || 0,
     status, furnishing,
     bhk_type: clean('bhk_type'),
@@ -29,6 +41,7 @@ if (Astro.request.method === 'POST') {
   return Astro.redirect(`/admin/${slug}?saved=1`);
 }
 
+const neighbourhoods = (await listNeighbourhoods(db)).map((n) => ({ slug: n.slug, name: n.name, mapped: n.major_slug != null }));
 const data = await getAnyListingBySlug(db, slug);
 if (!data) return Astro.redirect('/admin', 303);
 const { property, media, neighbourhood } = data;
@@ -46,6 +59,10 @@ const email = Astro.locals.adminEmail;
     rentInr={property.rent_inr}
     status={property.status}
     propertyType={property.property_type}
+    segment={property.segment}
+    neighbourhoods={neighbourhoods}
+    neighbourhoodSlug={property.neighbourhood_slug}
+    areaSqft={property.area_sqft ?? ''}
     bhkType={property.bhk_type ?? ''}
     furnishing={property.furnishing ?? ''}
     landmark={property.landmark ?? ''}

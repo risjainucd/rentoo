@@ -103,27 +103,33 @@ export async function getAnyListingBySlug(db: D1Database, slug: string) {
   return { property, media: media.results ?? [], neighbourhood };
 }
 
-// Next free "#NN" display id: max numeric part across all listings + 1, zero-padded to 2
-// digits ("#01" when there are none). Single-admin tool, so a create race is negligible.
+// Listings created here get their own "A-NN" series. The Excel importer takes display_id
+// straight from the spreadsheet ("#01".."#118", "##01".., "C-1".."C-19") and upserts on slug
+// only, so minting another "#NN" here would collide with a future spreadsheet row on
+// UNIQUE(display_id) and abort the whole re-import. Scanning only our own series also avoids
+// the old /(\d+)/ scan, which flattened three unrelated id series into one number space.
 export async function suggestNextDisplayId(db: D1Database): Promise<string> {
-  const r = await db.prepare('SELECT display_id FROM properties').all<{ display_id: string }>();
+  const r = await db.prepare("SELECT display_id FROM properties WHERE display_id LIKE 'A-%'").all<{ display_id: string }>();
   let max = 0;
   for (const row of r.results ?? []) {
-    const m = /(\d+)/.exec(row.display_id ?? '');
+    const m = /^A-(\d+)$/.exec(row.display_id ?? '');
     if (m) max = Math.max(max, parseInt(m[1], 10));
   }
-  return '#' + String(max + 1).padStart(2, '0');
+  return 'A-' + String(max + 1).padStart(2, '0');
 }
 
 async function slugTaken(db: D1Database, slug: string): Promise<boolean> {
   const row = await db.prepare('SELECT 1 AS x FROM properties WHERE slug = ?').bind(slug).first();
   return row != null;
 }
+// Slugs that collide with a static admin route. Astro resolves /admin/new to the static
+// new-listing page, so a listing slugged "new" could never be opened in the editor.
+const RESERVED_SLUGS = new Set(['new']);
 // A slug not already in use: `base`, else base-2, base-3, … Falls back to 'listing' if empty.
 export async function uniqueSlug(db: D1Database, base: string): Promise<string> {
   const clean = base || 'listing';
   let slug = clean;
-  for (let i = 2; await slugTaken(db, slug); i++) slug = `${clean}-${i}`;
+  for (let i = 2; RESERVED_SLUGS.has(slug) || (await slugTaken(db, slug)); i++) slug = `${clean}-${i}`;
   return slug;
 }
 
@@ -146,16 +152,24 @@ export async function createListing(db: D1Database, f: NewListingInput): Promise
   ).run();
 }
 
+// segment, neighbourhood_slug and area_sqft are editable here too: they are only ever set at
+// create time, and without this a mis-picked segment or area could never be corrected from the
+// admin UI. (slug stays immutable — it is the public URL and the R2 media path prefix.)
 export interface AdminListingUpdate {
   rent_inr: number; status: string; furnishing: string | null; bhk_type: string | null;
   property_type: string; landmark: string | null; description: string | null;
   map_url: string | null; featured: 0 | 1; published: 0 | 1;
+  segment: string; neighbourhood_slug: string; area_sqft: number | null;
 }
 export async function updateListingFields(db: D1Database, slug: string, f: AdminListingUpdate) {
   await db.prepare(
     `UPDATE properties SET rent_inr=?, status=?, furnishing=?, bhk_type=?, property_type=?,
-            landmark=?, description=?, map_url=?, featured=?, published=? WHERE slug=?`,
-  ).bind(f.rent_inr, f.status, f.furnishing, f.bhk_type, f.property_type, f.landmark, f.description, f.map_url, f.featured, f.published, slug).run();
+            landmark=?, description=?, map_url=?, featured=?, published=?,
+            segment=?, neighbourhood_slug=?, area_sqft=? WHERE slug=?`,
+  ).bind(
+    f.rent_inr, f.status, f.furnishing, f.bhk_type, f.property_type, f.landmark, f.description,
+    f.map_url, f.featured, f.published, f.segment, f.neighbourhood_slug, f.area_sqft, slug,
+  ).run();
 }
 
 // Set which photo is the cover (and make it lead the gallery: display_order 0).

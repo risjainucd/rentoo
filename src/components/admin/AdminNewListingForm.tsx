@@ -37,7 +37,7 @@ const STATUS_ITEMS: Record<string, string> = {
 }
 
 export interface AdminNewListingFormProps {
-  neighbourhoods: { slug: string; name: string }[]
+  neighbourhoods: { slug: string; name: string; mapped: boolean }[]
   /** Server-computed next "#NN" — shown read-only; the server assigns it on submit. */
   suggestedDisplayId: string
   /**
@@ -83,11 +83,39 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
   const [bhk, setBhk] = React.useState(prev.bhk_type || "")
   const [slug, setSlug] = React.useState(prev.slug || "")
   const [slugEdited, setSlugEdited] = React.useState(Boolean(prev.slug))
+  // Both uniqueness helpers auto-avoid collisions rather than reject, so a second POST cannot
+  // fail — it just creates a second near-identical listing. Let the first submit through only.
+  const [submitting, setSubmitting] = React.useState(false)
+
+  // Astro serves this form as real, typeable HTML before the island hydrates, so an admin can
+  // start filling it in immediately. Those keystrokes are invisible to React, and the first
+  // re-render (picking any dropdown) would wipe the controlled fields back to state. Adopt
+  // whatever the DOM already holds, once, right after hydration.
+  const typeRef = React.useRef<HTMLInputElement>(null)
+  const bhkRef = React.useRef<HTMLInputElement>(null)
+  const slugRef = React.useRef<HTMLInputElement>(null)
+  React.useLayoutEffect(() => {
+    const domType = typeRef.current?.value ?? ""
+    const domBhk = bhkRef.current?.value ?? ""
+    const domSlug = slugRef.current?.value ?? ""
+    if (domType) setPropertyType(domType)
+    if (domBhk) setBhk(domBhk)
+    // Only treat the slug as hand-written if it isn't just the suggestion we rendered.
+    if (domSlug && domSlug !== slugify([domBhk, domType].filter(Boolean).join(" "))) {
+      setSlug(domSlug)
+      setSlugEdited(true)
+    }
+    // Mount only: later edits come through onChange.
+  }, [])
 
   const neighbourhoodItems = React.useMemo(
     () => Object.fromEntries(props.neighbourhoods.map((n) => [n.slug, n.name])),
     [props.neighbourhoods]
   )
+
+  // Areas with no major_slug are absent from the public Area filter, so a listing filed under one
+  // is only reachable by browsing. Warn at create time rather than letting it happen silently.
+  const areaUnmapped = props.neighbourhoods.some((n) => n.slug === neighbourhood && !n.mapped)
 
   const isResidential = segment === "residential"
   // Live slug suggestion from the fields, unless the admin has typed their own.
@@ -100,6 +128,13 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
     <form
       method="POST"
       className="mb-6 rounded-xl border border-border bg-card p-5 shadow-[var(--elev-1)] sm:p-6"
+      onSubmit={(e) => {
+        if (submitting) {
+          e.preventDefault()
+          return
+        }
+        setSubmitting(true)
+      }}
     >
       <Row label="Display ID">
         <div className="flex h-9 items-center font-mono text-sm text-muted-foreground">
@@ -132,7 +167,15 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
           browser cannot show a validation bubble on it — the submit would just be swallowed with
           no visible message. An unset area is caught server-side instead, which re-renders with a
           readable banner and every field preserved. */}
-      <Row label="Neighbourhood" htmlFor="neighbourhood" hint="Determines the area map and browse filters.">
+      <Row
+        label="Neighbourhood"
+        htmlFor="neighbourhood"
+        hint={
+          areaUnmapped
+            ? "This area isn't part of any major area, so the listing won't show up under the public Area filter."
+            : "Determines the area map and browse filters."
+        }
+      >
         <Select
           name="neighbourhood_slug"
           items={neighbourhoodItems}
@@ -156,6 +199,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
         <Input
           id="property_type"
           name="property_type"
+          ref={typeRef}
           required
           value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
@@ -169,6 +213,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
           <Input
             id="bhk_type"
             name="bhk_type"
+            ref={bhkRef}
             value={bhk}
             onChange={(e) => setBhk(e.target.value)}
             placeholder="e.g. 2BHK"
@@ -231,6 +276,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
         <Input
           id="slug"
           name="slug"
+          ref={slugRef}
           value={slugValue}
           onChange={(e) => {
             setSlugEdited(true)
@@ -273,8 +319,8 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       </Row>
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
-        <Button type="submit" className="h-10 px-6 text-sm">
-          Create listing
+        <Button type="submit" disabled={submitting} className="h-10 px-6 text-sm">
+          {submitting ? "Creating…" : "Create listing"}
         </Button>
         <span className="text-xs text-muted-foreground">You'll add photos on the next screen.</span>
       </div>

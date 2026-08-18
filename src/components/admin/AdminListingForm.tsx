@@ -22,6 +22,11 @@ const FURNISHING_ITEMS: Record<string, string> = {
   "semi-furnished": "Semi-furnished",
   unfurnished: "Unfurnished",
 }
+const SEGMENT_ITEMS: Record<string, string> = {
+  residential: "Residential",
+  commercial: "Commercial",
+  industrial: "Industrial",
+}
 const STATUS_ITEMS: Record<string, string> = {
   available: "Available",
   rented: "Rented out (hidden from site)",
@@ -32,6 +37,10 @@ export interface AdminListingFormProps {
   rentInr: number
   status: string
   propertyType: string
+  segment: string
+  neighbourhoods: { slug: string; name: string; mapped: boolean }[]
+  neighbourhoodSlug: string
+  areaSqft: number | string
   bhkType: string
   furnishing: string
   landmark: string
@@ -70,6 +79,16 @@ function Row({
 }
 
 export function AdminListingForm(props: AdminListingFormProps) {
+  const [segment, setSegment] = React.useState(props.segment)
+  const [neighbourhood, setNeighbourhood] = React.useState(props.neighbourhoodSlug)
+  const neighbourhoodItems = React.useMemo(
+    () => Object.fromEntries(props.neighbourhoods.map((n) => [n.slug, n.name])),
+    [props.neighbourhoods]
+  )
+  // Areas with no major_slug are absent from the public Area filter, so a listing parked in one
+  // is only reachable by browsing. Say so rather than letting it happen silently.
+  const areaUnmapped = props.neighbourhoods.some((n) => n.slug === neighbourhood && !n.mapped)
+
   // Surface the post-save / post-create redirect as a Sonner toast, then strip the
   // query flag so a reload doesn't re-toast. sonner is dynamically imported so it never
   // loads during SSR (its module top-level breaks React in the Cloudflare/workerd SSR);
@@ -93,6 +112,61 @@ export function AdminListingForm(props: AdminListingFormProps) {
       method="POST"
       className="mb-6 rounded-xl border border-border bg-card p-5 shadow-[var(--elev-1)] sm:p-6"
     >
+      <Row label="Segment" htmlFor="segment">
+        <Select name="segment" items={SEGMENT_ITEMS} value={segment} onValueChange={(v) => setSegment(String(v))}>
+          <SelectTrigger id="segment" className="h-9 w-full max-w-72">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(SEGMENT_ITEMS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      <Row
+        label="Neighbourhood"
+        htmlFor="neighbourhood"
+        hint={
+          areaUnmapped
+            ? "This area isn't part of any major area, so the listing won't show up under the public Area filter."
+            : "Determines the area map and browse filters."
+        }
+      >
+        <Select
+          name="neighbourhood_slug"
+          items={neighbourhoodItems}
+          value={neighbourhood}
+          onValueChange={(v) => setNeighbourhood(String(v))}
+        >
+          <SelectTrigger id="neighbourhood" className="h-9 w-full max-w-72">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {props.neighbourhoods.map((n) => (
+              <SelectItem key={n.slug} value={n.slug}>
+                {n.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      <Row label="Area (sq ft)" htmlFor="area_sqft">
+        <Input
+          id="area_sqft"
+          name="area_sqft"
+          type="number"
+          min={0}
+          defaultValue={props.areaSqft}
+          placeholder="optional"
+          className="h-9 max-w-48"
+        />
+      </Row>
+
       <Row label="Rent (₹/mo)" htmlFor="rent_inr">
         <Input
           id="rent_inr"

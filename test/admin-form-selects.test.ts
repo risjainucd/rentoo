@@ -81,3 +81,36 @@ test('no required on the neighbourhood select — it would block submit invisibl
   expect(tag).not.toBeNull();
   expect(tag![0]).not.toMatch(/\brequired\b/);
 });
+
+// Astro serves the form as typeable HTML before the island hydrates; controlled fields whose
+// state starts empty would wipe anything typed in that window on the first re-render.
+test('the create form adopts input typed before hydration', () => {
+  expect(newListingSrc).toMatch(/React\.useLayoutEffect/);
+  for (const ref of ['typeRef', 'bhkRef', 'slugRef']) {
+    expect(newListingSrc, `no ${ref}`).toContain(`ref={${ref}}`);
+  }
+});
+
+// Neither uniqueSlug nor suggestNextDisplayId can reject, so a second POST silently creates a
+// second listing rather than failing.
+test('the create form blocks a double submit', () => {
+  expect(newListingSrc).toMatch(/const \[submitting, setSubmitting\]/);
+  expect(newListingSrc).toMatch(/if \(submitting\)/);
+  expect(newListingSrc).toContain('disabled={submitting}');
+});
+
+// segment / neighbourhood / area_sqft were write-once: only createListing set them, so a
+// mis-picked value could never be corrected from the admin UI.
+test('the editor can correct segment, neighbourhood and area', () => {
+  for (const field of ['segment', 'neighbourhood_slug', 'area_sqft']) {
+    expect(editListingSrc, `editor cannot set ${field}`).toContain(`name="${field}"`);
+  }
+});
+
+// Areas with no major_slug are missing from the public Area filter.
+test('both forms warn when the chosen area has no major area', () => {
+  for (const src of [newListingSrc, editListingSrc]) {
+    expect(src).toMatch(/areaUnmapped/);
+    expect(src).toContain("won't show up under the public Area filter");
+  }
+});

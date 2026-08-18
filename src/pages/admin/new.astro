@@ -59,7 +59,7 @@ if (Astro.request.method === 'POST') {
   submitted = Object.fromEntries([...form.entries()].map(([k, v]) => [k, String(v)]));
 }
 
-const neighbourhoods = (await listNeighbourhoods(db)).map((n) => ({ slug: n.slug, name: n.name }));
+const neighbourhoods = (await listNeighbourhoods(db)).map((n) => ({ slug: n.slug, name: n.name, mapped: n.major_slug != null }));
 const suggestedDisplayId = await suggestNextDisplayId(db);
 ---
 <AdminLayout title="New listing — Rentoo Admin" email={email} back={true}>

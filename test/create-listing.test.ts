@@ -35,14 +35,19 @@ function slugDb(taken: string[]): D1Database {
 }
 
 describe('suggestNextDisplayId', () => {
-  test('max numeric part + 1, zero-padded to 2', async () => {
-    expect(await suggestNextDisplayId(displayIdDb(['#01', '#07', '#03']))).toBe('#08');
+  test('max of the admin "A-NN" series + 1, zero-padded to 2', async () => {
+    expect(await suggestNextDisplayId(displayIdDb(['A-01', 'A-07', 'A-03']))).toBe('A-08');
   });
-  test('#01 when there are no listings', async () => {
-    expect(await suggestNextDisplayId(displayIdDb([]))).toBe('#01');
+  test('A-01 when there are no admin-created listings', async () => {
+    expect(await suggestNextDisplayId(displayIdDb([]))).toBe('A-01');
   });
   test('rolls past 2 digits', async () => {
-    expect(await suggestNextDisplayId(displayIdDb(['#98', '#99']))).toBe('#100');
+    expect(await suggestNextDisplayId(displayIdDb(['A-98', 'A-99']))).toBe('A-100');
+  });
+  // The Excel importer takes display_id straight from the spreadsheet and upserts on slug only,
+  // so minting into its "#NN" / "C-N" space would break a re-import on UNIQUE(display_id).
+  test('never mints into the importer\'s id space', async () => {
+    expect(await suggestNextDisplayId(displayIdDb(['#118', '##12', 'C-19']))).toBe('A-01');
   });
 });
 
@@ -56,5 +61,9 @@ describe('uniqueSlug', () => {
   });
   test('falls back to "listing" for an empty base', async () => {
     expect(await uniqueSlug(slugDb([]), '')).toBe('listing');
+  });
+  // /admin/new is a static route, so a listing slugged "new" could never be opened in the editor.
+  test('never hands out the reserved "new" slug', async () => {
+    expect(await uniqueSlug(slugDb([]), 'new')).toBe('new-2');
   });
 });
