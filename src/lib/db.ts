@@ -61,6 +61,25 @@ export async function listMajorAreas(db: D1Database, segment?: string) {
   const r = await stmt.all<{ slug: string; name: string; n: number }>();
   return (r.results ?? []).map((x) => ({ slug: x.slug, name: x.name }));
 }
+// The Area filter options, plus the currently selected area when it has no live listings —
+// rented out, or none in this segment (most areas have no commercial/industrial stock). Base UI
+// resolves a Select's label only from the items it is given, so without this the trigger renders
+// the raw slug ("mahesh-nagar"). The name always comes from the DB: slugs are not reversible
+// ("sodala-ajmer-road" is "Sodala / Ajmer Road"). Returned unchanged when the slug names no
+// area at all — the caller treats that as an unknown filter and drops it.
+export async function listMajorAreasIncluding(db: D1Database, segment?: string, selected?: string) {
+  const areas = await listMajorAreas(db, segment);
+  if (!selected || areas.some((a) => a.slug === selected)) return areas;
+  const row = await db.prepare(
+    'SELECT major_area AS name FROM neighbourhoods WHERE major_slug = ? AND major_area IS NOT NULL LIMIT 1',
+  ).bind(selected).first<{ name: string }>();
+  if (!row) return areas;
+  // Splice rather than re-sort: `areas` is already ordered by SQLite's collation, and inserting
+  // leaves that order untouched even where JS string comparison would disagree with it.
+  const entry = { slug: selected, name: row.name };
+  const at = areas.findIndex((a) => a.name > entry.name);
+  return at === -1 ? [...areas, entry] : [...areas.slice(0, at), entry, ...areas.slice(at)];
+}
 export async function getNeighbourhood(db: D1Database, slug: string) {
   return db.prepare('SELECT * FROM neighbourhoods WHERE slug = ?').bind(slug).first<Neighbourhood>();
 }

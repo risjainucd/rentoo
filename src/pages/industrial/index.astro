@@ -5,11 +5,16 @@ import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import PropertyCard from '../../components/PropertyCard.astro';
 import FilterBar from '../../components/FilterBar.tsx';
-import { parseListingFilters } from '../../lib/sql';
-import { listListings, listMajorAreas } from '../../lib/db';
+import { parseListingFilters, areaRedirectUrl, isAreaOnlyFilter } from '../../lib/sql';
+import { listListings, listMajorAreasIncluding } from '../../lib/db';
 const filters = { ...parseListingFilters(Astro.url), segment: 'industrial' as const };
+// Areas first: a ?area= naming no major area has no label to show, so the filter is
+// dropped before the (now pointless) listings query runs.
+const areas = await listMajorAreasIncluding(Astro.locals.db, 'industrial', filters.area);
+const areaRedirect = areaRedirectUrl(Astro.url, areas, filters.area);
+if (areaRedirect) return Astro.redirect(areaRedirect, 302);
 const { items, total } = await listListings(Astro.locals.db, filters);
-const areas = await listMajorAreas(Astro.locals.db, 'industrial');
+const areaName = filters.area ? areas.find((a) => a.slug === filters.area)?.name : undefined;
 const perPage = filters.perPage ?? 12;
 const page = filters.page ?? 1;
 const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -54,7 +59,9 @@ function pageHref(p: number) {
 
         {items.length === 0 ? (
           <div class="empty-state">
-            <p>No industrial spaces match your current filters.</p>
+            <p>{areaName && isAreaOnlyFilter(filters)
+              ? `No industrial spaces in ${areaName} right now.`
+              : 'No industrial spaces match your current filters.'}</p>
             <a href="/industrial" class="btn-secondary">Clear filters</a>
           </div>
         ) : (

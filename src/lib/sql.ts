@@ -71,3 +71,23 @@ export function parseListingFilters(url: URL): ListingFilters {
   if (num('page') !== undefined)    f.page = num('page');
   return f;
 }
+
+// An ?area= slug that names no major area at all (typo, junk, a renamed slug) has no label
+// anywhere, so the honest resolution is to drop the filter rather than show a raw slug or
+// pretend no filter is applied. Returns the URL to redirect to, or null to stay put — which is
+// the case whenever the area is absent or was resolved to a real name.
+export function areaRedirectUrl(url: URL, areas: { slug: string }[], area?: string): string | null {
+  if (!area || areas.some((a) => a.slug === area)) return null;
+  const u = new URL(url);
+  u.searchParams.delete('area');
+  u.searchParams.delete('page'); // dropping a filter changes the result set; the old page may not exist
+  return u.pathname + u.search;
+}
+
+// Whether `area` is the only thing narrowing the results. The empty state may name the area only
+// then — with bhk/rent/furnishing also set, any of them could be what emptied the page, and
+// blaming the area would be a quieter version of the same misrepresentation.
+export function isAreaOnlyFilter(f: ListingFilters): boolean {
+  return !!f.area && !f.bhk && !f.furnishing && !f.neighbourhood
+    && f.minRent == null && f.maxRent == null;
+}
