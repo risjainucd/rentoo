@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/select"
 
 // Value → label for the selects, passed to <Select items> and used to render the options.
-// Without `items`, Base UI's <Select.Value> falls back to the raw value ("semi-furnished"),
-// and SSR/client disagree once the popup registers the real labels (hydration mismatch).
+// Without `items`, Base UI's <Select.Value> falls back to rendering the raw value, so the
+// trigger reads "semi-furnished" instead of "Semi-furnished".
 const FURNISHING_ITEMS: Record<string, string> = {
   "": "—",
   furnished: "Furnished",

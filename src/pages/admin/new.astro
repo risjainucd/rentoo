@@ -13,6 +13,9 @@ const STATUSES = ['available', 'rented', 'on-hold'];
 const FURNISHINGS = ['furnished', 'semi-furnished', 'unfurnished'];
 
 let error: string | null = null;
+// The rejected submission, echoed back into the form so a validation bounce doesn't make the
+// admin retype everything (and doesn't silently reset the selects to defaults they never picked).
+let submitted: Record<string, string> | null = null;
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
@@ -53,6 +56,7 @@ if (Astro.request.method === 'POST') {
     return Astro.redirect(`/admin/${slug}?created=1`, 303);
   }
   error = `Please provide a valid: ${problems.join(', ')}.`;
+  submitted = Object.fromEntries([...form.entries()].map(([k, v]) => [k, String(v)]));
 }
 
 const neighbourhoods = (await listNeighbourhoods(db)).map((n) => ({ slug: n.slug, name: n.name }));
@@ -67,7 +71,7 @@ const suggestedDisplayId = await suggestNextDisplayId(db);
   {neighbourhoods.length === 0 ? (
     <div class="err">No neighbourhoods exist yet — seed the <code>neighbourhoods</code> table before adding listings.</div>
   ) : (
-    <AdminNewListingForm client:load neighbourhoods={neighbourhoods} suggestedDisplayId={suggestedDisplayId} />
+    <AdminNewListingForm client:load neighbourhoods={neighbourhoods} suggestedDisplayId={suggestedDisplayId} values={submitted} />
   )}
 
   <style>

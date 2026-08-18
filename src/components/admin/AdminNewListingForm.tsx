@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/select"
 
 // Value → label for every select. Passed to <Select items> AND used to render the options,
-// so the two can never drift. Base UI's <Select.Value> can only resolve an item's label from
-// `items`: the options live in a Portal that isn't mounted during SSR, so without this the
-// trigger renders the raw value ("c-scheme") on the server and React reports a hydration
-// mismatch when the client renders the label ("C Scheme").
+// so the two can never drift. Base UI's <Select.Value> resolves a selected item's LABEL from
+// `items`; without it the trigger falls back to rendering the raw value, so the admin sees
+// "c-scheme" / "residential" instead of "C Scheme" / "Residential" — on the server-rendered
+// HTML and after hydration alike.
 const SEGMENT_ITEMS: Record<string, string> = {
   residential: "Residential",
   commercial: "Commercial",
@@ -40,6 +40,13 @@ export interface AdminNewListingFormProps {
   neighbourhoods: { slug: string; name: string }[]
   /** Server-computed next "#NN" — shown read-only; the server assigns it on submit. */
   suggestedDisplayId: string
+  /**
+   * The raw fields of a submission the server rejected. Every control seeds from this so a
+   * validation bounce re-renders what the admin typed instead of an empty form — resetting
+   * the selects would otherwise silently swap in valid-looking defaults (Residential / the
+   * first neighbourhood / Available) that the admin never chose.
+   */
+  values?: Record<string, string> | null
 }
 
 function Row({
@@ -67,12 +74,15 @@ function Row({
 }
 
 export function AdminNewListingForm(props: AdminNewListingFormProps) {
-  const [segment, setSegment] = React.useState("residential")
-  const [neighbourhood, setNeighbourhood] = React.useState(props.neighbourhoods[0]?.slug ?? "")
-  const [propertyType, setPropertyType] = React.useState("")
-  const [bhk, setBhk] = React.useState("")
-  const [slug, setSlug] = React.useState("")
-  const [slugEdited, setSlugEdited] = React.useState(false)
+  const prev = props.values ?? {}
+  const [segment, setSegment] = React.useState(prev.segment || "residential")
+  // Deliberately unset: pre-selecting the first of 88 neighbourhoods files the listing in an
+  // arbitrary area, and the server only checks that the slug exists, so the wrong area validates.
+  const [neighbourhood, setNeighbourhood] = React.useState(prev.neighbourhood_slug || "")
+  const [propertyType, setPropertyType] = React.useState(prev.property_type || "")
+  const [bhk, setBhk] = React.useState(prev.bhk_type || "")
+  const [slug, setSlug] = React.useState(prev.slug || "")
+  const [slugEdited, setSlugEdited] = React.useState(Boolean(prev.slug))
 
   const neighbourhoodItems = React.useMemo(
     () => Object.fromEntries(props.neighbourhoods.map((n) => [n.slug, n.name])),
@@ -118,6 +128,10 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
         </Select>
       </Row>
 
+      {/* No `required` here: Base UI's hidden select input is aria-hidden and tabindex=-1, so the
+          browser cannot show a validation bubble on it — the submit would just be swallowed with
+          no visible message. An unset area is caught server-side instead, which re-renders with a
+          readable banner and every field preserved. */}
       <Row label="Neighbourhood" htmlFor="neighbourhood" hint="Determines the area map and browse filters.">
         <Select
           name="neighbourhood_slug"
@@ -126,7 +140,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
           onValueChange={(v) => setNeighbourhood(String(v))}
         >
           <SelectTrigger id="neighbourhood" className="h-9 w-full max-w-72">
-            <SelectValue />
+            <SelectValue placeholder="Choose an area…" />
           </SelectTrigger>
           <SelectContent>
             {props.neighbourhoods.map((n) => (
@@ -164,15 +178,15 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       )}
 
       <Row label="Rent (₹/mo)" htmlFor="rent_inr">
-        <Input id="rent_inr" name="rent_inr" type="number" min={1} required defaultValue="" className="h-9 max-w-48" />
+        <Input id="rent_inr" name="rent_inr" type="number" min={1} required defaultValue={prev.rent_inr || ""} className="h-9 max-w-48" />
       </Row>
 
       <Row label="Area (sq ft)" htmlFor="area_sqft">
-        <Input id="area_sqft" name="area_sqft" type="number" min={0} defaultValue="" placeholder="optional" className="h-9 max-w-48" />
+        <Input id="area_sqft" name="area_sqft" type="number" min={0} defaultValue={prev.area_sqft || ""} placeholder="optional" className="h-9 max-w-48" />
       </Row>
 
       <Row label="Furnishing" htmlFor="furnishing">
-        <Select name="furnishing" items={FURNISHING_ITEMS} defaultValue="">
+        <Select name="furnishing" items={FURNISHING_ITEMS} defaultValue={prev.furnishing || ""}>
           <SelectTrigger id="furnishing" className="h-9 w-full max-w-72">
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -187,7 +201,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       </Row>
 
       <Row label="Status" htmlFor="status">
-        <Select name="status" items={STATUS_ITEMS} defaultValue="available">
+        <Select name="status" items={STATUS_ITEMS} defaultValue={prev.status || "available"}>
           <SelectTrigger id="status" className="h-9 w-full max-w-72">
             <SelectValue />
           </SelectTrigger>
@@ -202,7 +216,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       </Row>
 
       <Row label="Landmark" htmlFor="landmark">
-        <Input id="landmark" name="landmark" defaultValue="" placeholder="optional" className="h-9" />
+        <Input id="landmark" name="landmark" defaultValue={prev.landmark || ""} placeholder="optional" className="h-9" />
       </Row>
 
       <Row
@@ -228,7 +242,7 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
       </Row>
 
       <Row label="Description" htmlFor="description">
-        <Textarea id="description" name="description" defaultValue="" placeholder="optional" />
+        <Textarea id="description" name="description" defaultValue={prev.description || ""} placeholder="optional" />
       </Row>
 
       <Row
@@ -240,17 +254,17 @@ export function AdminNewListingForm(props: AdminNewListingFormProps) {
           </>
         }
       >
-        <Input id="map_url" name="map_url" defaultValue="" placeholder="optional" className="h-9" />
+        <Input id="map_url" name="map_url" defaultValue={prev.map_url || ""} placeholder="optional" className="h-9" />
       </Row>
 
       <Row label="Flags">
         <div className="flex flex-col gap-3 pt-1">
           <div className="flex items-center gap-2.5">
-            <Switch id="featured" name="featured" aria-label="Featured" />
+            <Switch id="featured" name="featured" aria-label="Featured" defaultChecked={prev.featured === "on"} />
             <label htmlFor="featured" className="cursor-pointer text-sm font-medium">Featured</label>
           </div>
           <div className="flex items-center gap-2.5">
-            <Switch id="published" name="published" aria-label="Published" />
+            <Switch id="published" name="published" aria-label="Published" defaultChecked={prev.published === "on"} />
             <label htmlFor="published" className="cursor-pointer text-sm font-medium">
               Published <span className="font-normal text-muted-foreground">(off = draft; add photos first)</span>
             </label>
