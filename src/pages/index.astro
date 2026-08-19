@@ -8,9 +8,18 @@ import PropertyCard from '../components/PropertyCard.astro';
 import FeaturedHero from '../components/FeaturedHero.astro';
 import { featuredListings, getFeaturedListing, listMajorAreas } from '../lib/db';
 import { WHATSAPP_NUMBER } from '../lib/site';
-const featured = await featuredListings(Astro.locals.db, 6);
-const featuredOne = await getFeaturedListing(Astro.locals.db);
-const areas = await listMajorAreas(Astro.locals.db);
+// Three reads with no data dependency on one another, so awaiting them in sequence bought
+// nothing and cost the page the SUM of their latencies before the first byte of HTML — five D1
+// round trips, since the two listing calls each fetch their photos in a follow-up query. Issued
+// together, the page waits on the slowest chain instead. Promise.all attaches a handler to every
+// input as it is called, so a rejection on any of them still surfaces here exactly as the serial
+// awaits did, with no unhandled rejection left behind.
+const db = Astro.locals.db;
+const [featured, featuredOne, areas] = await Promise.all([
+  featuredListings(db, 6),
+  getFeaturedListing(db),
+  listMajorAreas(db),
+]);
 ---
 
 <BaseLayout title="Rentoo: Curated rentals in Jaipur" description="Hand-verified residential, commercial, and industrial rentals in Jaipur. Transparent brokerage, agreed up front. WhatsApp-first response within 30 minutes.">

@@ -7,6 +7,14 @@ export function getDb(locals: App.Locals): D1Database { return locals.db; }
 
 // Attach each card's full ordered photo list (base r2_keys) in one batched query.
 // photos[0] === cover_key (cover is display_order 0). Mutates + returns the cards.
+//
+// This stays a second round trip on purpose. The IN-list is bound from the slugs the caller's
+// query just returned, so it cannot ride along in the caller's db.batch(). Inlining the caller's
+// SELECT as an `IN (SELECT ...)` subquery would remove that dependency but not safely: the
+// listings ORDER BY is not a total order over the data we actually have (every imported row
+// shares one created_at, so `created_at DESC LIMIT n` picks an arbitrary n), and a second
+// evaluation in a different syntactic position may well pick a different window — which would
+// silently leave some cards with only their cover instead of a gallery.
 async function attachPhotos(db: D1Database, cards: ListingCard[]) {
   if (!cards.length) return cards;
   const slugs = cards.map((c) => c.slug);
@@ -243,6 +251,9 @@ export async function deletePhoto(db: D1Database, slug: string, id: string): Pro
   await db.batch(stmts);
 }
 
+// The home page's "just added" grid: the DEFAULT sort (p.created_at DESC), NOT the 'featured'
+// sort getFeaturedListing uses. The two therefore cannot be collapsed into one query — see the
+// note on getFeaturedListing below.
 export async function featuredListings(db: D1Database, limit: number) {
   const { sql, params } = buildListingsQuery({ perPage: limit, page: 1 });
   const r = await db.prepare(sql).bind(...params).all<Record<string, any>>();
@@ -258,6 +269,10 @@ export async function featuredListings(db: D1Database, limit: number) {
 // and that is what we show: the slot carries the only context-prefilled WhatsApp CTA on the
 // page, so leaving it dark costs more than spotlighting an unflagged listing. Returns null
 // only when there is genuinely nothing to show.
+//
+// Not derivable from featuredListings()' rows, tempting as that is: those are ordered by
+// created_at alone, so an admin-flagged listing that is not among the newest few would never
+// appear in them and the spotlight would silently ignore the flag.
 export async function getFeaturedListing(db: D1Database): Promise<ListingCard | null> {
   const { sql, params } = buildListingsQuery({ sort: 'featured', perPage: 1, page: 1 });
   const r = await db.prepare(sql).bind(...params).all<Record<string, any>>();
