@@ -84,9 +84,13 @@ const isFeatured = variant === 'featured';
     box-shadow: 0 1px 2px rgba(8, 39, 70, 0.12);
   }
 
-  /* Status pill */
+  /* Status pill — a status is data, so it takes the mono label style.
+     z-index keeps it above the card's hover scrim, which is painted at z-index 1
+     precisely to make this pill legible and was covering it instead. */
   .status-pill {
     position: absolute;
+    z-index: 2;
+    font-family: var(--font-mono);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -104,18 +108,18 @@ const isFeatured = variant === 'featured';
     background: rgba(255, 255, 255, 0.94);
   }
 
+  /* The documented badge-ok foreground: --ok-green on white is only 3.3:1. */
   .status-pill--available {
-    color: var(--ok-green);
+    color: #0F7A37;
   }
 
-  .status-pill--rented {
-    background: rgba(241, 245, 249, 0.94);
-    color: var(--rest-gray);
-  }
-
+  /* Rented and on-hold are both deliberately inert, in Rest tones. On-hold used to
+     borrow the focus-ring clay on a terracotta ground, which spent the one rationed
+     accent on a non-event and read at 2.9:1. */
+  .status-pill--rented,
   .status-pill--on-hold {
-    background: rgba(245, 228, 218, 0.94);
-    color: var(--focus-clay);
+    background: rgba(241, 245, 249, 0.94);
+    color: var(--ink-muted);
   }
 
   .status-pill .dot {
@@ -133,15 +137,18 @@ const isFeatured = variant === 'featured';
     }
   }
 
+  /* Derived from the dot's own colour so the halo can never drift from the pill. */
   @keyframes dot-pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5); }
-    70%  { box-shadow: 0 0 0 5px rgba(22, 163, 74, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 50%, transparent); }
+    70%  { box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 0%, transparent); }
   }
 
   /* Verified pill */
   .verified-pill {
     position: absolute;
+    z-index: 2;
+    font-family: var(--font-mono);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -157,7 +164,7 @@ const isFeatured = variant === 'featured';
     right: var(--space-sm);
     left: auto;
     background: rgba(220, 252, 231, 0.94);
-    color: var(--ok-green);
+    color: #0F7A37;
   }
 
   .verified-pill svg {
@@ -169,6 +176,7 @@ const isFeatured = variant === 'featured';
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    font-family: var(--font-mono);
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.04em;

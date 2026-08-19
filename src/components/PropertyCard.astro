@@ -70,11 +70,13 @@ const statusLabel = card.status === 'available'
       </div>
       <h3 class="card-title">{card.title}</h3>
       {card.landmark && <p class="card-landmark">{card.landmark}</p>}
-      <p class="card-meta-row">
-        {card.bhk_type && <span>{card.bhk_type}</span>}
-        {card.furnishing && card.bhk_type && <span aria-hidden="true"> · </span>}
-        {card.furnishing && <span>{card.furnishing}</span>}
-      </p>
+      {(card.bhk_type || card.furnishing) && (
+        <p class="card-meta-row">
+          {card.bhk_type && <span>{card.bhk_type}</span>}
+          {card.furnishing && card.bhk_type && <span aria-hidden="true"> · </span>}
+          {card.furnishing && <span>{card.furnishing}</span>}
+        </p>
+      )}
     </div>
   </a>
 </article>
@@ -462,6 +464,7 @@ const statusLabel = card.status === 'available'
     margin-bottom: 4px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }

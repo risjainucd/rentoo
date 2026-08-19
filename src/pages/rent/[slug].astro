@@ -11,10 +11,25 @@ import { mapEmbed } from '../../lib/utils';
 const data = await getListingBySlug(Astro.locals.db, Astro.params.slug!);
 if (!data) return Astro.redirect('/404', 404);
 const { property, media, neighbourhood } = data;
-const images = media.filter(m => m.kind === 'photo').map(m => ({
+// `property_type` and `furnishing` are stored lowercase ("apartment", "furnished"),
+// so case them once here and use the same label in the breadcrumb, heading, spec
+// table and alt text instead of only capitalising the heading in CSS.
+const titleCase = (s: string) => s.replace(/\b[a-z]/g, (c) => c.toUpperCase());
+const typeLabel = titleCase(property.property_type);
+const furnishingLabel = property.furnishing ? titleCase(property.furnishing) : null;
+const homeLabel = [property.bhk_type, typeLabel].filter(Boolean).join(' ');
+// Landmarks are entered with their own locative word about half the time
+// ("near diona", "Opp jpi pre school"), so only add "near" when it is missing.
+const landmark = property.landmark?.trim() || null;
+const landmarkNear = landmark
+  ? (/^(near|nr\.?|opp\.?|opposite|behind|beside|next\s+to|in\s+front)\b/i.test(landmark)
+      ? landmark
+      : `near ${landmark}`)
+  : null;
+const images = media.filter(m => m.kind === 'photo').map((m, i) => ({
   gallery: mediaUrl(m.r2_key, 'gallery'),
   full: mediaUrl(m.r2_key, 'full'),
-  alt: `${property.display_id} — ${property.bhk_type ?? property.property_type}`,
+  alt: `${homeLabel} in ${neighbourhood.name} — photo ${i + 1}`,
 }));
 const tourVideo = (() => {
   const v = media.find(m => m.kind === 'video');
@@ -22,13 +37,13 @@ const tourVideo = (() => {
   return {
     src: videoUrl(v.r2_key),                 // /media/properties/<slug>/tour.mp4
     poster: mediaUrl(v.r2_key, 'gallery'),   // /media/properties/<slug>/tour-gallery.webp
-    alt: `${property.display_id} video tour`,
+    alt: `${homeLabel} in ${neighbourhood.name} — video tour`,
   };
 })();
 const waText = encodeURIComponent(`Hi Rentoo, I'm interested in ${property.display_id} (${property.slug}).`);
 const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;
-const pageTitle = [property.bhk_type, property.property_type, property.landmark ? `near ${property.landmark}` : null, `· ${property.display_id} — Rentoo`].filter(Boolean).join(' ');
+const pageTitle = [homeLabel, landmarkNear, `· ${property.display_id} — Rentoo`].filter(Boolean).join(' ');
 const statusLabel = property.status === 'available' ? 'Available now' : property.status === 'rented' ? 'Rented out' : 'On hold';
 const statusClass = property.status === 'available' ? 'status--available' : property.status === 'rented' ? 'status--rented' : 'status--on-hold';
 const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_slug });
@@ -36,7 +51,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
 
 <BaseLayout
   title={pageTitle}
-  description={`${property.bhk_type ?? property.property_type}${property.landmark ? ` near ${property.landmark}` : ''}, ${neighbourhood.name}. ${rupees(property.rent_inr)}/month. Hand-verified by Rentoo.`}
+  description={`${homeLabel}${landmarkNear ? ` ${landmarkNear}` : ''}, ${neighbourhood.name}. ${rupees(property.rent_inr)}/month. Hand-verified by Rentoo.`}
 >
   <SiteHeader slot="header" />
 
@@ -50,7 +65,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
       <a href={`/rent?neighbourhood=${neighbourhood.slug}`}>{neighbourhood.name}</a>
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
       <span class="current" aria-current="page">
-        {property.bhk_type ?? property.property_type} · {property.display_id}
+        {`${property.bhk_type || typeLabel} · ${property.display_id}`}
       </span>
     </div>
   </nav>
@@ -63,8 +78,8 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
       </div>
     </div>
   ) : (
-    <div class="gallery-placeholder" aria-hidden="true">
-      <div class="section-inner"><div class="no-photos">Photos coming soon</div></div>
+    <div class="gallery-placeholder">
+      <div class="section-inner"><p class="no-photos">Photos coming soon</p></div>
     </div>
   )}
 
@@ -78,29 +93,31 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
         <!-- Status row -->
         <div class="detail-status-row">
           <span class="display-id-tag">{property.display_id}</span>
+          <span class="verified-inline">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19l12-12-1.41-1.41z"/></svg>
+            Verified by Rentoo
+          </span>
           <span class={`status-badge ${statusClass}`}>
             <span class="dot" aria-hidden="true"></span>
             {statusLabel}
           </span>
         </div>
 
-        <h1>
-          {[property.bhk_type, property.property_type].filter(Boolean).join(' ')}
-          {`, ${neighbourhood.name}`}
-        </h1>
+        <h1>{`${homeLabel}, ${neighbourhood.name}`}</h1>
 
-        {property.landmark && (
+        {(landmark || furnishingLabel) && (
           <p class="detail-landmark">
-            {property.landmark}
-            {property.furnishing && ` · ${property.furnishing.charAt(0).toUpperCase() + property.furnishing.slice(1)}`}
+            {[landmark, furnishingLabel].filter(Boolean).join(' · ')}
           </p>
         )}
 
-        <!-- Price block -->
+        <!-- Price block: rent and, where we have it, size on one ledger line. -->
         <div class="price-block">
           <span class="price-num">{rupees(property.rent_inr)}</span>
           <span class="price-suf">/ month</span>
-          <span class="price-note">Verified listing</span>
+          {property.area_sqft && (
+            <span class="price-figure">{property.area_sqft.toLocaleString('en-IN')} sq ft</span>
+          )}
         </div>
 
         <!-- Spec list -->
@@ -115,12 +132,12 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
             )}
             <div class="spec-row">
               <span class="spec-k">Property type</span>
-              <span class="spec-v">{property.property_type}</span>
+              <span class="spec-v">{typeLabel}</span>
             </div>
-            {property.furnishing && (
+            {furnishingLabel && (
               <div class="spec-row">
                 <span class="spec-k">Furnishing</span>
-                <span class="spec-v">{property.furnishing.charAt(0).toUpperCase() + property.furnishing.slice(1)}</span>
+                <span class="spec-v">{furnishingLabel}</span>
               </div>
             )}
             {property.area_sqft && (
@@ -133,10 +150,10 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
               <span class="spec-k">Status</span>
               <span class={`spec-v ${property.status === 'available' ? 'spec-v--ok' : property.status === 'rented' ? 'spec-v--rented' : ''}`}>{statusLabel}</span>
             </div>
-            {property.landmark && (
+            {landmark && (
               <div class="spec-row">
                 <span class="spec-k">Nearby landmark</span>
-                <span class="spec-v">{property.landmark}</span>
+                <span class="spec-v">{landmark}</span>
               </div>
             )}
             <div class="spec-row">
@@ -172,7 +189,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
           <div class="map-meta">
             <span>{neighbourhood.name}, Jaipur</span>
             {map.exact
-              ? (property.landmark && <span>{property.landmark}</span>)
+              ? (landmark && <span>{landmark}</span>)
               : <span class="map-approx">Approximate · area view</span>}
           </div>
         </div>
@@ -182,10 +199,9 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
       <!-- Sticky sidebar CTA -->
       <aside class="sticky-cta" aria-label="Contact Rentoo">
         <div class="cta-card-inner">
-          <div class="cta-card-kicker">Interested?</div>
-          <div class="cta-card-title">
+          <p class="cta-card-title">
             Talk to Rentoo about <strong>{property.display_id}</strong>. We usually reply in under 30 minutes during business hours.
-          </div>
+          </p>
           <div class="cta-card-actions">
             <a href={waUrl} class="btn-whatsapp btn-whatsapp--lg btn-sheen" data-cta="whatsapp-detail">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
@@ -193,7 +209,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
               </svg>
               <span>Chat on WhatsApp</span>
             </a>
-            <a href="tel:+918740000854" class="btn-secondary">Request a callback</a>
+            <a href={`tel:+${WHATSAPP_NUMBER}`} class="btn-secondary">Request a callback</a>
           </div>
           <div class="cta-fineprint">Listed by Rentoo · Visit on request</div>
         </div>
@@ -202,8 +218,8 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
         <div class="location-card">
           <div class="location-card-lbl">Neighbourhood</div>
           <div class="location-card-name">{neighbourhood.name}</div>
-          {property.landmark && (
-            <div class="location-card-addr">near {property.landmark}</div>
+          {landmarkNear && (
+            <div class="location-card-addr">{landmarkNear}</div>
           )}
           {neighbourhood.short_description && (
             <div class="location-card-desc">{neighbourhood.short_description}</div>
@@ -222,13 +238,14 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
       </svg>
       <span>WhatsApp</span>
     </a>
-    <a href="tel:+918740000854" class="btn-secondary">Call</a>
+    <a href={`tel:+${WHATSAPP_NUMBER}`} class="btn-secondary">Call</a>
   </div>
+
+  <div id="view-beacon" data-slug={property.slug} hidden></div>
 
   <SiteFooter slot="footer" />
 </BaseLayout>
 
-<div id="view-beacon" data-slug={property.slug} hidden></div>
 <script>
   // Count one view per session per listing.
   function beaconView() {
@@ -299,13 +316,19 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
 
   .no-photos {
     height: 200px;
-    background: var(--haze-tint);
+    margin: 0;
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
     border-radius: var(--r-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--ink-soft);
-    font-size: 0.875rem;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   /* ── Detail layout ── */
@@ -348,10 +371,29 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     border-radius: var(--r-sm);
   }
 
+  /* Statuses and marks are data, so they take the mono label style, like the
+     display-ID tag beside them. */
+  .verified-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    /* The documented badge-ok foreground: --ok-green on --ok-mist is only 3.0:1. */
+    color: #0F7A37;
+    background: var(--ok-mist);
+    padding: 4px var(--space-sm);
+    border-radius: var(--r-sm);
+  }
+
   .status-badge {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -369,7 +411,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
   }
 
   .status--available {
-    color: var(--ok-green);
+    color: #0F7A37;
     border: 1px solid var(--ok-green);
   }
 
@@ -378,14 +420,18 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     border: 1px solid var(--danger-red);
   }
 
+  /* On-hold is an inert state, not an accent: terracotta is rationed to one mark
+     per screen and reads as emphasis, which "on hold" is not. */
   .status--on-hold {
-    color: var(--terracotta);
-    border: 1px solid var(--terracotta);
+    color: var(--ink-muted);
+    border: 1px solid var(--rest-gray);
   }
 
   /* ── Detail main ── */
   .detail-main h1 {
-    font-size: clamp(1.5rem, 3.5vw, 2.125rem);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.015em;
     margin-bottom: var(--space-sm);
@@ -406,6 +452,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
     margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
   }
 
   .price-num {
@@ -421,13 +468,15 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     color: var(--ink-muted);
   }
 
-  .price-note {
-    margin-left: auto;
+  /* Size, ruled off from the rent the way a ledger column is. */
+  .price-figure {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
+    font-size: 0.8125rem;
     color: var(--ink-muted);
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-left: var(--space-sm);
+    border-left: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
   }
 
   /* ── Detail sections ── */
@@ -436,8 +485,9 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
   }
 
   .detail-section h2 {
+    font-family: var(--font-display);
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: var(--space-md);
     letter-spacing: -0.005em;
   }
@@ -468,7 +518,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     display: flex;
     justify-content: space-between;
     gap: var(--space-md);
-    padding: 11px var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
     border-bottom: 1px solid var(--line);
   }
 
@@ -495,7 +545,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
   }
 
   .spec-v--ok {
-    color: var(--ok-green);
+    color: #0F7A37;
     font-weight: 600;
   }
 
@@ -511,29 +561,6 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     border: 1px solid var(--line);
   }
 
-  .map-placeholder {
-    height: 280px;
-    border-radius: var(--r-md);
-    background: linear-gradient(135deg, #dde6f0, #c5d3e3);
-    position: relative;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .map-pin {
-    background: var(--terracotta);
-    color: var(--paper);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--r-sm);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(181, 83, 46, 0.3);
-    position: relative;
-  }
-
   .map-meta {
     display: flex;
     justify-content: space-between;
@@ -545,9 +572,11 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     color: var(--ink-muted);
   }
 
+  /* This caveat is real information about the pin, so it reads as text, not as a
+     placeholder: --ink-soft on paper is 2.4:1. */
   .map-approx {
     font-style: italic;
-    color: var(--ink-soft);
+    color: var(--ink-muted);
   }
 
   /* ── Sticky sidebar CTA ── */
@@ -567,21 +596,11 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     box-shadow: var(--elev-2);
   }
 
-  .cta-card-kicker {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--terracotta);
-    margin-bottom: var(--space-sm);
-  }
-
   .cta-card-title {
     font-size: 1.0625rem;
     line-height: 1.45;
     color: var(--ink);
-    margin-bottom: var(--space-lg);
+    margin: 0 0 var(--space-lg);
     font-weight: 500;
   }
 
@@ -632,7 +651,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
   .location-card-addr {
     font-size: 0.875rem;
     color: var(--ink-muted);
-    margin-top: 2px;
+    margin-top: var(--space-xs);
     line-height: 1.5;
   }
 
@@ -650,14 +669,18 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     justify-content: center;
     gap: var(--space-sm);
     padding: var(--space-md) var(--space-xl);
-    background: linear-gradient(180deg, #2ee06d 0%, var(--whatsapp-deep) 100%);
-    color: var(--paper);
+    /* The two reserved WhatsApp greens — the brightened #2ee06d this used to open on
+       was outside the palette. Flat at rest; the lift is the hover response. */
+    background: var(--whatsapp-signal);
+    /* Navy on WhatsApp green is 8.64:1; paper on it was 1.9:1. Keeps the reserved green
+       intact and matches the header and home page, which use the same pairing. */
+    color: var(--jaipur-navy);
     font-size: 1rem;
     font-weight: 600;
     border-radius: var(--r-md);
     min-height: 48px;
     text-decoration: none;
-    box-shadow: 0 8px 20px rgba(31, 185, 88, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    box-shadow: var(--elev-1);
     transition: background var(--dur-base) var(--ease-out),
                 box-shadow var(--dur-base) var(--ease-out),
                 transform var(--dur-fast) var(--ease-out);
@@ -665,9 +688,14 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
   }
 
   .btn-whatsapp:hover {
-    background: linear-gradient(180deg, #28cf63 0%, #189c4b 100%);
-    box-shadow: 0 12px 28px rgba(31, 185, 88, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    background: var(--whatsapp-deep);
+    box-shadow: var(--elev-3);
     transform: translateY(-1px);
+  }
+
+  .btn-whatsapp:active {
+    transform: translateY(0);
+    box-shadow: var(--elev-1);
   }
 
   .btn-whatsapp--lg {
@@ -687,7 +715,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     font-size: 0.9375rem;
     font-weight: 600;
     border-radius: var(--r-md);
-    border: 1.5px solid var(--line);
+    border: 1px solid var(--line);
     min-height: 48px;
     text-decoration: none;
     transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
@@ -699,11 +727,18 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
     background: var(--paper-warm);
   }
 
+  .btn-secondary:active {
+    transform: translateY(1px);
+  }
+
   /* ── Mobile sticky CTA ── */
   .mobile-sticky-cta {
     display: flex;
     gap: var(--space-sm);
     padding: var(--space-md) var(--gutter);
+    /* Clear the iPhone home indicator — the layout ships viewport-fit=cover and this
+       bar is the primary control on the device the traffic actually arrives on. */
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
     background: var(--paper-snow);
     border-top: 1px solid var(--line);
     position: fixed;
@@ -728,7 +763,7 @@ const map = mapEmbed({ mapUrl: property.map_url, majorSlug: neighbourhood.major_
 
   @media (max-width: 1023px) {
     :global(body) {
-      padding-bottom: 80px;
+      padding-bottom: calc(var(--space-4xl) + var(--space-lg) + env(safe-area-inset-bottom, 0px));
     }
   }
 </style>
