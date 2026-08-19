@@ -21,7 +21,7 @@ describe('buildListingsQuery', () => {
 describe('mapRowToCard', () => {
   test('builds a ListingCard incl. title + segment', () => {
     const card = mapRowToCard({ slug: 's', display_id: '#01', segment: 'residential', bhk_type: '2BHK', property_type: 'apartment', rent_inr: 35000, landmark: 'near Gulab Garh', furnishing: 'furnished', status: 'available', neighbourhood_slug: 'mansarovar', cover_key: 'properties/s/0', cover_w: 1200, cover_h: 900 });
-    expect(card.title).toBe('2BHK apartment');
+    expect(card.title).toBe('2BHK Apartment'); // property_type is stored lowercase; the mapper cases it
     expect(card.segment).toBe('residential');
     expect(card.cover_key).toBe('properties/s/0');
   });

@@ -4,7 +4,7 @@
 import Gallery from './Gallery.astro';
 import { mediaUrl, videoUrl } from '../lib/media';
 import { WHATSAPP_NUMBER } from '../lib/site';
-import { mapEmbed } from '../lib/utils';
+import { mapEmbed, titleCase, withLocative } from '../lib/utils';
 import type { Property, PropertyMedia, Neighbourhood } from '../lib/types';
 
 interface Props { property: Property; media: PropertyMedia[]; neighbourhood: Neighbourhood; }
@@ -14,20 +14,12 @@ const isIndustrial = property.segment === 'industrial';
 const sectionLabel = isIndustrial ? 'Industrial' : 'Commercial';
 const sectionHref = isIndustrial ? '/industrial' : '/commercial';
 
-// `property_type` and `furnishing` are stored lowercase ("office space", "furnished").
-// Case them once here so the breadcrumb, heading, spec table and alt text agree —
-// previously only the <h1> was capitalised, in CSS.
-const titleCase = (s: string) => s.replace(/\b[a-z]/g, (c) => c.toUpperCase());
 const typeLabel = titleCase(property.property_type);
 const furnishingLabel = property.furnishing ? titleCase(property.furnishing) : null;
 // Landmarks are entered with their own locative word about half the time
 // ("near diona", "Opp jpi pre school"), so only add "near" when it is missing.
 const landmark = property.landmark?.trim() || null;
-const landmarkNear = landmark
-  ? (/^(near|nr\.?|opp\.?|opposite|behind|beside|next\s+to|in\s+front)\b/i.test(landmark)
-      ? landmark
-      : `near ${landmark}`)
-  : null;
+const landmarkNear = withLocative(landmark);
 
 const images = media.filter(m => m.kind === 'photo').map((m, i) => ({
   gallery: mediaUrl(m.r2_key, 'gallery'),

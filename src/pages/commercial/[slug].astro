@@ -5,17 +5,20 @@ import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import SpaceDetail from '../../components/SpaceDetail.astro';
 import { getListingBySlug } from '../../lib/db';
+import { titleCase, withLocative, perSqftLabel } from '../../lib/utils';
 const data = await getListingBySlug(Astro.locals.db, Astro.params.slug!);
 if (!data) return Astro.redirect('/404', 404);
 const { property, media, neighbourhood } = data;
 const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;
-const pricePerSqft = property.area_sqft ? Math.round(property.rent_inr / property.area_sqft) : null;
-const pageTitle = [property.property_type, property.landmark ? `near ${property.landmark}` : null, `· ${property.display_id} — Rentoo`].filter(Boolean).join(' ');
+const rateLabel = perSqftLabel(property.rent_inr, property.area_sqft);
+const typeLabel = titleCase(property.property_type);
+const landmarkNear = withLocative(property.landmark);
+const pageTitle = [typeLabel, landmarkNear, `· ${property.display_id} — Rentoo`].filter(Boolean).join(' ');
 ---
 
 <BaseLayout
   title={pageTitle}
-  description={`${property.property_type}${property.landmark ? ` near ${property.landmark}` : ''}, ${neighbourhood.name}. ${rupees(property.rent_inr)}/month${pricePerSqft ? ` (₹${pricePerSqft}/sqft)` : ''}. Hand-verified by Rentoo.`}
+  description={`${typeLabel}${landmarkNear ? ` ${landmarkNear}` : ''}, ${neighbourhood.name}. ${rupees(property.rent_inr)}/month${rateLabel ? ` (${rateLabel})` : ''}. Hand-verified by Rentoo.`}
 >
   <SiteHeader slot="header" />
   <SpaceDetail property={property} media={media} neighbourhood={neighbourhood} />

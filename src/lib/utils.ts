@@ -44,3 +44,29 @@ export function mapEmbed(opts: {
   const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
   return { src, exact: false };
 }
+
+// `property_type` and `furnishing` are stored lowercase ("office space", "furnished").
+// Casing them in CSS only fixes what is rendered — page titles, meta descriptions and
+// alt text stay lowercase, and those are what a WhatsApp link preview shows.
+export function titleCase(s: string): string {
+  return s.replace(/\b[a-z]/g, (c) => c.toUpperCase());
+}
+
+// Landmarks are entered with their own locative word about half the time ("near diona",
+// "Opp jpi pre school"), so only prefix when one is missing — otherwise a title reads
+// "office space near near diona".
+const LOCATIVE = /^(near|nr\.?|opp\.?|opposite|behind|beside|next\s+to|in\s+front)\b/i;
+export function withLocative(landmark?: string | null): string | null {
+  const s = landmark?.trim();
+  if (!s) return null;
+  return LOCATIVE.test(s) ? s : `near ${s}`;
+}
+
+// Rent per sq ft is often below ₹1 on large industrial floors, where Math.round() prints
+// "₹1" for ₹0.57 and "₹0" — falsy — for anything under ₹0.50.
+export function perSqftLabel(rentInr: number, areaSqft?: number | null): string | null {
+  if (!areaSqft) return null;
+  const rate = rentInr / areaSqft;
+  if (!Number.isFinite(rate) || rate <= 0) return null;
+  return `₹${rate < 10 ? rate.toFixed(1) : Math.round(rate)}/sqft`;
+}

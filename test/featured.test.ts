@@ -29,7 +29,7 @@ describe('getFeaturedListing', () => {
     expect(card).not.toBeNull();
     expect(card!.slug).toBe('villa-x');
     expect(card!.featured).toBe(1);
-    expect(card!.title).toBe('3BHK apartment');
+    expect(card!.title).toBe('3BHK Apartment'); // property_type is stored lowercase; the mapper cases it
     expect(card!.photos).toEqual(['properties/villa-x/0']);
   });
 

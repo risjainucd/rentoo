@@ -1,4 +1,5 @@
 import type { ListingFilters, ListingCard, Segment, Furnishing } from './types';
+import { titleCase } from './utils';
 
 const SELECT_CARD = `
   SELECT p.slug, p.display_id, p.segment, p.bhk_type, p.property_type, p.rent_inr, p.landmark,
@@ -38,7 +39,10 @@ export function buildListingsQuery(f: ListingFilters): { sql: string; params: un
   return { sql, params: [...params, perPage, offset], countSql, countParams: [...params] };
 }
 export function mapRowToCard(r: Record<string, any>): ListingCard {
-  const title = [r.bhk_type, r.property_type].filter(Boolean).join(' ');
+  // `property_type` is stored lowercase, so a grid renders "3BHK apartment" beside
+  // "3BHK Villa" depending on how the row was entered. Case it here, once, for every
+  // surface that shows a card.
+  const title = [r.bhk_type, r.property_type ? titleCase(r.property_type) : null].filter(Boolean).join(' ');
   return {
     slug: r.slug, display_id: r.display_id, title, rent_inr: r.rent_inr, landmark: r.landmark,
     segment: r.segment, bhk_type: r.bhk_type, furnishing: r.furnishing, status: r.status,

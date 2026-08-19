@@ -206,7 +206,7 @@ Functional signals, each locked to one meaning:
 ### Hierarchy
 - **Display** (700, `clamp(2rem, 5vw, 3.25rem)`, line-height 1.1, tracking -0.025em): Page-opening statements. One per page.
 - **Headline** (700, `clamp(1.5rem, 3.5vw, 2.25rem)`, line-height 1.2, tracking -0.015em): Section openers.
-- **Title** (700, 1.25rem): Card titles, sub-section heads, admin page titles.
+- **Title** (700, 1.25rem): Sub-section heads and admin page titles. This is the display face's floor — see The Display Floor Rule.
 - **Body** (400, 1.0625rem, line-height 1.6): Editorial prose. Keep measure in the 65–75ch range.
 - **UI** (400, 0.9375rem, line-height 1.5): Standard interface text — card meta, form labels, list rows. The working default below editorial prose.
 - **Base / Small / Caption / Meta** (1rem / 0.875rem / 0.8125rem / 0.75rem): The descending interface steps, in use across every surface.
@@ -217,6 +217,8 @@ Functional signals, each locked to one meaning:
 ### Named Rules
 
 **The Two Faces Rule.** Space Grotesk sets, Geist says. Display type never runs body copy, and body type never sets a headline. A page using one face for both has lost the system.
+
+**The Display Floor Rule.** Space Grotesk applies at 1.25rem (20px) and above. Below that the UI face carries, headings included. The display face earns its keep on distinctive letterforms that only resolve at size; set at 16px and repeated twenty times down a listing grid, it costs legibility and returns no character. A card title at 1rem is therefore Geist by rule, not by oversight.
 
 **The Data Is Mono Rule.** Anything that is an identifier, a status, or a count — `#04`, "AVAILABLE", "26 min" — is set in the mono label style, not in body type.
 
