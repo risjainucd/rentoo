@@ -20,7 +20,7 @@ export interface Neighbourhood {
   major_slug?: string | null; major_area?: string | null;
 }
 // A rolled-up "major area" (e.g. Mansarovar) used for the main-area filter.
-export interface MajorArea { slug: string; name: string; }
+export interface MajorArea { slug: string; name: string; n?: number; }
 export interface ListingCard {
   slug: string; display_id: string; title: string; rent_inr: number; landmark: string | null;
   segment: Segment; bhk_type: string | null; furnishing: Furnishing | null; status: Status;

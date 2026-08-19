@@ -59,7 +59,7 @@ export async function listMajorAreas(db: D1Database, segment?: string) {
      ORDER BY n.major_area ASC`;
   const stmt = segment ? db.prepare(sql).bind(segment) : db.prepare(sql);
   const r = await stmt.all<{ slug: string; name: string; n: number }>();
-  return (r.results ?? []).map((x) => ({ slug: x.slug, name: x.name }));
+  return (r.results ?? []).map((x) => ({ slug: x.slug, name: x.name, n: x.n }));
 }
 // The Area filter options, plus the currently selected area when it has no live listings —
 // rented out, or none in this segment (most areas have no commercial/industrial stock). Base UI
@@ -76,7 +76,7 @@ export async function listMajorAreasIncluding(db: D1Database, segment?: string, 
   if (!row) return areas;
   // Splice rather than re-sort: `areas` is already ordered by SQLite's collation, and inserting
   // leaves that order untouched even where JS string comparison would disagree with it.
-  const entry = { slug: selected, name: row.name };
+  const entry = { slug: selected, name: row.name, n: 0 };
   const at = areas.findIndex((a) => a.name > entry.name);
   return at === -1 ? [...areas, entry] : [...areas.slice(0, at), entry, ...areas.slice(at)];
 }
@@ -251,16 +251,18 @@ export async function featuredListings(db: D1Database, limit: number) {
   return cards;
 }
 
-// The single admin-flagged listing to spotlight on the home page. Uses the existing
-// 'featured' sort (p.featured DESC, p.created_at DESC) + LIMIT 1 and the shared WHERE
-// (published = 1 AND status <> 'rented'), so an unpublished/rented flagged listing never
-// surfaces. Returns null when nothing is flagged: with no featured=1 rows the top row
-// comes back featured:0, which the guard rejects — so the home page renders no hero.
+// The single listing to spotlight on the home page. Uses the existing 'featured' sort
+// (p.featured DESC, p.created_at DESC) + LIMIT 1 and the shared WHERE (published = 1 AND
+// status <> 'rented'), so an unpublished/rented listing never surfaces. When nothing is
+// admin-flagged the same query already returns the most recently added available listing,
+// and that is what we show: the slot carries the only context-prefilled WhatsApp CTA on the
+// page, so leaving it dark costs more than spotlighting an unflagged listing. Returns null
+// only when there is genuinely nothing to show.
 export async function getFeaturedListing(db: D1Database): Promise<ListingCard | null> {
   const { sql, params } = buildListingsQuery({ sort: 'featured', perPage: 1, page: 1 });
   const r = await db.prepare(sql).bind(...params).all<Record<string, any>>();
   const card = (r.results ?? []).map(mapRowToCard)[0];
-  if (!card || card.featured !== 1) return null;
+  if (!card) return null;
   await attachPhotos(db, [card]);
   return card;
 }

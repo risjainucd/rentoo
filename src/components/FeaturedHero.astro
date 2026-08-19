@@ -28,7 +28,7 @@ const specs = [card.bhk_type, card.furnishing].filter(Boolean) as string[];
     <div class="featured-grid">
       <a class="featured-media" href={href} aria-label={`View ${card.title}`}>
         {img ? (
-          <img src={img} alt={card.title} loading="lazy" width={card.cover_w ?? 1200} height={card.cover_h ?? 800} />
+          <img src={img} alt={card.title} loading="eager" fetchpriority="high" width={card.cover_w ?? 1200} height={card.cover_h ?? 800} />
         ) : (
           <div class="featured-media-placeholder"></div>
         )}
@@ -146,7 +146,7 @@ const specs = [card.bhk_type, card.furnishing].filter(Boolean) as string[];
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--terracotta);
+    color: var(--ink-muted);
     margin-bottom: var(--space-md);
   }
   .featured-kicker svg { fill: currentColor; }
@@ -201,7 +201,7 @@ const specs = [card.bhk_type, card.furnishing].filter(Boolean) as string[];
     padding: 5px var(--space-md);
     background: var(--paper-warm);
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: var(--r-sm);
   }
 
   .featured-ctas {

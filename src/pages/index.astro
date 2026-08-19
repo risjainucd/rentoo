@@ -6,8 +6,8 @@ import SiteFooter from '../components/SiteFooter.astro';
 import SectionMarker from '../components/SectionMarker.astro';
 import PropertyCard from '../components/PropertyCard.astro';
 import FeaturedHero from '../components/FeaturedHero.astro';
-import { NumberTicker } from '../components/ui/number-ticker';
 import { featuredListings, getFeaturedListing, listMajorAreas } from '../lib/db';
+import { WHATSAPP_NUMBER } from '../lib/site';
 const featured = await featuredListings(Astro.locals.db, 6);
 const featuredOne = await getFeaturedListing(Astro.locals.db);
 const areas = await listMajorAreas(Astro.locals.db);
@@ -37,7 +37,10 @@ const areas = await listMajorAreas(Astro.locals.db);
           <div class="search-grid">
             <label class="search-field">
               <span class="field-label">Locality</span>
-              <input type="text" name="neighbourhood" placeholder="Mansarovar, C-Scheme..." autocomplete="off" />
+              <select name="area">
+                <option value="">Any area</option>
+                {areas.map(a => <option value={a.slug}>{a.name}</option>)}
+              </select>
             </label>
             <label class="search-field">
               <span class="field-label">BHK</span>
@@ -69,23 +72,23 @@ const areas = await listMajorAreas(Astro.locals.db);
           </button>
         </form>
 
-        <div class="hero-chips" role="list" aria-label="Popular searches">
-          <a href="/rent?bhk=2BHK&neighbourhood=mansarovar" role="listitem">2BHK in Mansarovar</a>
-          <a href="/commercial?type=office&neighbourhood=c-scheme" role="listitem">Office in C-Scheme</a>
-          <a href="/rent?bhk=3BHK&neighbourhood=bapu-nagar" role="listitem">3BHK in Bapu Nagar</a>
-          <a href="/rent?furnishing=furnished&maxRent=30000" role="listitem">Furnished under ₹30K</a>
-        </div>
+        <nav class="hero-chips" aria-label="Popular searches">
+          <a href="/rent?bhk=2BHK&area=mansarovar">2BHK in Mansarovar</a>
+          <a href="/commercial?area=c-scheme">Commercial in C-Scheme</a>
+          <a href="/rent?bhk=3BHK&area=bapu-nagar">3BHK in Bapu Nagar</a>
+          <a href="/rent?furnishing=furnished&maxRent=30000">Furnished under ₹30K</a>
+        </nav>
       </div>
     </div>
   </section>
 
-  <!-- FEATURED PROPERTY (admin-flagged marquee; hidden when nothing is flagged) -->
+  <!-- FEATURED PROPERTY (admin-flagged, else the most recently added available listing) -->
   {featuredOne && <FeaturedHero card={featuredOne} />}
 
   <!-- RECENTLY ADDED / FEATURED -->
   <section class="section section--recently-added" aria-labelledby="recently-added-title">
     <div class="section-inner">
-      <SectionMarker num="01" label="Just added to the catalog" meta={`See all listings ↗`} />
+      <SectionMarker num="01" label="Just added to the catalog" id="recently-added-title" meta="See all listings ↗" metaHref="/rent" />
       {featured.length === 0 ? (
         <p class="empty-state">No listings yet — check back soon.</p>
       ) : (
@@ -107,14 +110,15 @@ const areas = await listMajorAreas(Astro.locals.db);
   {areas.length > 0 && (
     <section class="section section--areas" aria-labelledby="areas-title">
       <div class="section-inner">
-        <SectionMarker num="02" label="By area" meta="Pick what you know" />
-        <div class="area-chips" role="list" data-reveal>
+        <SectionMarker num="02" label="By area" id="areas-title" meta="Pick what you know" />
+        <nav class="area-chips" aria-label="Browse by area" data-reveal>
           {areas.map(a => (
-            <a href={`/rent?area=${a.slug}`} role="listitem">
+            <a href={`/rent?area=${a.slug}`}>
               <span>{a.name}</span>
+              {a.n ? <span class="area-count">{a.n}</span> : null}
             </a>
           ))}
-        </div>
+        </nav>
       </div>
     </section>
   )}
@@ -135,11 +139,11 @@ const areas = await listMajorAreas(Astro.locals.db);
 
       <div class="editorial-proof" role="list" data-reveal style="--reveal-delay:180ms">
         <div class="proof-stat" role="listitem">
-          <span class="stat-num"><NumberTicker value={247} client:visible /></span>
+          <span class="stat-num">247</span>
           <span class="stat-label">Families placed since 2021</span>
         </div>
         <div class="proof-stat" role="listitem">
-          <span class="stat-num"><NumberTicker value={26} suffix=" min" client:visible /></span>
+          <span class="stat-num">26 min</span>
           <span class="stat-label">Median WhatsApp response (last 30 days)</span>
         </div>
         <div class="proof-stat" role="listitem">
@@ -153,7 +157,7 @@ const areas = await listMajorAreas(Astro.locals.db);
   <!-- TESTIMONIALS -->
   <section class="section section--testimonials" aria-labelledby="testimonials-title">
     <div class="section-inner">
-      <SectionMarker num="03" label="Word of mouth" meta="Recent moves" />
+      <SectionMarker num="03" label="Word of mouth" id="testimonials-title" meta="Recent moves" />
 
       <div class="testimonial-row" role="list">
         <figure class="testimonial" role="listitem" data-reveal>
@@ -210,7 +214,7 @@ const areas = await listMajorAreas(Astro.locals.db);
         <p>If I don't have something right today, I'll keep an eye out and tell you when something fits.</p>
 
         <div class="signoff-actions">
-          <a href="https://wa.me/918740000854" class="btn-whatsapp btn-whatsapp--lg btn-sheen">
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Rentoo — looking for a ___ in ___, budget ___.")}`} class="btn-whatsapp btn-whatsapp--lg btn-sheen">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413" />
             </svg>
@@ -218,7 +222,7 @@ const areas = await listMajorAreas(Astro.locals.db);
           </a>
         </div>
 
-        <p class="signoff-meta">+91 8740000854 · connect@rentoo.in · Mangalam Radiance, Durgapura</p>
+        <p class="signoff-meta">+91 87400 00854 · connect@rentoo.in · Mangalam Radiance, Durgapura</p>
       </div>
     </div>
   </section>
@@ -356,7 +360,9 @@ const areas = await listMajorAreas(Astro.locals.db);
     font-size: 0.9375rem;
     font-weight: 600;
     font-style: italic;
-    color: var(--terracotta, #d4794a);
+    /* Terracotta is spent on the section-marker numbers (The One Voice Rule); on the navy
+       hero it also measured 2.66:1, below AA. Paper at 90% reads clearly and stays quiet. */
+    color: rgba(250, 247, 238, 0.9);
     margin-bottom: var(--space-2xl);
   }
 
@@ -369,13 +375,13 @@ const areas = await listMajorAreas(Astro.locals.db);
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    box-shadow: 0 14px 36px rgba(4, 16, 30, 0.30), 0 2px 6px rgba(4, 16, 30, 0.18);
+    box-shadow: 0 14px 36px rgba(8, 39, 70, 0.30), 0 2px 6px rgba(8, 39, 70, 0.18);
     transition: box-shadow var(--dur-base) var(--ease-out),
                 transform var(--dur-base) var(--ease-out);
   }
 
   .hero-search:focus-within {
-    box-shadow: 0 22px 50px rgba(4, 16, 30, 0.38), 0 3px 8px rgba(4, 16, 30, 0.20);
+    box-shadow: 0 22px 50px rgba(8, 39, 70, 0.38), 0 3px 8px rgba(8, 39, 70, 0.20);
     transform: translateY(-3px);
   }
 
@@ -408,7 +414,7 @@ const areas = await listMajorAreas(Astro.locals.db);
 
   .search-field input,
   .search-field select {
-    padding: 10px var(--space-md);
+    padding: var(--space-md);
     border: 1px solid var(--line);
     border-radius: var(--r-sm);
     font-size: 0.9375rem;
@@ -430,7 +436,7 @@ const areas = await listMajorAreas(Astro.locals.db);
     justify-content: center;
     gap: var(--space-sm);
     padding: var(--space-md) var(--space-xl);
-    background: linear-gradient(180deg, #0e3358 0%, #082746 100%);
+    background: var(--jaipur-navy);
     color: var(--paper);
     font-size: 1rem;
     font-weight: 600;
@@ -438,7 +444,7 @@ const areas = await listMajorAreas(Astro.locals.db);
     border: none;
     cursor: pointer;
     min-height: 48px;
-    box-shadow: 0 6px 16px rgba(8, 39, 70, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: var(--elev-1);
     transition: background var(--dur-base) var(--ease-out),
                 box-shadow var(--dur-base) var(--ease-out),
                 transform var(--dur-fast) var(--ease-out);
@@ -446,8 +452,8 @@ const areas = await listMajorAreas(Astro.locals.db);
   }
 
   .btn-primary:hover {
-    background: linear-gradient(180deg, #16477b 0%, #0c3055 100%);
-    box-shadow: 0 10px 24px rgba(8, 39, 70, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    background: var(--midnight-tile);
+    box-shadow: var(--elev-3);
     transform: translateY(-1px);
   }
 
@@ -478,11 +484,11 @@ const areas = await listMajorAreas(Astro.locals.db);
   }
 
   .hero-chips a {
-    padding: 6px var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     font-size: 0.8125rem;
     font-weight: 500;
     border: 1px solid rgba(250, 247, 238, 0.2);
-    border-radius: 999px;
+    border-radius: var(--r-sm);
     color: rgba(250, 247, 238, 0.8);
     text-decoration: none;
     transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
@@ -542,7 +548,7 @@ const areas = await listMajorAreas(Astro.locals.db);
     font-size: 0.9375rem;
     font-weight: 600;
     border-radius: var(--r-md);
-    border: 1.5px solid var(--jaipur-navy);
+    border: 1px solid var(--jaipur-navy);
     min-height: 48px;
     text-decoration: none;
     transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
@@ -560,6 +566,15 @@ const areas = await listMajorAreas(Astro.locals.db);
     border-bottom: 1px solid var(--line);
   }
 
+  .area-count {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-muted);
+    margin-inline-start: var(--space-sm);
+  }
+
   .area-chips {
     display: flex;
     flex-wrap: wrap;
@@ -574,7 +589,7 @@ const areas = await listMajorAreas(Astro.locals.db);
     font-size: 0.9375rem;
     font-weight: 500;
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: var(--r-sm);
     background: var(--paper);
     color: var(--jaipur-navy);
     text-decoration: none;
@@ -651,7 +666,7 @@ const areas = await listMajorAreas(Astro.locals.db);
   .proof-stat {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-sm);
   }
 
   .stat-num {
@@ -703,7 +718,8 @@ const areas = await listMajorAreas(Astro.locals.db);
     transform: translateY(-3px);
   }
 
-  /* Faint terracotta quotation mark behind the quote */
+  /* Faint quotation mark behind the quote — warm hairline, not the accent
+     (The One Voice Rule: terracotta belongs to the section-marker numbers) */
   .testimonial blockquote {
     position: relative;
   }
@@ -716,7 +732,7 @@ const areas = await listMajorAreas(Astro.locals.db);
     font-family: var(--font-display);
     font-size: 3rem;
     line-height: 1;
-    color: var(--terracotta);
+    color: var(--line);
     opacity: 0.16;
     pointer-events: none;
   }
@@ -824,22 +840,23 @@ const areas = await listMajorAreas(Astro.locals.db);
     justify-content: center;
     gap: var(--space-sm);
     padding: var(--space-md) var(--space-xl);
-    background: linear-gradient(180deg, #2ee06d 0%, var(--whatsapp-deep) 100%);
-    color: var(--paper);
+    background: var(--whatsapp-signal);
+    /* Navy on WhatsApp green measures 8.64:1; paper on it was 1.63:1 — and navy is on-system. */
+    color: var(--jaipur-navy);
     font-size: 1rem;
     font-weight: 600;
     border-radius: var(--r-md);
     min-height: 48px;
     text-decoration: none;
-    box-shadow: 0 8px 20px rgba(31, 185, 88, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    box-shadow: var(--elev-1);
     transition: background var(--dur-base) var(--ease-out),
                 box-shadow var(--dur-base) var(--ease-out),
                 transform var(--dur-fast) var(--ease-out);
   }
 
   .btn-whatsapp:hover {
-    background: linear-gradient(180deg, #28cf63 0%, #189c4b 100%);
-    box-shadow: 0 12px 28px rgba(31, 185, 88, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    background: var(--whatsapp-deep);
+    box-shadow: var(--elev-3);
     transform: translateY(-1px);
   }
 
@@ -853,7 +870,7 @@ const areas = await listMajorAreas(Astro.locals.db);
     font-family: var(--font-mono);
     font-size: 0.75rem;
     letter-spacing: 0.04em;
-    color: var(--ink-soft);
+    color: var(--ink-muted);
     margin-bottom: 0 !important;
   }
 </style>

@@ -24,11 +24,12 @@ function areaDb(areas: { slug: string; name: string }[], names: Record<string, s
   } as unknown as D1Database;
 }
 
+// `n` is the live-listing count the area query computes and the chips render.
 const LIVE = [
-  { slug: 'bani-park', name: 'Bani Park' },
-  { slug: 'c-scheme', name: 'C-Scheme' },
-  { slug: 'civil-lines', name: 'Civil Lines' },
-  { slug: 'mansarovar', name: 'Mansarovar' },
+  { slug: 'bani-park', name: 'Bani Park', n: 1 },
+  { slug: 'c-scheme', name: 'C-Scheme', n: 1 },
+  { slug: 'civil-lines', name: 'Civil Lines', n: 1 },
+  { slug: 'mansarovar', name: 'Mansarovar', n: 1 },
 ];
 // Real names for areas with no live inventory in this segment.
 const DORMANT = { 'mahesh-nagar': 'Mahesh Nagar', 'sodala-ajmer-road': 'Sodala / Ajmer Road', 'bapu-nagar': 'Bapu Nagar' };
@@ -44,13 +45,13 @@ describe('listMajorAreasIncluding', () => {
 
   test('adds the selected area with its real name when it has no live listings', async () => {
     const areas = await listMajorAreasIncluding(areaDb(LIVE, DORMANT), 'industrial', 'mahesh-nagar');
-    expect(areas).toContainEqual({ slug: 'mahesh-nagar', name: 'Mahesh Nagar' });
+    expect(areas).toContainEqual({ slug: 'mahesh-nagar', name: 'Mahesh Nagar', n: 0 });
   });
 
   test('never humanizes the slug — the name comes from the database', async () => {
     // 'sodala-ajmer-road' humanizes to "Sodala Ajmer Road"; the real name has a slash.
     const areas = await listMajorAreasIncluding(areaDb(LIVE, DORMANT), 'commercial', 'sodala-ajmer-road');
-    expect(areas).toContainEqual({ slug: 'sodala-ajmer-road', name: 'Sodala / Ajmer Road' });
+    expect(areas).toContainEqual({ slug: 'sodala-ajmer-road', name: 'Sodala / Ajmer Road', n: 0 });
   });
 
   test('inserts in name order without disturbing the order of the live areas', async () => {

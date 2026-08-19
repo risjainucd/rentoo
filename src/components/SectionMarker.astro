@@ -3,15 +3,21 @@ interface Props {
   num?: string;
   label: string;
   meta?: string;
+  /** Set when a section labels itself via aria-labelledby — the heading needs a real id. */
+  id?: string;
+  /** When present the meta reads as navigation and renders as a link, not an inert span. */
+  metaHref?: string;
 }
 
-const { num, label, meta } = Astro.props;
+const { num, label, meta, id, metaHref } = Astro.props;
 ---
 
 <header class="section-marker" data-reveal>
   {num && <span class="section-marker-num" aria-hidden="true">{num}</span>}
-  <h2>{label}</h2>
-  {meta && <span class="section-marker-meta">{meta}</span>}
+  <h2 id={id}>{label}</h2>
+  {meta && (metaHref
+    ? <a class="section-marker-meta" href={metaHref}>{meta}</a>
+    : <span class="section-marker-meta">{meta}</span>)}
 </header>
 
 <style>
@@ -31,10 +37,13 @@ const { num, label, meta } = Astro.props;
     letter-spacing: 0.08em;
     color: var(--terracotta);
     flex-shrink: 0;
-    padding-top: 2px;
+    padding-top: var(--space-xs);
   }
 
+  /* Space Grotesk sets, Geist says — these are the only headlines between the hero
+     and the editorial block, so the display face has to carry them. */
   .section-marker h2 {
+    font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.2;
@@ -48,5 +57,10 @@ const { num, label, meta } = Astro.props;
     letter-spacing: 0.04em;
     color: var(--ink-muted);
     align-self: center;
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out);
   }
+
+  a.section-marker-meta:hover { color: var(--jaipur-navy); text-decoration: underline; }
+  a.section-marker-meta:focus-visible { outline: 2px solid var(--focus-clay); outline-offset: 2px; }
 </style>

@@ -61,8 +61,13 @@ export function parseListingFilters(url: URL): ListingFilters {
   const str = (k: string) => q.get(k) || undefined;
   const f: ListingFilters = {};
   if (str('segment'))       f.segment = str('segment') as Segment;
-  if (str('area'))          f.area = str('area');
-  if (str('neighbourhood')) f.neighbourhood = str('neighbourhood');
+  // Place filters arrive from a free-text field as well as from chips, so normalize to the slug
+  // form the DB stores: "Vaishali Nagar", "C-Scheme" and a stray trailing space all have to match.
+  const slug = (k: string) => { const v = q.get(k); const s = v ? slugify(v) : ''; return s || undefined; };
+  const areaSlug = slug('area');
+  if (areaSlug)             f.area = areaSlug;
+  const nbhdSlug = slug('neighbourhood');
+  if (nbhdSlug)             f.neighbourhood = nbhdSlug;
   if (str('bhk'))           f.bhk = str('bhk');
   if (str('sort'))          f.sort = str('sort');
   if (str('furnishing'))    f.furnishing = str('furnishing') as Furnishing;

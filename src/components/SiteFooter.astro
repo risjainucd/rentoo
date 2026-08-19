@@ -1,5 +1,6 @@
 ---
 // SiteFooter — ported from index.html footer markup + styles.css .site-footer rules
+import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
 ---
 
 <footer class="site-footer" role="contentinfo">
@@ -21,9 +22,9 @@
     <div class="footer-col">
       <h4>Reach us</h4>
       <ul>
-        <li><a href="https://wa.me/918740000854">WhatsApp +91 8740000854</a></li>
-        <li><a href="tel:+918740000854">Call +91 8740000854</a></li>
-        <li><a href="mailto:connect@rentoo.in">connect@rentoo.in</a></li>
+        <li><a href={`https://wa.me/${WHATSAPP_NUMBER}`}>WhatsApp +91 87400 00854</a></li>
+        <li><a href={`tel:+${WHATSAPP_NUMBER}`}>Call +91 87400 00854</a></li>
+        <li><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></li>
       </ul>
     </div>
 
@@ -57,7 +58,9 @@
 
 <style>
   .site-footer {
-    background: var(--ink);
+    /* The system's dark ground is navy; --ink is a text token and read as a second,
+       greyer brand dark one scroll below the navy editorial section. */
+    background: var(--jaipur-navy);
     color: rgba(255, 255, 255, 0.78);
     padding-block: var(--space-4xl) var(--space-xl);
   }

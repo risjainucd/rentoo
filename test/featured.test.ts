@@ -33,10 +33,13 @@ describe('getFeaturedListing', () => {
     expect(card!.photos).toEqual(['properties/villa-x/0']);
   });
 
-  test('returns null when the top row is not flagged (nothing featured)', async () => {
-    // With no featured=1 rows, the 'featured' sort still returns the newest row (featured:0).
+  test('falls back to the newest listing when nothing is flagged', async () => {
+    // With no featured=1 rows the 'featured' sort still returns the newest available row, and
+    // that is what the home page shows: the slot carries the only context-prefilled WhatsApp
+    // CTA on the page, so leaving it dark costs more than spotlighting an unflagged listing.
     const card = await getFeaturedListing(fakeDb([{ ...flaggedRow, featured: 0 }]));
-    expect(card).toBeNull();
+    expect(card).not.toBeNull();
+    expect(card!.slug).toBe('villa-x');
   });
 
   test('returns null when there are no listings at all', async () => {
