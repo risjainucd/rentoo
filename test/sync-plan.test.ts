@@ -31,7 +31,8 @@ describe('planListings', () => {
     const p = planListings([row('#01', { rent_inr: 27000 })], [dbRow('#01')]);
     expect(p.update).toHaveLength(1);
     expect(p.update[0].display_id).toBe('#01');
-    expect(p.update[0].changes.rent_inr).toEqual([25000, 27000]);
+    const changes = p.update[0].changes as Record<string, [unknown, unknown]>;
+    expect(changes.rent_inr).toEqual([25000, 27000]);
   });
 
   test('never proposes changing a slug or id, whatever the sheet says', () => {

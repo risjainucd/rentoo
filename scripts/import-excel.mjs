@@ -3,6 +3,7 @@
 import * as XLSX from 'xlsx';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { slugify, normalizeFurnishing, normalizeStatus } from './lib/transform.ts';
+import { parseRent, parseAreaSqft } from './lib/parse-rent.mjs';
 
 const FILE = 'data/Rentoo data 2026.xlsx';
 const wb = XLSX.read(readFileSync(FILE), { type: 'buffer' });
@@ -10,22 +11,6 @@ const J = (sn) => XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: null });
 const esc = (v) => (v == null || v === '' ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`);
 const titlecase = (s) => String(s).replace(/\b\w/g, (c) => c.toUpperCase());
 
-function parseRent(v) {
-  let n;
-  if (typeof v === 'number') n = v;
-  else {
-    const s = String(v ?? '').toLowerCase();
-    const m = s.match(/([\d][\d.,]*)\s*(k|l|lakh|lac)?/);
-    if (!m) return 0;
-    n = parseFloat(m[1].replace(/,/g, ''));
-    if (!isFinite(n)) return 0;
-    if (m[2] === 'k') n *= 1000;
-    else if (m[2] && /l/.test(m[2])) n *= 100000;
-  }
-  n = Math.round(n);
-  if (n > 0 && n < 1000) n *= 1000; // no listing rents below ₹1000/mo; bare small values are shorthand thousands
-  return n;
-}
 function bhkOf(type) {
   if (!type) return null;
   const s = String(type);
@@ -110,7 +95,7 @@ for (const r of J('Commercial')) {
   const pt = ptype(r['Key Feature']);
   const slug = slugify(`${pt} ${r['Location'] || landmark || area}`, idx);
   const areaSqft = r['Area (sqft)'] ? Math.round(Number(String(r['Area (sqft)']).replace(/[^0-9.]/g, ''))) || null : null;
-  const rent = parseRent(r['Rent']);
+  const rent = parseRent(r['Rent'], parseAreaSqft(r['Area (sqft)']));
   props.push({
     id: crypto.randomUUID(), display_id: uniqDisplay(rawId), segment: 'commercial',
     bhk_type: null, property_type: pt, rent_inr: rent,

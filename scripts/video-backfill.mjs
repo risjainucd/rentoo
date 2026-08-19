@@ -10,7 +10,7 @@
 //
 // Scope guard: live listings with ZERO videos, so re-running never re-encodes or duplicates.
 // R2 and D1 go through the authenticated wrangler session; no R2 access keys needed.
-import { readdirSync, statSync, writeFileSync, readFileSync, rmSync, mkdtempSync } from 'node:fs';
+import { readdirSync, statSync, writeFileSync, rmSync, mkdtempSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
