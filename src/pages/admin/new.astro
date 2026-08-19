@@ -1,0 +1,83 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { AdminNewListingForm } from '../../components/admin/AdminNewListingForm';
+import { listNeighbourhoods, suggestNextDisplayId, uniqueSlug, createListing } from '../../lib/db';
+import { slugify } from '../../lib/sql';
+
+const db = Astro.locals.db;
+const email = Astro.locals.adminEmail;
+
+const SEGMENTS = ['residential', 'commercial', 'industrial'];
+const STATUSES = ['available', 'rented', 'on-hold'];
+const FURNISHINGS = ['furnished', 'semi-furnished', 'unfurnished'];
+
+let error: string | null = null;
+// The rejected submission, echoed back into the form so a validation bounce doesn't make the
+// admin retype everything (and doesn't silently reset the selects to defaults they never picked).
+let submitted: Record<string, string> | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const clean = (k: string) => { const v = form.get(k); const s = v == null ? '' : String(v).trim(); return s === '' ? null : s; };
+
+  const segment = String(form.get('segment') || '');
+  const neighbourhood_slug = String(form.get('neighbourhood_slug') || '');
+  const property_type = clean('property_type') || '';
+  const rent_inr = parseInt(String(form.get('rent_inr') || '0'), 10) || 0;
+
+  const nbhds = await listNeighbourhoods(db);
+  const problems: string[] = [];
+  if (!SEGMENTS.includes(segment)) problems.push('segment');
+  if (!nbhds.some((n) => n.slug === neighbourhood_slug)) problems.push('neighbourhood');
+  if (!property_type) problems.push('property type');
+  if (rent_inr <= 0) problems.push('rent');
+
+  if (problems.length === 0) {
+    const statusIn = String(form.get('status') || 'available');
+    const status = STATUSES.includes(statusIn) ? statusIn : 'available';
+    const furnIn = clean('furnishing');
+    const furnishing = furnIn && FURNISHINGS.includes(furnIn) ? furnIn : null;
+    const bhk_type = segment === 'residential' ? clean('bhk_type') : null;
+    const areaIn = parseInt(String(form.get('area_sqft') || ''), 10);
+    const area_sqft = Number.isFinite(areaIn) && areaIn > 0 ? areaIn : null;
+
+    const display_id = await suggestNextDisplayId(db);
+    const slugBase = slugify(clean('slug') || [bhk_type, property_type, neighbourhood_slug].filter(Boolean).join(' '));
+    const slug = await uniqueSlug(db, slugBase);
+
+    await createListing(db, {
+      display_id, segment, bhk_type, property_type, rent_inr, area_sqft, furnishing, status,
+      landmark: clean('landmark'), neighbourhood_slug, map_url: clean('map_url'),
+      description: clean('description'), slug,
+      published: form.get('published') ? 1 : 0,
+      featured: form.get('featured') ? 1 : 0,
+    });
+    return Astro.redirect(`/admin/${slug}?created=1`, 303);
+  }
+  error = `Please provide a valid: ${problems.join(', ')}.`;
+  submitted = Object.fromEntries([...form.entries()].map(([k, v]) => [k, String(v)]));
+}
+
+const neighbourhoods = (await listNeighbourhoods(db)).map((n) => ({ slug: n.slug, name: n.name, mapped: n.major_slug != null }));
+const suggestedDisplayId = await suggestNextDisplayId(db);
+---
+<AdminLayout title="New listing — Rentoo Admin" email={email} back={true}>
+  <h1 class="page-title">New listing</h1>
+  <p class="sub">Create the listing, then add photos on the next screen. New listings start as <b>drafts</b> — publish once photos are up.</p>
+
+  {error && <div class="err" role="alert">{error}</div>}
+
+  {neighbourhoods.length === 0 ? (
+    <div class="err">No neighbourhoods exist yet — seed the <code>neighbourhoods</code> table before adding listings.</div>
+  ) : (
+    <AdminNewListingForm client:load neighbourhoods={neighbourhoods} suggestedDisplayId={suggestedDisplayId} values={submitted} />
+  )}
+
+  <style>
+    .page-title { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 var(--space-xs); }
+    .sub { color: var(--ink-muted); font-size: .85rem; margin: 0 0 var(--space-lg); max-width: 62ch; }
+    .err { background: var(--danger-mist); color: var(--danger-red); padding: 10px 14px; border-radius: var(--r-md); margin-bottom: var(--space-lg); font-size: .85rem; font-weight: 600; }
+    .err code { font-family: var(--font-mono); }
+  </style>
+</AdminLayout>

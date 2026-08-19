@@ -2,7 +2,10 @@
 import sharp from 'sharp';
 import { readFileSync } from 'node:fs';
 
-export const WORDMARK_FRAC = 0.6;
+// Width of the stamped wordmark as a fraction of the photo width. Tuned so the *visible*
+// mark matches the photos watermarked before public/Rentoo.svg was cropped to its artwork:
+// the old asset was 66.3% ink, so 0.6 there == 0.3976 here. Mirrored in src/lib/admin-photos.ts — keep in sync.
+export const WORDMARK_FRAC = 0.3976;
 export const WHITE_OPACITY = 0.18;
 export const SHADOW_OPACITY = 0.22;
 

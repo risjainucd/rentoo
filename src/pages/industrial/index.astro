@@ -5,11 +5,25 @@ import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import PropertyCard from '../../components/PropertyCard.astro';
 import FilterBar from '../../components/FilterBar.tsx';
-import { parseListingFilters } from '../../lib/sql';
-import { listListings, listMajorAreas } from '../../lib/db';
+import { parseListingFilters, dropUnknownFilters, soleNarrowingFilter } from '../../lib/sql';
+import { listListings, listMajorAreasIncluding, getNeighbourhood } from '../../lib/db';
 const filters = { ...parseListingFilters(Astro.url), segment: 'industrial' as const };
+// Resolve the place filters first: one that names nothing real has no label to show, so it
+// is dropped before the (now pointless) listings query runs. ?neighbourhood= is reachable
+// from the footer, the homepage and every detail-page breadcrumb, so a renamed slug there
+// would otherwise land on an unexplained empty page.
+const areas = await listMajorAreasIncluding(Astro.locals.db, 'industrial', filters.area);
+const areaName = filters.area ? areas.find((a) => a.slug === filters.area)?.name : undefined;
+const nbhd = filters.neighbourhood ? await getNeighbourhood(Astro.locals.db, filters.neighbourhood) : null;
+const unknown = [
+  ...(filters.area && !areaName ? ['area'] : []),
+  ...(filters.neighbourhood && !nbhd ? ['neighbourhood'] : []),
+];
+const redirectTo = dropUnknownFilters(Astro.url, unknown);
+if (redirectTo) return Astro.redirect(redirectTo, 302);
 const { items, total } = await listListings(Astro.locals.db, filters);
-const areas = await listMajorAreas(Astro.locals.db, 'industrial');
+const sole = soleNarrowingFilter(filters);
+const placeName = sole === 'area' ? areaName : sole === 'neighbourhood' ? nbhd?.name : undefined;
 const perPage = filters.perPage ?? 12;
 const page = filters.page ?? 1;
 const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -54,7 +68,9 @@ function pageHref(p: number) {
 
         {items.length === 0 ? (
           <div class="empty-state">
-            <p>No industrial spaces match your current filters.</p>
+            <p>{placeName
+              ? `No industrial spaces in ${placeName} right now.`
+              : 'No industrial spaces match your current filters.'}</p>
             <a href="/industrial" class="btn-secondary">Clear filters</a>
           </div>
         ) : (

@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T10:01:24Z",
+  "title": "Design System: Rentoo",
+  "extensions": {
+    "colorMeta": {
+      "jaipur-navy":     { "role": "primary", "displayName": "Jaipur Navy",     "canonical": "oklch(0.25 0.06 250)", "tonalRamp": ["oklch(0.15 0.06 250)","oklch(0.26 0.06 250)","oklch(0.37 0.06 250)","oklch(0.48 0.055 250)","oklch(0.59 0.05 250)","oklch(0.70 0.04 250)","oklch(0.81 0.03 250)","oklch(0.92 0.015 250)"] },
+      "midnight-tile":   { "role": "primary", "displayName": "Midnight Tile",   "canonical": "oklch(0.33 0.07 250)" },
+      "terracotta":      { "role": "secondary", "displayName": "Terracotta",    "canonical": "oklch(0.53 0.13 45)",  "tonalRamp": ["oklch(0.15 0.13 45)","oklch(0.26 0.13 45)","oklch(0.37 0.13 45)","oklch(0.48 0.13 45)","oklch(0.59 0.12 45)","oklch(0.70 0.10 45)","oklch(0.81 0.07 45)","oklch(0.92 0.04 45)"] },
+      "terracotta-mist": { "role": "secondary", "displayName": "Terracotta Mist", "canonical": "oklch(0.92 0.03 45)" },
+      "paper":           { "role": "neutral", "displayName": "Paper",           "canonical": "oklch(0.97 0.01 90)",  "tonalRamp": ["oklch(0.15 0.01 90)","oklch(0.26 0.01 90)","oklch(0.37 0.01 90)","oklch(0.48 0.01 90)","oklch(0.59 0.01 90)","oklch(0.70 0.01 90)","oklch(0.81 0.01 90)","oklch(0.97 0.01 90)"] },
+      "paper-warm":      { "role": "neutral", "displayName": "Paper Warm",      "canonical": "oklch(0.94 0.015 90)" },
+      "paper-snow":      { "role": "neutral", "displayName": "Paper Snow",      "canonical": "oklch(1 0 0)" },
+      "haze-tint":       { "role": "neutral", "displayName": "Haze Tint",       "canonical": "oklch(0.93 0.02 240)" },
+      "ink":             { "role": "neutral", "displayName": "Ink",             "canonical": "oklch(0.21 0.03 265)", "tonalRamp": ["oklch(0.15 0.03 265)","oklch(0.26 0.03 265)","oklch(0.37 0.03 265)","oklch(0.48 0.03 265)","oklch(0.59 0.025 265)","oklch(0.70 0.02 265)","oklch(0.81 0.015 265)","oklch(0.92 0.01 265)"] },
+      "ink-muted":       { "role": "neutral", "displayName": "Ink Muted",       "canonical": "oklch(0.45 0.03 260)" },
+      "ink-soft":        { "role": "neutral", "displayName": "Ink Soft",        "canonical": "oklch(0.70 0.03 255)" },
+      "line":            { "role": "neutral", "displayName": "Line",            "canonical": "oklch(0.90 0.02 90)" },
+      "ok-green":        { "role": "tertiary", "displayName": "OK Green",       "canonical": "oklch(0.60 0.17 145)", "tonalRamp": ["oklch(0.15 0.17 145)","oklch(0.26 0.17 145)","oklch(0.37 0.17 145)","oklch(0.48 0.17 145)","oklch(0.60 0.17 145)","oklch(0.70 0.13 145)","oklch(0.81 0.09 145)","oklch(0.92 0.05 145)"] },
+      "ok-mist":         { "role": "tertiary", "displayName": "OK Mist",        "canonical": "oklch(0.95 0.05 145)" },
+      "danger-red":      { "role": "tertiary", "displayName": "Danger Red",     "canonical": "oklch(0.58 0.21 27)" },
+      "danger-mist":     { "role": "tertiary", "displayName": "Danger Mist",    "canonical": "oklch(0.94 0.03 27)" },
+      "rest-gray":       { "role": "tertiary", "displayName": "Rest Gray",      "canonical": "oklch(0.58 0.03 255)" },
+      "rest-mist":       { "role": "tertiary", "displayName": "Rest Mist",      "canonical": "oklch(0.97 0.005 255)" },
+      "whatsapp-signal": { "role": "tertiary", "displayName": "WhatsApp Signal", "canonical": "oklch(0.78 0.19 148)" },
+      "whatsapp-deep":   { "role": "tertiary", "displayName": "WhatsApp Deep",  "canonical": "oklch(0.71 0.18 148)" },
+      "focus-clay":      { "role": "tertiary", "displayName": "Focus Clay",     "canonical": "oklch(0.63 0.19 45)" }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Page-opening statements. One per page." },
+      "headline": { "displayName": "Headline", "purpose": "Section openers." },
+      "title":    { "displayName": "Title",    "purpose": "Card titles, sub-section heads, admin page titles." },
+      "body":     { "displayName": "Body",     "purpose": "Editorial prose at 1.0625rem; UI text steps down to 0.9375rem. Measure 65-75ch." },
+      "label":    { "displayName": "Label",    "purpose": "Status pills, badges, display-ID tags, eyebrow markers. Uppercase mono." }
+    },
+    "shadows": [
+      { "name": "elev-1", "value": "0 1px 2px rgba(8,39,70,.04), 0 1px 3px rgba(8,39,70,.06)", "purpose": "Resting state for cards and raised surfaces. Reads as a printed edge, not a float." },
+      { "name": "elev-2", "value": "0 4px 8px rgba(8,39,70,.06), 0 2px 4px rgba(8,39,70,.04)", "purpose": "Mid-level surfaces and sticky bars." },
+      { "name": "elev-3", "value": "0 12px 24px rgba(8,39,70,.10)", "purpose": "Hover and active overlays only. Never a rest state." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.22, 0.61, 0.36, 1)", "purpose": "Default easing for all structural state transitions." },
+      { "name": "ease-spring", "value": "cubic-bezier(0.34, 1.3, 0.64, 1)", "purpose": "Subtle overshoot. Playful interactive moments only, never structural UI." },
+      { "name": "dur-fast", "value": "150ms", "purpose": "Colour and border shifts." },
+      { "name": "dur-base", "value": "200ms", "purpose": "Card hover: shadow, transform, border together." },
+      { "name": "dur-slow", "value": "300ms", "purpose": "Ceiling. Keep all UI motion at or under this." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "max-w", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default action. Navy fill on paper, compact 32px height.",
+      "html": "<button class=\"ds-btn-primary\">Message on WhatsApp</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; height:32px; padding:0 10px; border:1px solid transparent; border-radius:12px; background:var(--jaipur-navy,#082746); color:var(--paper,#FAF7EE); font-family:'Geist Variable',sans-serif; font-size:.875rem; font-weight:500; cursor:pointer; transition:background 200ms cubic-bezier(0.22,0.61,0.36,1), transform 150ms cubic-bezier(0.22,0.61,0.36,1); } .ds-btn-primary:hover { background:color-mix(in oklch, var(--jaipur-navy,#082746), transparent 20%); } .ds-btn-primary:focus-visible { outline:2px solid var(--focus-clay,#EA580C); outline-offset:2px; } .ds-btn-primary:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action. Warm hairline on the paper ground.",
+      "html": "<button class=\"ds-btn-outline\">View all listings</button>",
+      "css": ".ds-btn-outline { display:inline-flex; align-items:center; justify-content:center; height:32px; padding:0 10px; border:1px solid var(--line,#E5E0D5); border-radius:12px; background:var(--paper,#FAF7EE); color:var(--ink,#0F172A); font-family:'Geist Variable',sans-serif; font-size:.875rem; font-weight:500; cursor:pointer; transition:background 150ms cubic-bezier(0.22,0.61,0.36,1); } .ds-btn-outline:hover { background:var(--paper-warm,#F2EDE0); } .ds-btn-outline:focus-visible { outline:2px solid var(--focus-clay,#EA580C); outline-offset:2px; } .ds-btn-outline:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Status Pill — Available",
+      "kind": "chip",
+      "refersTo": "badge-ok",
+      "description": "Listing availability. Uppercase mono with a leading dot.",
+      "html": "<span class=\"ds-pill-available\"><span class=\"ds-pill-dot\"></span>Available</span>",
+      "css": ".ds-pill-available { display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:4px; background:var(--ok-mist,#DCFCE7); color:#0F7A37; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:.6875rem; font-weight:600; letter-spacing:.02em; text-transform:uppercase; } .ds-pill-dot { width:6px; height:6px; border-radius:50%; background:var(--ok-green,#16A34A); }"
+    },
+    {
+      "name": "Badge — Warn",
+      "kind": "chip",
+      "refersTo": "badge-warn",
+      "description": "Attention state. The rationed terracotta accent in badge form.",
+      "html": "<span class=\"ds-badge-warn\">On hold</span>",
+      "css": ".ds-badge-warn { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:4px; border:1px solid #E7CBBB; background:var(--terracotta-mist,#F5E4DA); color:var(--terracotta,#B5532E); font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; font-weight:600; letter-spacing:.02em; line-height:1.45; white-space:nowrap; }"
+    },
+    {
+      "name": "Display-ID Tag",
+      "kind": "chip",
+      "refersTo": "badge-ok",
+      "description": "The ledger's signature mark — every listing's entry number.",
+      "html": "<span class=\"ds-tag-id\">#04</span>",
+      "css": ".ds-tag-id { display:inline-flex; align-items:center; justify-content:center; padding:3px 9px; border-radius:4px; border:1px solid var(--line,#E5E0D5); background:var(--paper-snow,#FFFFFF); color:var(--ink-muted,#475569); font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; font-weight:600; letter-spacing:.02em; }"
+    },
+    {
+      "name": "Listing Card",
+      "kind": "card",
+      "refersTo": "card-listing",
+      "description": "The catalog entry. Flat at rest, lifts on intent.",
+      "html": "<article class=\"ds-card-listing\"><div class=\"ds-card-body\"><h3 class=\"ds-card-title\">2BHK in Malviya Nagar</h3><p class=\"ds-card-meta\">₹24,000 / month · Semi-furnished</p></div></article>",
+      "css": ".ds-card-listing { background:var(--paper-snow,#FFFFFF); border:1px solid var(--line,#E5E0D5); border-radius:8px; overflow:hidden; box-shadow:0 1px 2px rgba(8,39,70,.04),0 1px 3px rgba(8,39,70,.06); transition:box-shadow 200ms cubic-bezier(0.22,0.61,0.36,1), transform 200ms cubic-bezier(0.22,0.61,0.36,1), border-color 200ms cubic-bezier(0.22,0.61,0.36,1); } .ds-card-listing:hover { box-shadow:0 12px 24px rgba(8,39,70,.10), 0 0 0 1px rgba(8,39,70,.05); border-color:rgba(8,39,70,.18); transform:translateY(-3px); } .ds-card-listing:active { transform:translateY(-1px); } .ds-card-body { padding:16px; } .ds-card-title { margin:0 0 4px; font-family:'Space Grotesk',sans-serif; font-size:1.25rem; font-weight:700; color:var(--ink,#0F172A); } .ds-card-meta { margin:0; font-family:'Geist Variable',sans-serif; font-size:.9375rem; color:var(--ink-muted,#475569); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Transparent ground, hairline border, navy focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search by area\" />",
+      "css": ".ds-input { height:32px; width:100%; padding:4px 10px; border:1px solid var(--line,#E5E0D5); border-radius:12px; background:transparent; color:var(--ink,#0F172A); font-family:'Geist Variable',sans-serif; font-size:.875rem; outline:none; transition:border-color 150ms cubic-bezier(0.22,0.61,0.36,1), box-shadow 150ms cubic-bezier(0.22,0.61,0.36,1); } .ds-input::placeholder { color:var(--ink-soft,#94A3B8); } .ds-input:focus-visible { border-color:var(--jaipur-navy,#082746); box-shadow:0 0 0 3px color-mix(in oklch, var(--jaipur-navy,#082746), transparent 50%); }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Fixed 64px header on the paper ground with a hairline base rule.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-mark\">Rentoo</span><span class=\"ds-nav-links\"><a class=\"ds-nav-link\" href=\"#\">Rent</a><a class=\"ds-nav-link\" href=\"#\">Commercial</a><a class=\"ds-nav-link\" href=\"#\">Industrial</a></span></nav>",
+      "css": ".ds-nav { display:flex; align-items:center; justify-content:space-between; height:64px; padding:0 24px; background:var(--paper,#FAF7EE); border-bottom:1px solid var(--line,#E5E0D5); } .ds-nav-mark { font-family:'Space Grotesk',sans-serif; font-size:1.25rem; font-weight:700; color:var(--jaipur-navy,#082746); } .ds-nav-links { display:flex; gap:8px; } .ds-nav-link { padding:6px 10px; border-radius:12px; color:var(--ink,#0F172A); font-family:'Geist Variable',sans-serif; font-size:.9375rem; text-decoration:none; transition:background 150ms cubic-bezier(0.22,0.61,0.36,1); } .ds-nav-link:hover { background:var(--paper-warm,#F2EDE0); } .ds-nav-link:focus-visible { outline:2px solid var(--focus-clay,#EA580C); outline-offset:2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Property Ledger",
+    "overview": "Rentoo looks like a well-kept book of accounts, not a listings portal. Every property enters the system as a numbered entry (#01, #02) set in monospace, ruled off from its neighbours by a single warm hairline, and stamped with its status. The ground is warm paper (#FAF7EE) rather than screen-white; the ink is a deep Jaipur navy (#082746) rather than black. That pairing does the work that photography and badges do on aggregator sites — it says someone keeps records here before a single listing is read.\n\nThe register is precise, civic, and trustworthy. Restraint is the trust signal: the system earns credibility by looking accurate rather than by looking expensive or exciting. Density is disciplined but never cramped — a strict 4pt spacing ladder, tight radii (4/8/12px), and hairline borders keep the page orderly, while a warm ground and generous line-height (1.6–1.7 on body prose) keep it from reading as a spreadsheet. Terracotta (#B5532E) is the single warm accent, and its scarcity is the entire point.\n\nMotion is functional and short. Nothing bounces, nothing exceeds 300ms, and every reveal degrades to a static page under prefers-reduced-motion. Surfaces sit flat until addressed. This system has four confirmed anti-references and rejects all of them: Indian aggregator portals, generic AI/SaaS styling, luxury real-estate gloss, and undifferentiated Silicon Valley minimal.",
+    "keyCharacteristics": [
+      "Warm paper ground, navy ink — never white-on-black, never pure #000",
+      "Numbered, stamped, ruled: the ledger vocabulary of display-ID tags, status pills, and hairline dividers",
+      "One rationed warm accent against a cool navy-and-paper field",
+      "Flat at rest; depth is a response to intent, not decoration",
+      "Motion under 300ms, fully reduced-motion safe"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Terracotta marks one thing per screen. If two elements compete for it, neither gets it. Its rarity is what makes it read as emphasis rather than as brand paint.", "section": "colors" },
+      { "name": "The Warm Ground Rule", "body": "The page is paper (#FAF7EE); white (#FFFFFF) is reserved for surfaces that sit on top of it. A full-bleed white background breaks the system.", "section": "colors" },
+      { "name": "The Reserved Green Rule", "body": "WhatsApp green means WhatsApp. Availability green means available. They are never swapped, blended, or reused for generic success states.", "section": "colors" },
+      { "name": "The Two Faces Rule", "body": "Space Grotesk sets, Geist says. Display type never runs body copy, and body type never sets a headline. A page using one face for both has lost the system.", "section": "typography" },
+      { "name": "The Data Is Mono Rule", "body": "Anything that is an identifier, a status, or a count — #04, AVAILABLE, 26 min — is set in the mono label style, not in body type.", "section": "typography" },
+      { "name": "The Ladder Rule", "body": "If a spacing value is not on the 4pt ladder, it is wrong. Reach for the neighbouring step instead of inventing one.", "section": "layout" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadow is a response to the pointer, never decoration. If an element is elevated before the user has addressed it, the hierarchy is being faked.", "section": "elevation" },
+      { "name": "The Navy Shadow Rule", "body": "Shadows are tinted navy, never black or neutral gray.", "section": "elevation" },
+      { "name": "The Hairline Rule", "body": "One pixel, warm, #E5E0D5. Borders never thicken for emphasis — emphasis comes from color and elevation instead.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do draw every spacing value from the 4pt ladder (4/8/12/16/24/32/48/64/96px).",
+      "Do tint shadows with navy rgba(8,39,70,…) and keep surfaces flat until hovered.",
+      "Do set identifiers, statuses, and counts in the mono label style at 0.6875rem/600/0.02em uppercase.",
+      "Do keep transitions at or under 300ms on cubic-bezier(0.22,0.61,0.36,1), and gate every motion behind prefers-reduced-motion: no-preference so it fails open.",
+      "Do reserve WhatsApp green (#25D366) exclusively for WhatsApp affordances.",
+      "Do use the warm hairline (#E5E0D5) for structure before reaching for elevation."
+    ],
+    "donts": [
+      "Don't spend terracotta more than once per screen, or use it as general warmth.",
+      "Don't use #FFFFFF as a page background — white is a raised surface on the paper ground.",
+      "Don't ship aggregator-portal texture: badge spam, stacked ad rails, shouting CTAs, or stock-photo filler.",
+      "Don't introduce purple/violet gradients, glassmorphism, cyan-on-dark, or gradient text on headings.",
+      "Don't reach for luxury-real-estate signals: gold-on-black, thin serif capitals, full-bleed video heroes, exclusive language.",
+      "Don't collapse to undifferentiated minimal — Inter everywhere, all-gray, generic card grids. The warm ground and mono ledger marks are the identity.",
+      "Don't use bounce, elastic, or overshoot easing on structural UI; --ease-spring is for playful interactive moments only.",
+      "Don't thicken borders for emphasis."
+    ]
+  }
+}

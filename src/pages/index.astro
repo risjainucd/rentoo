@@ -5,9 +5,11 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import SectionMarker from '../components/SectionMarker.astro';
 import PropertyCard from '../components/PropertyCard.astro';
+import FeaturedHero from '../components/FeaturedHero.astro';
 import { NumberTicker } from '../components/ui/number-ticker';
-import { featuredListings, listMajorAreas } from '../lib/db';
+import { featuredListings, getFeaturedListing, listMajorAreas } from '../lib/db';
 const featured = await featuredListings(Astro.locals.db, 6);
+const featuredOne = await getFeaturedListing(Astro.locals.db);
 const areas = await listMajorAreas(Astro.locals.db);
 ---
 
@@ -76,6 +78,9 @@ const areas = await listMajorAreas(Astro.locals.db);
       </div>
     </div>
   </section>
+
+  <!-- FEATURED PROPERTY (admin-flagged marquee; hidden when nothing is flagged) -->
+  {featuredOne && <FeaturedHero card={featuredOne} />}
 
   <!-- RECENTLY ADDED / FEATURED -->
   <section class="section section--recently-added" aria-labelledby="recently-added-title">

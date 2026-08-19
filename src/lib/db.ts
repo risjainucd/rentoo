@@ -61,6 +61,25 @@ export async function listMajorAreas(db: D1Database, segment?: string) {
   const r = await stmt.all<{ slug: string; name: string; n: number }>();
   return (r.results ?? []).map((x) => ({ slug: x.slug, name: x.name }));
 }
+// The Area filter options, plus the currently selected area when it has no live listings —
+// rented out, or none in this segment (most areas have no commercial/industrial stock). Base UI
+// resolves a Select's label only from the items it is given, so without this the trigger renders
+// the raw slug ("mahesh-nagar"). The name always comes from the DB: slugs are not reversible
+// ("sodala-ajmer-road" is "Sodala / Ajmer Road"). Returned unchanged when the slug names no
+// area at all — the caller treats that as an unknown filter and drops it.
+export async function listMajorAreasIncluding(db: D1Database, segment?: string, selected?: string) {
+  const areas = await listMajorAreas(db, segment);
+  if (!selected || areas.some((a) => a.slug === selected)) return areas;
+  const row = await db.prepare(
+    'SELECT major_area AS name FROM neighbourhoods WHERE major_slug = ? AND major_area IS NOT NULL LIMIT 1',
+  ).bind(selected).first<{ name: string }>();
+  if (!row) return areas;
+  // Splice rather than re-sort: `areas` is already ordered by SQLite's collation, and inserting
+  // leaves that order untouched even where JS string comparison would disagree with it.
+  const entry = { slug: selected, name: row.name };
+  const at = areas.findIndex((a) => a.name > entry.name);
+  return at === -1 ? [...areas, entry] : [...areas.slice(0, at), entry, ...areas.slice(at)];
+}
 export async function getNeighbourhood(db: D1Database, slug: string) {
   return db.prepare('SELECT * FROM neighbourhoods WHERE slug = ?').bind(slug).first<Neighbourhood>();
 }
@@ -84,16 +103,73 @@ export async function getAnyListingBySlug(db: D1Database, slug: string) {
   return { property, media: media.results ?? [], neighbourhood };
 }
 
+// Listings created here get their own "A-NN" series. The Excel importer takes display_id
+// straight from the spreadsheet ("#01".."#118", "##01".., "C-1".."C-19") and upserts on slug
+// only, so minting another "#NN" here would collide with a future spreadsheet row on
+// UNIQUE(display_id) and abort the whole re-import. Scanning only our own series also avoids
+// the old /(\d+)/ scan, which flattened three unrelated id series into one number space.
+export async function suggestNextDisplayId(db: D1Database): Promise<string> {
+  const r = await db.prepare("SELECT display_id FROM properties WHERE display_id LIKE 'A-%'").all<{ display_id: string }>();
+  let max = 0;
+  for (const row of r.results ?? []) {
+    const m = /^A-(\d+)$/.exec(row.display_id ?? '');
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return 'A-' + String(max + 1).padStart(2, '0');
+}
+
+async function slugTaken(db: D1Database, slug: string): Promise<boolean> {
+  const row = await db.prepare('SELECT 1 AS x FROM properties WHERE slug = ?').bind(slug).first();
+  return row != null;
+}
+// Slugs that collide with a static admin route. Astro resolves /admin/new to the static
+// new-listing page, so a listing slugged "new" could never be opened in the editor.
+const RESERVED_SLUGS = new Set(['new']);
+// A slug not already in use: `base`, else base-2, base-3, … Falls back to 'listing' if empty.
+export async function uniqueSlug(db: D1Database, base: string): Promise<string> {
+  const clean = base || 'listing';
+  let slug = clean;
+  for (let i = 2; RESERVED_SLUGS.has(slug) || (await slugTaken(db, slug)); i++) slug = `${clean}-${i}`;
+  return slug;
+}
+
+export interface NewListingInput {
+  display_id: string; segment: string; bhk_type: string | null; property_type: string;
+  rent_inr: number; area_sqft: number | null; furnishing: string | null; status: string;
+  landmark: string | null; neighbourhood_slug: string; map_url: string | null;
+  description: string | null; slug: string; published: 0 | 1; featured: 0 | 1;
+}
+// Insert a new listing. Caller resolves display_id (suggestNextDisplayId) and a unique slug
+// (uniqueSlug) first, and validates segment/status/furnishing/neighbourhood.
+export async function createListing(db: D1Database, f: NewListingInput): Promise<void> {
+  await db.prepare(
+    `INSERT INTO properties (id, display_id, segment, bhk_type, property_type, rent_inr, area_sqft,
+       furnishing, status, landmark, neighbourhood_slug, map_url, description, slug, published, featured)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  ).bind(
+    crypto.randomUUID(), f.display_id, f.segment, f.bhk_type, f.property_type, f.rent_inr, f.area_sqft,
+    f.furnishing, f.status, f.landmark, f.neighbourhood_slug, f.map_url, f.description, f.slug, f.published, f.featured,
+  ).run();
+}
+
+// segment, neighbourhood_slug and area_sqft are editable here too: they are only ever set at
+// create time, and without this a mis-picked segment or area could never be corrected from the
+// admin UI. (slug stays immutable — it is the public URL and the R2 media path prefix.)
 export interface AdminListingUpdate {
   rent_inr: number; status: string; furnishing: string | null; bhk_type: string | null;
   property_type: string; landmark: string | null; description: string | null;
   map_url: string | null; featured: 0 | 1; published: 0 | 1;
+  segment: string; neighbourhood_slug: string; area_sqft: number | null;
 }
 export async function updateListingFields(db: D1Database, slug: string, f: AdminListingUpdate) {
   await db.prepare(
     `UPDATE properties SET rent_inr=?, status=?, furnishing=?, bhk_type=?, property_type=?,
-            landmark=?, description=?, map_url=?, featured=?, published=? WHERE slug=?`,
-  ).bind(f.rent_inr, f.status, f.furnishing, f.bhk_type, f.property_type, f.landmark, f.description, f.map_url, f.featured, f.published, slug).run();
+            landmark=?, description=?, map_url=?, featured=?, published=?,
+            segment=?, neighbourhood_slug=?, area_sqft=? WHERE slug=?`,
+  ).bind(
+    f.rent_inr, f.status, f.furnishing, f.bhk_type, f.property_type, f.landmark, f.description,
+    f.map_url, f.featured, f.published, f.segment, f.neighbourhood_slug, f.area_sqft, slug,
+  ).run();
 }
 
 // Set which photo is the cover (and make it lead the gallery: display_order 0).
@@ -173,4 +249,18 @@ export async function featuredListings(db: D1Database, limit: number) {
   const cards = (r.results ?? []).map(mapRowToCard);
   await attachPhotos(db, cards);
   return cards;
+}
+
+// The single admin-flagged listing to spotlight on the home page. Uses the existing
+// 'featured' sort (p.featured DESC, p.created_at DESC) + LIMIT 1 and the shared WHERE
+// (published = 1 AND status <> 'rented'), so an unpublished/rented flagged listing never
+// surfaces. Returns null when nothing is flagged: with no featured=1 rows the top row
+// comes back featured:0, which the guard rejects — so the home page renders no hero.
+export async function getFeaturedListing(db: D1Database): Promise<ListingCard | null> {
+  const { sql, params } = buildListingsQuery({ sort: 'featured', perPage: 1, page: 1 });
+  const r = await db.prepare(sql).bind(...params).all<Record<string, any>>();
+  const card = (r.results ?? []).map(mapRowToCard)[0];
+  if (!card || card.featured !== 1) return null;
+  await attachPhotos(db, [card]);
+  return card;
 }

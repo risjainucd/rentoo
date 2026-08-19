@@ -1,5 +1,6 @@
 ---
 import '../styles/globals.css';
+import { SonnerToaster } from '../components/admin/SonnerToaster';
 interface Props { title: string; email?: string | null; back?: boolean; }
 const { title, email = null, back = false } = Astro.props;
 ---
@@ -9,6 +10,7 @@ const { title, email = null, back = false } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/Rentooicon.svg" />
     <link rel="icon" type="image/png" href="/Rentooicon.png" />
     <title>{title}</title>
   </head>
@@ -16,12 +18,13 @@ const { title, email = null, back = false } = Astro.props;
     <header class="admin-bar">
       <div class="brand">
         {back && <a class="back" href="/admin">← All listings</a>}
-        <img src="/Rentoo.svg" alt="Rentoo" class="logo" />
+        <img src="/Rentoo.svg" alt="Rentoo" width="445" height="84" class="logo" />
         <span class="tag">Admin</span>
       </div>
       {email && <span class="who">{email}</span>}
     </header>
     <main class="admin-main"><slot /></main>
+    <SonnerToaster client:only="react" />
     <style>
       .admin-body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); margin: 0; }
       .admin-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg);

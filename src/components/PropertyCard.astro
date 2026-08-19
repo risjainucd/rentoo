@@ -28,6 +28,7 @@ const statusLabel = card.status === 'available'
 <article class="property-card" data-card-photos={multi ? JSON.stringify(photoUrls) : undefined}>
   <div class="card-image">
     <Pill variant="display-id" label={card.display_id} />
+    {card.featured === 1 && <Pill variant="featured" label="Featured" />}
     {cover ? (
       <img
         class="card-photo"
@@ -79,6 +80,8 @@ const statusLabel = card.status === 'available'
 </article>
 
 <script>
+  import { swipeDirection } from '../lib/swipe';
+
   // Re-wired on every page load so the carousel survives View Transitions navs.
   function initCardCarousels() {
     document.querySelectorAll('[data-card-photos]').forEach((card) => {
@@ -103,6 +106,38 @@ const statusLabel = card.status === 'available'
       const onClick = (fn: () => void) => (e: Event) => { e.preventDefault(); e.stopPropagation(); fn(); };
       card.querySelector('[data-card-prev]')?.addEventListener('click', onClick(() => show(i - 1)));
       card.querySelector('[data-card-next]')?.addEventListener('click', onClick(() => show(i + 1)));
+
+      // ── Swipe ── the arrows are small targets on a phone.
+      // Listen on the card, NOT on .card-image: a stretched <a class="card-link"> is painted
+      // over the photo, so it — not the image — is the touch target, and .card-image is not on
+      // that event's path. Which photo area the gesture started in is decided by hit-testing the
+      // frame instead, so a drag over the text body still scrolls the page normally.
+      const frame = card.querySelector('.card-image');
+      if (!frame) return;
+      let startX = 0, startY = 0, fromPhoto = false, swiped = false;
+      card.addEventListener('touchstart', (e) => {
+        const t = (e as TouchEvent).changedTouches[0];
+        const r = frame.getBoundingClientRect();
+        fromPhoto = t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom;
+        startX = t.clientX; startY = t.clientY; swiped = false;
+      }, { passive: true });
+      card.addEventListener('touchend', (e) => {
+        if (!fromPhoto) return;
+        const t = (e as TouchEvent).changedTouches[0];
+        const dir = swipeDirection(t.clientX - startX, t.clientY - startY);
+        if (!dir) return; // a tap or a vertical scroll — leave it to the link and the page
+        swiped = true;
+        e.preventDefault(); // suppress the click this touch would otherwise synthesise
+        show(dir === 'next' ? i + 1 : i - 1);
+      }, { passive: false });
+      // preventDefault on touchend does not reliably cancel the click everywhere, and here a
+      // stray click opens the listing. Capture on the card so it runs before the link's own.
+      card.addEventListener('click', (e) => {
+        if (!swiped) return;
+        swiped = false;
+        e.preventDefault();
+        e.stopPropagation();
+      }, true);
     });
   }
 
@@ -127,6 +162,12 @@ const statusLabel = card.status === 'available'
         e.stopPropagation();
         const nowLiked = btn.getAttribute('aria-pressed') !== 'true';
         btn.setAttribute('aria-pressed', nowLiked ? 'true' : 'false');
+        if (nowLiked) {
+          // Restart the pop keyframe on each like (reflow forces re-trigger).
+          btn.classList.remove('is-pop');
+          void btn.offsetWidth;
+          btn.classList.add('is-pop');
+        }
         if (countEl) {
           const c = Math.max(0, (parseInt(countEl.textContent || '0', 10) || 0) + (nowLiked ? 1 : -1));
           countEl.textContent = c ? String(c) : '';
@@ -234,8 +275,18 @@ const statusLabel = card.status === 'available'
 
   /* Decorative overlays pass clicks through to the card link. */
   .card-image :global(.display-id-tag--card),
-  .card-image :global(.status-pill) {
+  .card-image :global(.status-pill),
+  .card-image :global(.featured-pill) {
     pointer-events: none;
+  }
+
+  /* Featured ribbon: sits just under the display-id tag, top-left. */
+  .card-image :global(.featured-pill) {
+    position: absolute;
+    top: calc(var(--space-sm) + 28px);
+    left: var(--space-sm);
+    z-index: 2;
+    box-shadow: 0 1px 2px rgba(8, 39, 70, 0.12);
   }
 
   /* ── Carousel arrows ── */
@@ -353,6 +404,16 @@ const statusLabel = card.status === 'available'
 
   .card-like[aria-pressed="true"] { color: var(--danger-red, #dc2626); }
   .card-like[aria-pressed="true"] svg { fill: var(--danger-red, #dc2626); stroke: var(--danger-red, #dc2626); }
+
+  /* Heart "pop" on like — a single spring-eased bump, only when actually liked. */
+  @media (prefers-reduced-motion: no-preference) {
+    .card-like.is-pop svg { animation: heart-pop 240ms var(--ease-spring); }
+  }
+  @keyframes heart-pop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
 
   .card-like-count {
     font-size: 0.75rem;

@@ -104,8 +104,11 @@ and verified live. Stack: Astro SSR + Cloudflare Workers + D1 + R2.
   with `wrangler d1 execute --remote --file migrations/000N.sql`.
 - **`seed/` is gitignored** — seed data lives locally, applied via `wrangler d1 execute`.
 - **`media.sql` before `video-media.sql`** (broad vs scoped delete).
-- **`astro dev` does NOT run middleware for `/admin`** (a dev quirk) — verify auth on the real
-  worker (`wrangler dev -c dist/server/wrangler.json`) or live, never `astro dev`.
+- **`astro dev` DOES run the middleware for `/admin`** (as of Astro 6 — an older note here said
+  it did not). It fails closed with **403** without a Cloudflare Access JWT, so the admin POST
+  handlers cannot be exercised under `astro dev` at all. Test admin *islands* by rendering them
+  from a scratch page outside `/admin`, and verify auth on the real worker
+  (`wrangler dev -c dist/server/wrangler.json`) or live.
 - **Deploy**: `npm run build && npx wrangler deploy` (adapter emits `dist/server/wrangler.json`).
   Adding `routes` to config auto-disables `workers.dev`; with no routes it stays enabled.
 - **Admin login debugging** (the long tail): the real blocker was never code — it was

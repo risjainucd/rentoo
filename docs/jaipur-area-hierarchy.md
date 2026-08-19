@@ -62,3 +62,26 @@ The only formal two-level "Zone" structure is municipal (JNN "Mansarovar Zone", 
 ## Commercial / industrial flags
 - Industrial: Sitapura Industrial Area (RIICO). (Others if they appear: Jhotwara Ind. Area, VKI, Sudarshanpura, Transport Nagar.)
 - Commercial hubs: C-Scheme/MI Road, WTP & Gaurav Tower (Malviya Nagar), Gopalpura Bypass, Tonk Road frontage.
+
+## Corrections (2026-08-19)
+
+Two neighbourhood tags were mis-filed by name similarity and have been corrected in D1
+(production + local) and in `seed/neighbourhood-areas.sql`. Found by web research against
+the builders' own published addresses, auditing all 26 building/society tags.
+
+| tag | was | now | why |
+|---|---|---|---|
+| `kedia-the-kunba` | Vaishali Nagar | **Pratap Nagar** | Kedia The Kunba is at "Near MPS, Pratap Nagar, Tonk Road, Jaipur 302033" (kediahomes.com) — opposite side of the city. |
+| `vedang-heights` | Sodala / Ajmer Road | **Jagatpura** | Jaipur has three Nandpuris; this is Nandpuri B / Chak Getor 302033 (opp. NRI Colony, nr Maharana Pratap Circle), which 99acres, CommonFloor and SquareYards all file under Jagatpura. |
+
+The other 24 tags were confirmed correct or could not be resolved either way. Four remain
+unverifiable — `jamuna-vihar`, `rudraksh-road`, `tagor-nagar`, `terminnal-1` — each has
+multiple candidate locations in Jaipur and no disambiguating landmark on the listing.
+
+Three are genuine boundary calls, left as-is because the data is self-consistent and either
+answer is defensible: `jyoti-nagar` (C-Scheme vs Tonk Road — Lal Kothi belt),
+`sun-n-moon` (Mansarovar vs Sodala — New Sanganer Road corridor), `upasana-first-avenue`
+(Bani Park vs C-Scheme — Gopalbari). Two related inconsistencies if these are ever revisited:
+`lal-kothi`/`jyoti-nagar` are C-Scheme while `motisons-jwellers` (landmark "lal kothi") is
+Tonk Road; `vivek-vihar-metro` is Mansarovar while `shyam-nagar` is Sodala, though the metro
+station sits in Shyam Nagar.

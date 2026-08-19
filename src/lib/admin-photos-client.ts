@@ -65,7 +65,9 @@ async function renderRendition(
 }
 
 async function processFile(file: File): Promise<{ form: FormData; width: number; height: number }> {
-  const bitmap = await createImageBitmap(file);
+  // `from-image` applies EXIF orientation so portrait phone photos come out upright,
+  // matching the offline pipeline's `sharp(...).rotate()` (browser defaults vary/ignore EXIF).
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   const logo = await loadLogos();
   const plan = renditionPlan(bitmap.width);
   const form = new FormData();
