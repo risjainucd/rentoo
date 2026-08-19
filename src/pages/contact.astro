@@ -3,7 +3,6 @@ export const prerender = true;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import { ContactDialog } from '../components/ContactDialog';
 import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
 ---
 
@@ -26,12 +25,65 @@ import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
         Mention the property ID (#01, C-3) so we can pull up the file.
       </p>
       <div class="hero-cta">
-        <ContactDialog
-          client:visible
-          whatsappUrl={`https://wa.me/${WHATSAPP_NUMBER}`}
-          phone="+918740000854"
-          email={CONTACT_EMAIL}
-        />
+        {/* A native <dialog> rather than a React island: the modal is three links, and
+            showModal() already gives us the focus trap, Escape-to-close, inertness and
+            backdrop that the Base UI Dialog was loading 58 KB of runtime to provide. */}
+        <button
+          type="button"
+          class="contact-dialog-trigger"
+          data-contact-dialog-trigger
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="contact-dialog"
+        >Contact us</button>
+
+        <dialog
+          id="contact-dialog"
+          class="contact-dialog"
+          data-contact-dialog
+          aria-labelledby="contact-dialog-title"
+          aria-describedby="contact-dialog-desc"
+        >
+          <h2 id="contact-dialog-title" class="contact-dialog-title">Talk to Rentoo</h2>
+          <p id="contact-dialog-desc" class="contact-dialog-desc">
+            WhatsApp is the fastest way to reach us. We reply in under 30 minutes during business hours.
+          </p>
+
+          <div class="contact-dialog-actions">
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} class="contact-dialog-btn contact-dialog-btn--wa">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413" />
+              </svg>
+              <span>Chat on WhatsApp</span>
+            </a>
+
+            <a href="tel:+918740000854" class="contact-dialog-btn contact-dialog-btn--secondary">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.63 19.79 19.79 0 01.5 1.18 2 2 0 012.49.5h3a2 2 0 012 1.72c.13.96.36 1.9.69 2.81a2 2 0 01-.45 2.11L6.91 8.46a16 16 0 006.63 6.63l1.27-1.27a2 2 0 012.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0122 16.92z"/>
+              </svg>
+              <span>Call +918740000854</span>
+            </a>
+
+            <a href={`mailto:${CONTACT_EMAIL}`} class="contact-dialog-btn contact-dialog-btn--secondary">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/>
+              </svg>
+              <span>Email {CONTACT_EMAIL}</span>
+            </a>
+          </div>
+
+          <p class="contact-dialog-meta">Open all week · 10:00–20:00 IST</p>
+
+          <button type="button" class="contact-dialog-dismiss" data-contact-dialog-close>Dismiss</button>
+
+          <button type="button" class="contact-dialog-close" data-contact-dialog-close aria-label="Close">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18"/>
+              <path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </dialog>
       </div>
     </div>
   </section>
@@ -153,6 +205,61 @@ import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
 
   <SiteFooter slot="footer" />
 </BaseLayout>
+
+<script>
+  // Re-wired on every page load so the dialog survives View Transitions navs; the
+  // dataset flag keeps a second `astro:page-load` from stacking duplicate listeners.
+  function initContactDialog() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-contact-dialog]');
+    const trigger = document.querySelector<HTMLButtonElement>('[data-contact-dialog-trigger]');
+    if (!dialog || !trigger || dialog.dataset.dialogReady) return;
+    // Browsers without <dialog> (pre-15.4 Safari) leave the trigger inert rather than throwing
+    // a TypeError out of the click handler; the CSS keeps the closed dialog's markup hidden for
+    // them regardless. Same pair of guards the mobile drawer in SiteHeader.astro carries.
+    if (typeof dialog.showModal !== 'function') return;
+    dialog.dataset.dialogReady = 'true';
+
+    // showModal() — not the `open` attribute — is what buys the focus trap,
+    // Escape-to-close, backdrop and inert background.
+    trigger.addEventListener('click', () => {
+      dialog.showModal();
+      trigger.setAttribute('aria-expanded', 'true');
+    });
+
+    // `close` also fires for Escape, so aria-expanded stays honest either way.
+    dialog.addEventListener('close', () => trigger.setAttribute('aria-expanded', 'false'));
+
+    dialog.querySelectorAll('[data-contact-dialog-close]').forEach((el) => {
+      el.addEventListener('click', () => dialog.close());
+    });
+
+    // Click-outside-to-dismiss, which native <dialog> does not do on its own. The
+    // backdrop has no element of its own — its clicks are reported against the
+    // <dialog> — and so are clicks on the dialog's own 24px padding, and the click
+    // that ends a text drag released outside the box. Hit-testing the box on both
+    // press and release is what separates a real backdrop click from those three.
+    const outsideBox = (event: MouseEvent) => {
+      if (event.target !== dialog) return false;
+      const box = dialog.getBoundingClientRect();
+      return (
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom
+      );
+    };
+
+    let pressedOutside = false;
+    dialog.addEventListener('pointerdown', (event) => {
+      pressedOutside = outsideBox(event);
+    });
+    dialog.addEventListener('click', (event) => {
+      if (pressedOutside && outsideBox(event)) dialog.close();
+    });
+  }
+
+  document.addEventListener('astro:page-load', initContactDialog);
+</script>
 
 <style>
   .section-inner {
@@ -588,7 +695,11 @@ import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
     letter-spacing: 0.04em;
   }
 
-  /* ── ContactDialog styles (global) ── */
+  /* ── Contact dialog (global) ──
+     These were Tailwind utilities on the Base UI popup/backdrop; they are spelled out
+     here, value for value, now that the modal is a native <dialog>. Literal hexes and
+     px rather than tokens because that is what the utilities resolved to — swapping in
+     nearest-token approximations would move the design. */
   :global(.contact-dialog-trigger) {
     display: inline-flex;
     align-items: center;
@@ -608,6 +719,63 @@ import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
 
   :global(.contact-dialog-trigger:hover) {
     background: var(--jaipur-navy-deep, #062038);
+  }
+
+  /* Every declaration down to `border-radius` exists to undo a UA `dialog` default:
+     the modal box is stretched to the viewport insets, centred with `margin: auto`,
+     and painted with a 3px border on `Canvas`. Overriding the insets to 50/auto is
+     what lets the translate re-centre it the way `left-1/2 -translate-x-1/2` did. */
+  /* Stated rather than left to the UA: where <dialog> is unknown there is no
+     `dialog:not([open]) { display: none }` rule, so the fixed, centred box below would paint
+     unconditionally — invisible under the motion block, opaque under reduced motion, and
+     swallowing taps either way. */
+  :global(.contact-dialog:not([open])) {
+    display: none;
+  }
+
+  :global(.contact-dialog) {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 28rem;
+    margin: 0;
+    padding: 24px;
+    background: #fff;
+    color: #0f172a;
+    border: 1px solid #e5e0d5;
+    /* Base UI's DialogContent set these via `rounded-lg` and `shadow-xl`, i.e. the shadcn
+       radius token and a Tailwind black-based shadow. --radius is the same 10px, so the
+       shape is unchanged; --elev-3 is the brand's top-surface elevation and replaces the
+       black shadow with the navy-tinted one every other raised surface on the site uses. */
+    border-radius: var(--radius);
+    box-shadow: var(--elev-3);
+  }
+
+  :global(.contact-dialog::backdrop) {
+    background: rgb(0 0 0 / 0.4);
+  }
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :global(.contact-dialog::backdrop) {
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+  }
+
+  :global(.contact-dialog-title) {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    margin-bottom: 4px;
+  }
+
+  :global(.contact-dialog-desc) {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #94a3b8;
+    margin-bottom: 16px;
   }
 
   :global(.contact-dialog-actions) {
@@ -657,5 +825,73 @@ import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
 
   :global(.contact-dialog-dismiss) {
     display: none;
+  }
+
+  :global(.contact-dialog-close) {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  :global(.contact-dialog-close:hover) {
+    color: #0f172a;
+  }
+
+  /* Stated rather than inherited from the global reset, so the 28px hit area does not
+     gain a text line box's worth of descender space if that reset ever changes. */
+  :global(.contact-dialog-close svg) {
+    display: block;
+  }
+
+  /* Enter/exit motion. `allow-discrete` on display/overlay is what keeps a top-layer
+     element painted while it animates out, so close() can stay synchronous — no JS
+     waiting on animationend, and therefore no way to strand the modal open. Browsers
+     without @starting-style ignore this block and simply show/hide the dialog. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.contact-dialog) {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.95);
+      transition-property: opacity, transform, overlay, display;
+      transition-duration: 200ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-behavior: allow-discrete;
+    }
+
+    :global(.contact-dialog[open]) {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    @starting-style {
+      :global(.contact-dialog[open]) {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+      }
+    }
+
+    :global(.contact-dialog::backdrop) {
+      opacity: 0;
+      transition-property: opacity, overlay, display;
+      transition-duration: 150ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-behavior: allow-discrete;
+    }
+
+    :global(.contact-dialog[open]::backdrop) {
+      opacity: 1;
+    }
+
+    @starting-style {
+      :global(.contact-dialog[open]::backdrop) {
+        opacity: 0;
+      }
+    }
   }
 </style>

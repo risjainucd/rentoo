@@ -4,24 +4,55 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import PropertyCard from '../../components/PropertyCard.astro';
-import FilterBar from '../../components/FilterBar.tsx';
 import { parseListingFilters, dropUnknownFilters, soleNarrowingFilter } from '../../lib/sql';
 import { listListings, listMajorAreasIncluding, getNeighbourhood } from '../../lib/db';
+// The filter menus, as [value, label] so the order the options render in is the order written
+// here. The empty value means "no filter"; the script below drops it from the submitted query
+// rather than letting the form put `?sort=&furnishing=` in the address bar. There is no BHK list
+// here: BHK is a residential idea, and this bar has never offered it.
+const SORT_ITEMS: [string, string][] = [
+  ['', 'Newest first'],
+  ['featured', 'Featured'],
+  ['most-viewed', 'Most viewed'],
+  ['budget', 'Budget-friendly'],
+  ['most-liked', 'Most liked'],
+];
+const FURNISHING_ITEMS: [string, string][] = [
+  ['', 'Any'],
+  ['furnished', 'Furnished'],
+  ['semi-furnished', 'Semi-furnished'],
+  ['unfurnished', 'Unfurnished'],
+];
 const filters = { ...parseListingFilters(Astro.url), segment: 'industrial' as const };
-// Resolve the place filters first: one that names nothing real has no label to show, so it
-// is dropped before the (now pointless) listings query runs. ?neighbourhood= is reachable
-// from the footer, the homepage and every detail-page breadcrumb, so a renamed slug there
-// would otherwise land on an unexplained empty page.
-const areas = await listMajorAreasIncluding(Astro.locals.db, 'industrial', filters.area);
+// Resolve the place filters first: one that names nothing real has no label to show, so it is
+// dropped rather than left narrowing the page to an unexplained nothing. ?neighbourhood= is
+// reachable from the footer, the homepage and every detail-page breadcrumb, so a renamed slug
+// there would otherwise land on exactly that.
+//
+// All three queries read nothing but the URL, so awaiting them one after another bought nothing
+// and cost two extra D1 round trips before the first byte of HTML. The listings query now starts
+// alongside the two place lookups and is settled after the redirect decision below. On the
+// redirect path its result is thrown away — that waste is the price of the two round trips the
+// common path saves, and the redirect is the rare typo/renamed-slug case.
+const listingsQuery = listListings(Astro.locals.db, filters);
+// Deliberately NOT one of the Promise.all inputs. Promise.all rejects the moment any input does,
+// so a D1 hiccup on the listings query would turn a redirect that only ever needed `areas` into a
+// 500 — whereas the old serial order never even ran that query on the redirect path. This no-op
+// marks the rejection as handled so redirecting away from it stays silent; `.catch` returns a new
+// promise and leaves this one rejected, so the `await` further down still throws as it always did.
+listingsQuery.catch(() => {});
+const [areas, nbhd] = await Promise.all([
+  listMajorAreasIncluding(Astro.locals.db, 'industrial', filters.area),
+  filters.neighbourhood ? getNeighbourhood(Astro.locals.db, filters.neighbourhood) : null,
+]);
 const areaName = filters.area ? areas.find((a) => a.slug === filters.area)?.name : undefined;
-const nbhd = filters.neighbourhood ? await getNeighbourhood(Astro.locals.db, filters.neighbourhood) : null;
 const unknown = [
   ...(filters.area && !areaName ? ['area'] : []),
   ...(filters.neighbourhood && !nbhd ? ['neighbourhood'] : []),
 ];
 const redirectTo = dropUnknownFilters(Astro.url, unknown);
 if (redirectTo) return Astro.redirect(redirectTo, 302);
-const { items, total } = await listListings(Astro.locals.db, filters);
+const { items, total } = await listingsQuery;
 const sole = soleNarrowingFilter(filters);
 const placeName = sole === 'area' ? areaName : sole === 'neighbourhood' ? nbhd?.name : undefined;
 const perPage = filters.perPage ?? 12;
@@ -55,8 +86,85 @@ function pageHref(p: number) {
   <section class="listings-layout">
     <div class="section-inner">
 
-      <!-- Filter bar (React island, loads when visible) -->
-      <FilterBar client:visible areas={areas} value={filters} />
+      {/* Filter bar. Every one of these controls only ever rewrote the query string and reloaded
+          the page, which is precisely what a GET form does on its own — so this is a form, and
+          the 58 KB of React that used to do it by hand is gone. `segment` is deliberately absent:
+          the page pins its own after the spread in `filters`, so a ?segment= in the URL is
+          ignored, and emitting it would only add a param the server throws away. `page` is absent
+          for the same reason it was omitted from the island's URLSearchParams — any filter change
+          resets you to page 1. */}
+      <form class="filter-bar" method="get" action="/industrial" aria-label="Filter listings" data-filter-form>
+        {/* A sub-locality reached by deep link has no control of its own, so it rides along as a
+            hidden field; picking a major Area clears it (see the script below). */}
+        {filters.neighbourhood && (
+          <input type="hidden" name="neighbourhood" value={filters.neighbourhood} data-filter-neighbourhood />
+        )}
+        {/* No BHK menu on this bar, but a ?bhk= that arrived in the URL survived every other
+            filter change under the old island, so it is carried rather than silently dropped. */}
+        {filters.bhk && <input type="hidden" name="bhk" value={filters.bhk} />}
+
+        {/* Sort — Featured / Most viewed / Budget / Most liked */}
+        <div class="filter-group">
+          <label class="filter-legend" for="filter-sort">Show me</label>
+          <select class="filter-select-trigger" id="filter-sort" name="sort">
+            {SORT_ITEMS.map(([value, label]) => (
+              <option value={value} selected={(filters.sort ?? '') === value}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Area (major areas only) */}
+        <div class="filter-group">
+          <label class="filter-legend" for="filter-area">Area</label>
+          <select class="filter-select-trigger" id="filter-area" name="area" data-filter-area>
+            <option value="" selected={!filters.area}>All areas</option>
+            {areas.map((a) => (
+              <option value={a.slug} selected={filters.area === a.slug}>{a.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Furnishing */}
+        <div class="filter-group">
+          <label class="filter-legend" for="filter-furnishing">Furnishing</label>
+          <select class="filter-select-trigger" id="filter-furnishing" name="furnishing">
+            {FURNISHING_ITEMS.map(([value, label]) => (
+              <option value={value} selected={(filters.furnishing ?? '') === value}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Rent range. The caption is a <span>, not a <label>: it heads two inputs and so can be
+            bound to neither, and each input carries its own aria-label instead. */}
+        <div class="filter-group filter-group--rent">
+          <span class="filter-legend">Rent (₹/mo)</span>
+          <div class="filter-rent-inputs">
+            <input
+              class="filter-input"
+              type="number"
+              name="minRent"
+              min="0"
+              placeholder="Min"
+              aria-label="Minimum rent per month, in rupees"
+              value={filters.minRent != null ? String(filters.minRent) : ''}
+            />
+            <span class="filter-rent-sep" aria-hidden="true">–</span>
+            <input
+              class="filter-input"
+              type="number"
+              name="maxRent"
+              min="0"
+              placeholder="Max"
+              aria-label="Maximum rent per month, in rupees"
+              value={filters.maxRent != null ? String(filters.maxRent) : ''}
+            />
+          </div>
+        </div>
+
+        {/* The script below applies a filter the moment you pick one, exactly as the island did.
+            This button is what keeps the same bar usable when that script never runs. */}
+        <button type="submit" class="filter-apply">Apply</button>
+      </form>
 
       <div class="listings-main">
         <div class="results-bar">
@@ -77,7 +185,10 @@ function pageHref(p: number) {
           <div class="listing-grid" role="list">
             {items.map((card, i) => (
               <div role="listitem" data-reveal style={`--reveal-delay:${Math.min(i, 8) * 55}ms`}>
-                <PropertyCard card={card} />
+                {/* The first row is above the fold on every viewport this grid has (1 column,
+                    2 at 640px, 3 at 1280px), and lazy is the one place it costs more than it saves:
+                    the fetch waits for layout, for a photo the visitor is already looking at. */}
+                <PropertyCard card={card} priority={i < 3} />
               </div>
             ))}
           </div>
@@ -141,6 +252,77 @@ function pageHref(p: number) {
 
   <SiteFooter slot="footer" />
 </BaseLayout>
+
+<script>
+  // The filter bar works without any of this — it is a GET form. All this adds is the
+  // instant-apply feel the React island had, plus two bits of query-string hygiene. Bound on
+  // every astro:page-load so it survives View Transitions, and guarded by a dataset flag so a
+  // second page-load on the same form cannot double-bind it.
+  function initFilterBar() {
+    document.querySelectorAll<HTMLFormElement>('[data-filter-form]').forEach((form) => {
+      if (form.dataset.filterReady) return;
+      form.dataset.filterReady = 'true';
+
+      // A form submits every named control, empty ones included, so an untouched bar would
+      // rewrite the URL as `?sort=&area=&bhk=&furnishing=&minRent=&maxRent=` — a second canonical
+      // URL for an identical result set. `formdata` is the one hook that fires both for a real
+      // submission and for the FormData the View Transitions router builds out of the form, so
+      // stripping here covers both paths. Without JS the form still submits, just with the empty
+      // params left in.
+      form.addEventListener('formdata', (e) => {
+        for (const [key, value] of [...e.formData]) {
+          if (value === '') e.formData.delete(key);
+        }
+      });
+
+      // A chosen major area supersedes a deep-linked sub-locality — the island expressed this by
+      // dropping `neighbourhood` from the query on an area change. Blanking the hidden field hands
+      // it to the stripper above. Registered before the auto-submit binding so it runs first.
+      const nbhd = form.querySelector<HTMLInputElement>('[data-filter-neighbourhood]');
+      // HTMLElement, not HTMLSelectElement: env.d.ts pulls in @cloudflare/workers-types, whose
+      // HTMLRewriter `Element` is the global one querySelector's type parameter is constrained
+      // to, and HTMLSelectElement's extra `remove(index)` overload fails that constraint.
+      form.querySelector<HTMLElement>('[data-filter-area]')?.addEventListener('change', () => {
+        if (nbhd) nbhd.value = '';
+      });
+
+      // requestSubmit fires the submit event (so the router and the stripper both see it);
+      // form.submit would not. The fallback still fires `formdata`, so it strips too.
+      const submit = () => {
+        if (typeof form.requestSubmit === 'function') form.requestSubmit();
+        else form.submit();
+      };
+
+      // Not every `change` may navigate. A pointer pick on a <select> settles the whole choice in
+      // one gesture, so it applies the instant it lands — that is the feel the island had, and it
+      // is what mouse and touch visitors still get. Two other sources fire `change` repeatedly in
+      // the middle of one interaction: a closed <select> stepped with Arrow keys commits a new
+      // value on every press, and the rent spinners fire on every click of the stepper. Navigating
+      // there swaps the document out from under the control being operated and drops focus on
+      // <body>, so those wait for the control to be left instead — which is what the island's
+      // `onBlur` did. Enter is the keyboard's commit gesture, so it navigates like a pointer pick.
+      form.querySelectorAll<HTMLElement>('select, input[type="number"]').forEach((control) => {
+        const isSelect = control.tagName === 'SELECT';
+        let instant = false;
+        let pending = false;
+        control.addEventListener('pointerdown', () => { instant = isSelect; });
+        control.addEventListener('keydown', (e) => { instant = isSelect && e.key === 'Enter'; });
+        control.addEventListener('change', () => {
+          if (!instant) { pending = true; return; }
+          instant = false;
+          submit();
+        });
+        control.addEventListener('blur', () => {
+          if (!pending) return;
+          pending = false;
+          submit();
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initFilterBar);
+</script>
 
 <style>
   .section-inner {
@@ -419,6 +601,137 @@ function pageHref(p: number) {
   }
 
   .nbhd-chips a:hover {
+    background: var(--jaipur-navy);
+    color: var(--paper);
+  }
+
+  /* ── Filter bar ──
+     Lifted out of FilterBar.tsx's inline <style> when the island became a plain GET form. The
+     .filter-bar / .filter-group / .filter-legend / .filter-rent-* rules are verbatim. The control
+     rules are not: they now have to spell out what the Base UI trigger and input were getting from
+     Tailwind utilities (the 32px h-8 box, the 1px border, the 10px inset), since no utility class
+     reaches a bare <select>. */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    align-items: flex-end;
+    background: var(--paper-snow);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: var(--space-lg);
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 140px;
+    flex: 1 1 140px;
+  }
+
+  .filter-group--rent {
+    min-width: 200px;
+    flex: 2 1 200px;
+  }
+
+  .filter-legend {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  /* appearance:none and a background chevron rather than the platform arrow: the trigger this
+     replaces drew its own lucide chevron, and every OS paints the native one differently. The
+     glyph is the same path lucide ships, in --ink-soft, at the same 16px it rendered at. */
+  .filter-select-trigger {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 32px;
+    padding: 0 30px 0 10px;
+    background-color: var(--paper);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  /* The global :focus-visible rule in globals.css supplies the 2px ring; this only recolours it,
+     exactly as the rule on the old trigger did. */
+  .filter-select-trigger:focus-visible {
+    border-color: var(--jaipur-navy);
+    outline-color: var(--jaipur-navy);
+  }
+
+  .filter-rent-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .filter-rent-sep {
+    color: var(--ink-soft);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .filter-input {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    padding: 0 10px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .filter-input::placeholder {
+    color: var(--ink-soft);
+  }
+
+  .filter-input:focus-visible {
+    border-color: var(--jaipur-navy);
+    outline-color: var(--jaipur-navy);
+  }
+
+  /* Sized to the controls rather than to the site's 44px tap target so the bar keeps its one
+     baseline; it is a fallback and a second way in, not the primary path. */
+  .filter-apply {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    height: 32px;
+    padding: 0 var(--space-lg);
+    background: transparent;
+    border: 1px solid var(--jaipur-navy);
+    border-radius: var(--r-sm);
+    color: var(--jaipur-navy);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+
+  .filter-apply:hover {
     background: var(--jaipur-navy);
     color: var(--paper);
   }

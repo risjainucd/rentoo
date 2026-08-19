@@ -1,6 +1,5 @@
 ---
 import { WHATSAPP_NUMBER } from '../lib/site';
-import { MobileNav } from './MobileNav';
 
 const links = [
   { label: 'Residential', href: '/rent' },
@@ -10,6 +9,10 @@ const links = [
 ];
 
 const currentPath = Astro.url.pathname;
+
+// The glyph appears twice (header CTA and drawer CTA). It used to be duplicated
+// across two files because the drawer was a React island; one constant now.
+const WHATSAPP_ICON_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413';
 ---
 
 <header class="site-header" role="banner">
@@ -31,13 +34,53 @@ const currentPath = Astro.url.pathname;
 
     <a href={`https://wa.me/${WHATSAPP_NUMBER}`} class="btn-whatsapp btn-sheen" data-cta="whatsapp-nav">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.002-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/>
+        <path d={WHATSAPP_ICON_PATH} />
       </svg>
       <span>WhatsApp us</span>
     </a>
 
-    <MobileNav links={links} client:visible />
+    <button
+      type="button"
+      class="nav-toggle"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      aria-controls="mobile-nav"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line class="nav-toggle-bar nav-toggle-bar--top" x1="3" y1="6" x2="21" y2="6" />
+        <line class="nav-toggle-bar nav-toggle-bar--mid" x1="3" y1="12" x2="21" y2="12" />
+        <line class="nav-toggle-bar nav-toggle-bar--bottom" x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
   </div>
+
+  {/* Opened with showModal(): the top layer, the focus trap, Escape handling and
+      the ::backdrop all come from the platform, so this drawer needs no framework.
+      Being in the top layer also means the header's backdrop-filter — which would
+      otherwise become the containing block — cannot pull it out of the viewport. */}
+  <dialog id="mobile-nav" class="mobile-sheet-content" aria-label="Site menu">
+    <nav class="mobile-sheet-nav" aria-label="Mobile navigation">
+      {links.map(link => (
+        <a href={link.href}>{link.label}</a>
+      ))}
+      <a href={`https://wa.me/${WHATSAPP_NUMBER}`} class="btn-whatsapp btn-whatsapp--block">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+          <path d={WHATSAPP_ICON_PATH} />
+        </svg>
+        <span>WhatsApp us</span>
+      </a>
+    </nav>
+  </dialog>
 </header>
 
 <script>
@@ -57,6 +100,122 @@ const currentPath = Astro.url.pathname;
     }
   }
   document.addEventListener('astro:page-load', initHeaderScroll);
+
+  // ── Mobile drawer ──────────────────────────────────────────────────────────
+  // A native <dialog> does the hard parts (focus trap, Escape, inert background,
+  // backdrop); everything below is just open/close state and the exit animation,
+  // which has to be driven from JS because close() hides the element instantly.
+  const EXIT_MS = 200; // keep in step with --dur-base on .mobile-sheet-content
+
+  let scrollLocked = false;
+
+  // Hold the page still behind the drawer. The padding replaces the scrollbar the
+  // lock removes so the sticky header never jumps sideways — a no-op on the phones
+  // this drawer is for, whose scrollbars are overlays. body as well as html: iOS
+  // Safari keeps scrolling when only the root element is locked.
+  function lockScroll() {
+    if (scrollLocked) return;
+    scrollLocked = true;
+    const root = document.documentElement;
+    const gap = window.innerWidth - root.clientWidth;
+    root.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    if (gap > 0) root.style.paddingRight = `${gap}px`;
+  }
+
+  function unlockScroll() {
+    if (!scrollLocked) return;
+    scrollLocked = false;
+    const root = document.documentElement;
+    root.style.overflow = '';
+    root.style.paddingRight = '';
+    document.body.style.overflow = '';
+  }
+
+  // The lock lives on <html>, which View Transitions never swap, so a navigation
+  // that starts while the drawer is still animating shut would strand it locked.
+  document.addEventListener('astro:before-swap', unlockScroll);
+
+  function wireMobileNav(toggle: HTMLButtonElement, drawer: HTMLDialogElement) {
+    let exitTimer = 0;
+    const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function setToggleState(isOpen: boolean) {
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+    }
+
+    function open() {
+      window.clearTimeout(exitTimer);
+      setToggleState(true);
+      if (drawer.open) {
+        // An exit was still in flight — the drawer never left, so calling off the
+        // fade is the whole job. Skipping this would strand it open but invisible.
+        drawer.removeAttribute('data-transition');
+        return;
+      }
+      drawer.setAttribute('data-transition', 'enter');
+      drawer.showModal();
+      lockScroll();
+      // Resolve style once while the drawer is still in its entry state: without
+      // this the attribute removal lands in the same frame and nothing animates.
+      void drawer.offsetWidth;
+      drawer.removeAttribute('data-transition');
+    }
+
+    function close(restoreFocus: boolean) {
+      if (!drawer.open) return;
+      setToggleState(false);
+      drawer.setAttribute('data-transition', 'exit');
+      window.clearTimeout(exitTimer);
+      const finish = () => {
+        drawer.close();
+        drawer.removeAttribute('data-transition');
+        unlockScroll();
+        // Escape and backdrop dismissals must land the user back on the hamburger.
+        // Skipped for link clicks, where the page is already navigating away.
+        if (restoreFocus && toggle.isConnected) toggle.focus();
+      };
+      if (reducedMotion()) finish();
+      else exitTimer = window.setTimeout(finish, EXIT_MS);
+    }
+
+    toggle.addEventListener('click', () => (drawer.open ? close(true) : open()));
+
+    // Escape fires `cancel` first and its default action closes the dialog outright,
+    // skipping the exit animation — take it over instead.
+    drawer.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close(true);
+    });
+
+    // A press on the ::backdrop reports the <dialog> itself as the target. Requiring
+    // both ends of the click to land there stops a drag out of the drawer dismissing it.
+    let pressedBackdrop = false;
+    drawer.addEventListener('pointerdown', (event) => {
+      pressedBackdrop = event.target === drawer;
+    });
+    drawer.addEventListener('click', (event) => {
+      if (pressedBackdrop && event.target === drawer) close(true);
+    });
+
+    drawer.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => close(false));
+    });
+  }
+
+  function initMobileNav() {
+    const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+    const drawer = document.querySelector<HTMLDialogElement>('.mobile-sheet-content');
+    if (!toggle || !drawer || toggle.dataset.navReady) return;
+    // Browsers without <dialog> (pre-15.4 Safari) leave the toggle inert rather than
+    // throwing; the CSS below keeps the drawer's markup hidden for them regardless.
+    if (typeof drawer.showModal !== 'function') return;
+    toggle.dataset.navReady = 'true';
+    wireMobileNav(toggle, drawer);
+  }
+
+  document.addEventListener('astro:page-load', initMobileNav);
 </script>
 
 <style>
@@ -193,8 +352,8 @@ const currentPath = Astro.url.pathname;
     .logo img { height: 24px; }
   }
 
-  /* Hide MobileNav hamburger on desktop via global CSS in sheet component,
-     but we also need to hide the trigger container on md+ */
+  /* The hamburger replaces the primary nav below 768px, so it is the only way into
+     the site's sections on a phone — hence the full 44px target. */
   :global(.nav-toggle) {
     display: flex;
     align-items: center;
@@ -219,11 +378,103 @@ const currentPath = Astro.url.pathname;
     :global(.nav-toggle) { display: none; }
   }
 
-  /* Mobile sheet nav styles */
+  /* Hamburger → X. These were inline styles keyed off React state; the button's own
+     aria-expanded drives them now, so the morph needs nothing mirrored in script. */
+  :global(.nav-toggle svg line) {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform var(--dur-fast) var(--ease-out),
+                opacity var(--dur-fast) var(--ease-out);
+  }
+
+  :global(.nav-toggle[aria-expanded="true"] .nav-toggle-bar--top) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  :global(.nav-toggle[aria-expanded="true"] .nav-toggle-bar--mid) {
+    opacity: 0;
+  }
+
+  :global(.nav-toggle[aria-expanded="true"] .nav-toggle-bar--bottom) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* Mobile drawer. Each declaration below reproduces a class the Base UI sheet
+     carried (fixed inset-y-0 left-0 h-full w-3/4 sm:max-w-sm border-r shadow-lg,
+     faded and slid 2.5rem in and out) so the drawer looks and moves as it did. */
+
+  /* Stated rather than left to the UA: where <dialog> is unknown the element would
+     otherwise be inline and its links would spill into the header. */
+  :global(.mobile-sheet-content:not([open])) {
+    display: none;
+  }
+
   :global(.mobile-sheet-content) {
-    padding: 0 !important;
-    gap: 0 !important;
-    background: var(--paper) !important;
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    right: auto;
+    width: 75%;
+    height: 100%;
+    /* The UA holds dialog:modal 2em clear of the viewport edges; a drawer wants none. */
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+    background-clip: padding-box;
+    color: var(--ink);
+    font-size: 0.875rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    /* Tailwind's ease-in-out, not the house --ease-out: this is the curve the sheet
+       already moved on, and the motion is meant to be unchanged. */
+    transition: opacity var(--dur-base) cubic-bezier(0.4, 0, 0.2, 1),
+                transform var(--dur-base) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  :global(.mobile-sheet-content[open]) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    :global(.mobile-sheet-content) { max-width: 24rem; }
+  }
+
+  /* data-transition marks both ends of the animation: set before showModal() so the
+     drawer enters from here, set again on close so it leaves the same way. */
+  :global(.mobile-sheet-content[data-transition]) {
+    opacity: 0;
+    transform: translateX(-2.5rem);
+  }
+
+  /* Literal duration here, not --dur-fast: ::backdrop only started inheriting custom
+     properties from its originating element recently, and an unresolved var() would
+     void the whole declaration. */
+  :global(.mobile-sheet-content::backdrop) {
+    background: rgba(0, 0, 0, 0.1);
+    transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @supports (backdrop-filter: blur(0)) {
+    :global(.mobile-sheet-content::backdrop) {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+  }
+
+  :global(.mobile-sheet-content[data-transition]::backdrop) {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.nav-toggle svg line),
+    :global(.mobile-sheet-content),
+    :global(.mobile-sheet-content::backdrop) {
+      transition: none;
+    }
   }
 
   :global(.mobile-sheet-nav) {

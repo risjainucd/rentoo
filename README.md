@@ -18,7 +18,7 @@ Worker bindings (see `wrangler.jsonc`): `DB` (D1), `MEDIA` (R2), `SESSION` (KV),
 
 ```
 src/
-  components/        PropertyCard, Gallery, FilterBar, SiteHeader/Footer, Pill, ui/*
+  components/        PropertyCard, Gallery, FeaturedHero, SiteHeader/Footer, Pill, ui/*
   layouts/           BaseLayout.astro
   lib/               db.ts, sql.ts, types.ts, media.ts, site.ts (domain + data access)
   middleware.ts      attaches D1 binding + siteOrigin to Astro.locals
