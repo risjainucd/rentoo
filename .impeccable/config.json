@@ -35,18 +35,27 @@
       },
       {
         "rule": "overused-font",
-        "value": "geist @font-face subset definition, not usage. geist is --font-sans, the documented body face; it is declared twice only because latin and latin-ext are separate unicode-range subsets — the required pattern for subset gating, not font overuse.",
-        "createdAt": "2026-08-19T15:13:38.176Z"
+        "value": "geist",
+        "createdAt": "2026-08-19T15:59:38.696Z",
+        "reason": "@font-face subset definition, not usage. Geist is --font-sans, the documented body face; declared twice only because latin and latin-ext are separate unicode-range subsets — the required pattern for subset gating."
       },
       {
         "rule": "overused-font",
-        "value": "space grotesk @font-face subset definition, not usage. space grotesk is --font-display, the documented heading face; declared twice for the latin/latin-ext unicode-range subsets. design.md specifies exactly this two-font system.",
-        "createdAt": "2026-08-19T15:13:38.238Z"
+        "value": "space grotesk",
+        "createdAt": "2026-08-19T15:59:38.756Z",
+        "reason": "@font-face subset definition, not usage. Space Grotesk is --font-display; declared twice for the latin/latin-ext unicode-range subsets. DESIGN.md specifies exactly this two-font system."
       },
       {
         "rule": "design-system-color",
-        "value": "rgb(0 0 0 / 0.4) contact.astro .contact-dialog::backdrop scrim. a ::backdrop is an alpha veil over the page, never a painted brand colour — same reasoning as the sanctioned #000 mask-stop ignore. value reproduces the bg-black/40 the base ui dialogoverlay already shipped.",
-        "createdAt": "2026-08-19T15:13:38.299Z"
+        "value": "rgb(0 0 0 / 0.4)",
+        "createdAt": "2026-08-19T15:59:38.816Z",
+        "reason": "contact.astro .contact-dialog::backdrop scrim. A ::backdrop is an alpha veil over the page, never a painted brand colour — same reasoning as the sanctioned #000 mask-stop ignore. Reproduces the bg-black/40 the Base UI DialogOverlay already shipped."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.1)",
+        "createdAt": "2026-08-19T16:02:07.637Z",
+        "reason": "SiteHeader .mobile-sheet-content::backdrop scrim. A ::backdrop is an alpha veil over the page, never a painted brand colour — same reasoning as the sanctioned #000 mask-stop and the contact dialog's rgb(0 0 0 / 0.4). Reproduces the bg-black/10 Base UI's SheetOverlay already shipped. Sole occurrence in src/ as of this commit; the drawer's Tailwind shadow that shared this value was moved to var(--elev-3)."
       }
     ]
   }

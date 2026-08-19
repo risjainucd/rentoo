@@ -427,7 +427,10 @@ const WHATSAPP_ICON_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-
     background-clip: padding-box;
     color: var(--ink);
     font-size: 0.875rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    /* Base UI's SheetContent carried `shadow-lg`, a Tailwind black-based shadow.
+       --elev-3 is the brand's top-surface elevation — the same swap the contact
+       dialog got, so the two overlay surfaces are lit the same way. */
+    box-shadow: var(--elev-3);
     /* Tailwind's ease-in-out, not the house --ease-out: this is the curve the sheet
        already moved on, and the motion is meant to be unchanged. */
     transition: opacity var(--dur-base) cubic-bezier(0.4, 0, 0.2, 1),
