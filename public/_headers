@@ -1,0 +1,13 @@
+# Astro copies this file verbatim into dist/client/, and the Cloudflare adapter
+# then PREPENDS its own `/_astro/*` immutable block to whatever it finds here
+# (see buildAssetsHeadersContent in @astrojs/cloudflare). So this file is merged,
+# not overwritten — but only as long as nothing in it already sets Cache-Control
+# on a path matching /_astro/*, which would make the adapter skip its injection
+# entirely. Keep the rules below narrow for that reason.
+
+# The woff2 files live at stable, unhashed names so BaseLayout can preload them,
+# which means they carry no cache-busting hash of their own. A year of immutable
+# caching is safe anyway: the contents are pinned to a @fontsource version, and a
+# font revision would ship under a new filename.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

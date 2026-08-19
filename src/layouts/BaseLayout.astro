@@ -25,6 +25,33 @@ const ogImageUrl = new URL(ogImage ?? '/og-image.jpg', Astro.url.origin);
     <meta name="theme-color" content="#082746" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    {/* The woff2 files are self-hosted at stable, unhashed paths (see the @font-face block
+        at the top of globals.css) for exactly one reason: so they can be named here. These
+        sit above the stylesheet link Astro injects at the end of <head>, so the preload
+        scanner opens the font connections while globals.css is still in flight — left to
+        itself a webfont is only discovered after the CSS parses AND layout finds text whose
+        codepoints fall in its unicode-range, which is the latest possible moment.
+
+        `crossorigin` is mandatory even though these are same-origin. Fonts are always
+        fetched in CORS mode, so a preload without it is keyed as a different cache entry
+        from the @font-face request and the browser downloads every file twice.
+
+        Three of the four subsets are preloaded, not all four — they compete with the LCP
+        image for the same early bandwidth, so each one has to earn it:
+          • geist-latin      — --font-sans, i.e. all body copy, nav and buttons.
+          • geist-latin-ext  — owns U+20B9 ₹, and every price on the site is a rupee. A late
+                               swap here reflows the one number visitors actually scan for.
+          • space-grotesk-latin — --font-display, which sets the heading that leads each page
+                               (.detail-main h1, .featured-title, .section-marker h2).
+        space-grotesk-latin-ext is deliberately omitted. Nothing routes a rupee or an
+        accented character through the display face — it only ever sets English headings —
+        so its unicode-range never matches and preloading it would spend ~19KB on a file the
+        browser then never uses. */}
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/geist-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/geist-latin-ext.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/space-grotesk-latin.woff2" crossorigin />
+
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/Rentooicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -52,6 +79,60 @@ const ogImageUrl = new URL(ogImage ?? '/og-image.jpg', Astro.url.origin);
         [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
       </style>
     </noscript>
+
+    {/* Speculative loading for the /rent → listing-detail loop.
+
+        `prefetch`, never `prerender`. A prerendered document runs its scripts, and
+        rent/[slug].astro fires `fetch('/api/view/' + slug, { method: 'POST' })` from
+        `astro:page-load` — which fires in a prerendering context just as it does in a
+        visible one. Prerendering would therefore bump `properties.views` for listings the
+        visitor only hovered, and set the sessionStorage guard so the real visit is never
+        counted. The admin dashboard sorts on that column, so the damage is silent.
+
+        The `where` clause keeps this to same-origin documents. An href_matches pattern is
+        resolved against this document's URL, so "/*" already cannot match another host; the
+        `not` clauses then drop /admin (behind Cloudflare Access — a prefetch buys a redirect
+        to a login screen), /api (never a document) and /media (an R2 byte stream). /admin is
+        listed twice on purpose: "/admin/*" requires the slash and would let a bare "/admin"
+        through. Nothing links there from a BaseLayout page today — SiteFooter points at
+        /admin/login/ and the "All listings" link lives in the standalone AdminLayout — but
+        the footer is one href edit away from making that gap real.
+
+        Eagerness is `conservative` (pointer-down), not `moderate` (~200ms hover), because
+        <ClientRouter /> silently turns on Astro's own prefetcher: it calls
+        init({ prefetchAll: true }) unless astro.config sets `prefetch: false`, so every
+        same-origin link is already fetched via <link rel="prefetch"> after 80ms of hover.
+        That response lands in the HTTP cache, whereas a speculation-rules prefetch lands in
+        the browser's separate prefetch cache — they do not share entries, so a `moderate`
+        rule would send the same URL through the Worker (and D1) twice on a single hover.
+        Conservative fires late enough to stay out of that window while still covering the
+        navigations Astro's prefetcher cannot serve: middle-click and ctrl-click open a real
+        navigation, which is the only kind of load the prefetch cache is allowed to answer.
+
+        Cloudflare's Speed Brain header (`speculation-rules: "/cdn-cgi/speculation"`) does
+        not conflict with this block — rule sets from headers and from inline scripts are
+        additive, and Cloudflare documents that it leaves an origin's own rules alone. It is
+        inert here regardless: Speed Brain refuses to prefetch routes that run a Worker, and
+        every route on this site is the Astro Worker. */}
+    <script type="speculationrules" is:inline>
+      {
+        "prefetch": [
+          {
+            "source": "document",
+            "where": {
+              "and": [
+                { "href_matches": "/*" },
+                { "not": { "href_matches": "/admin" } },
+                { "not": { "href_matches": "/admin/*" } },
+                { "not": { "href_matches": "/api/*" } },
+                { "not": { "href_matches": "/media/*" } }
+              ]
+            },
+            "eagerness": "conservative"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>

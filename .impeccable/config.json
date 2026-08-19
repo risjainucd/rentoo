@@ -7,13 +7,13 @@
         "rule": "design-system-radius",
         "value": "8px)",
         "createdAt": "2026-08-19T10:37:27.658Z",
-        "reason": "detector parses the var() fallback text: var(--r-md, 8px) \u2014 8px IS DESIGN.md rounded.md"
+        "reason": "detector parses the var() fallback text: var(--r-md, 8px) — 8px IS DESIGN.md rounded.md"
       },
       {
         "rule": "design-system-radius",
         "value": "4px)",
         "createdAt": "2026-08-19T10:37:27.727Z",
-        "reason": "detector parses the var() fallback text: var(--r-sm, 4px) \u2014 4px IS DESIGN.md rounded.sm"
+        "reason": "detector parses the var() fallback text: var(--r-sm, 4px) — 4px IS DESIGN.md rounded.sm"
       },
       {
         "rule": "bounce-easing",
@@ -31,7 +31,22 @@
         "rule": "design-system-color",
         "value": "#000",
         "createdAt": "2026-08-19T10:50:00.000Z",
-        "reason": "index.astro .hero-aura mask-image alpha stop \u2014 a mask stop is an alpha channel, never a painted colour. Verified false positive."
+        "reason": "index.astro .hero-aura mask-image alpha stop — a mask stop is an alpha channel, never a painted colour. Verified false positive."
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist @font-face subset definition, not usage. geist is --font-sans, the documented body face; it is declared twice only because latin and latin-ext are separate unicode-range subsets — the required pattern for subset gating, not font overuse.",
+        "createdAt": "2026-08-19T15:13:38.176Z"
+      },
+      {
+        "rule": "overused-font",
+        "value": "space grotesk @font-face subset definition, not usage. space grotesk is --font-display, the documented heading face; declared twice for the latin/latin-ext unicode-range subsets. design.md specifies exactly this two-font system.",
+        "createdAt": "2026-08-19T15:13:38.238Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgb(0 0 0 / 0.4) contact.astro .contact-dialog::backdrop scrim. a ::backdrop is an alpha veil over the page, never a painted brand colour — same reasoning as the sanctioned #000 mask-stop ignore. value reproduces the bg-black/40 the base ui dialogoverlay already shipped.",
+        "createdAt": "2026-08-19T15:13:38.299Z"
       }
     ]
   }
