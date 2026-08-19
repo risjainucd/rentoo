@@ -78,7 +78,9 @@ The user confirmed these are current implementation, open to change — do not t
 
 **Published claims with unverified provenance** — treat as client-supplied; do not restate as verified, extend, or add siblings: "247 families placed since 2021" and "26 min median WhatsApp response (last 30 days)" (hardcoded `NumberTicker` values on the homepage), "we visit every property", and "replies within 30 minutes".
 
-**Absent — must not be fabricated:** testimonials, named client references, press coverage, awards, partner logos, ratings.
+**Real, client-supplied:** the three homepage testimonials (Priya S., Ankit M., Rohit K. — `index.astro:158`) are genuine; confirmed by the user 2026-08-19. They describe different service paths — one had Satvik attend the viewings, another needed no site visits — which is real variation in how clients are served, not an inconsistency to reconcile.
+
+**Absent — must not be fabricated:** press coverage, awards, partner logos, ratings, and any testimonial beyond the three already confirmed.
 
 ## Product Principles
 

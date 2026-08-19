@@ -16,6 +16,9 @@ colors:
   line: "#E5E0D5"
   ok-green: "#16A34A"
   ok-mist: "#DCFCE7"
+  ok-deep: "#0F7A37"
+  navy-dawn: "#0C3157"
+  navy-abyss: "#061D33"
   danger-red: "#DC2626"
   danger-mist: "#FEE2E2"
   rest-gray: "#64748B"
@@ -45,6 +48,31 @@ typography:
     fontSize: "1.0625rem"
     fontWeight: 400
     lineHeight: 1.6
+  ui:
+    fontFamily: "Geist Variable, sans-serif"
+    fontSize: "0.9375rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  base:
+    fontFamily: "Geist Variable, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  small:
+    fontFamily: "Geist Variable, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.45
+  caption:
+    fontFamily: "Geist Variable, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 400
+    lineHeight: 1.45
+  meta:
+    fontFamily: "Geist Variable, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 400
+    lineHeight: 1.4
   label:
     fontFamily: "ui-monospace, SF Mono, Cascadia Code, Menlo, monospace"
     fontSize: "0.6875rem"
@@ -133,6 +161,8 @@ A cool navy-and-paper field with exactly one warm accent, plus a small set of fu
 ### Primary
 - **Jaipur Navy** (#082746): The ink of the system. Body headings, primary button fills, the focus ring, text selection, and every shadow's tint. Dominant by area on any dark surface.
 - **Midnight Tile** (#133A60): A lighter navy for tiled or layered navy surfaces where flat #082746 would read as a void.
+- **Navy Dawn** (#0C3157) / **Navy Abyss** (#061D33): the two stops either side of Jaipur Navy in the hero's
+  dawn gradient. Ground only — never a fill, a border, or a text colour.
 
 ### Secondary
 - **Terracotta** (#B5532E): The one warm accent. Marks the single most important thing in a view, and carries "warn/attention" in badges. Never used as a general warming device.
@@ -150,7 +180,8 @@ A cool navy-and-paper field with exactly one warm accent, plus a small set of fu
 
 ### Tertiary
 Functional signals, each locked to one meaning:
-- **OK Green** (#16A34A) / **OK Mist** (#DCFCE7): available status.
+- **OK Green** (#16A34A) / **OK Mist** (#DCFCE7): available status. **OK Deep** (#0F7A37) is the text tone —
+  OK Green on OK Mist measures 3.0:1, so labels use the deeper value to clear AA.
 - **Danger Red** (#DC2626) / **Danger Mist** (#FEE2E2): destructive actions only.
 - **Rest Gray** (#64748B) / **Rest Mist** (#F1F5F9): rented and on-hold — deliberately inert.
 - **WhatsApp Signal** (#25D366) / **WhatsApp Deep** (#1FB958): reserved exclusively for WhatsApp affordances. Using it for any other green is a bug.
@@ -176,7 +207,11 @@ Functional signals, each locked to one meaning:
 - **Display** (700, `clamp(2rem, 5vw, 3.25rem)`, line-height 1.1, tracking -0.025em): Page-opening statements. One per page.
 - **Headline** (700, `clamp(1.5rem, 3.5vw, 2.25rem)`, line-height 1.2, tracking -0.015em): Section openers.
 - **Title** (700, 1.25rem): Card titles, sub-section heads, admin page titles.
-- **Body** (400, 1.0625rem, line-height 1.6): Editorial prose. Standard UI text steps down to 0.9375rem. Keep measure in the 65–75ch range.
+- **Body** (400, 1.0625rem, line-height 1.6): Editorial prose. Keep measure in the 65–75ch range.
+- **UI** (400, 0.9375rem, line-height 1.5): Standard interface text — card meta, form labels, list rows. The working default below editorial prose.
+- **Base / Small / Caption / Meta** (1rem / 0.875rem / 0.8125rem / 0.75rem): The descending interface steps, in use across every surface.
+
+> **Known weakness.** Six steps (0.75 → 1.0625rem) crowd a 12–17px range, which is more granularity than the system can defend — 0.8125rem in particular sits between two neighbours doing the same job. They are documented here because they are genuinely shipped, and an undocumented ramp turns the detector into noise. Consolidating to three or four steps is worth a dedicated pass.
 - **Label** (600, 0.6875rem, tracking 0.02em, uppercase, mono): Status pills, badges, display-ID tags, eyebrow markers.
 
 ### Named Rules
