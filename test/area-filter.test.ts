@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'vitest';
 import type { D1Database } from '@cloudflare/workers-types';
 import { listMajorAreasIncluding } from '../src/lib/db';
-import { areaRedirectUrl, isAreaOnlyFilter } from '../src/lib/sql';
+import { dropUnknownFilters, soleNarrowingFilter } from '../src/lib/sql';
 
 // The Area select lists only areas with live inventory (listMajorAreas), but ?area= can name
 // any area — a stale link, a shared URL, an area whose last listing was marked rented, or a
@@ -66,43 +66,51 @@ describe('listMajorAreasIncluding', () => {
   });
 });
 
-describe('areaRedirectUrl', () => {
-  const resolved = [{ slug: 'c-scheme' }, { slug: 'mahesh-nagar' }];
-
-  test('no redirect when no area is filtered', () => {
-    expect(areaRedirectUrl(new URL('https://x.test/rent'), resolved, undefined)).toBeNull();
+describe('dropUnknownFilters', () => {
+  test('no redirect when everything named something real', () => {
+    expect(dropUnknownFilters(new URL('https://x.test/rent?area=mahesh-nagar'), [])).toBeNull();
   });
 
-  test('no redirect when the area resolved to a real name', () => {
-    expect(areaRedirectUrl(new URL('https://x.test/rent?area=mahesh-nagar'), resolved, 'mahesh-nagar')).toBeNull();
+  test('drops a slug that is not a real area', () => {
+    expect(dropUnknownFilters(new URL('https://x.test/rent?area=asdf'), ['area'])).toBe('/rent');
   });
 
-  test('drops an area slug that is not a real area', () => {
-    expect(areaRedirectUrl(new URL('https://x.test/rent?area=asdf'), resolved, 'asdf')).toBe('/rent');
+  test('drops a slug that is not a real neighbourhood', () => {
+    // Reachable from the footer's hard-coded links if a neighbourhood is ever renamed.
+    expect(dropUnknownFilters(new URL('https://x.test/rent?neighbourhood=gone'), ['neighbourhood'])).toBe('/rent');
   });
 
-  test('keeps the other filters when dropping the bad area', () => {
-    const to = areaRedirectUrl(new URL('https://x.test/rent?area=asdf&bhk=2BHK&sort=budget'), resolved, 'asdf');
+  test('keeps the other filters when dropping a bad one', () => {
+    const to = dropUnknownFilters(new URL('https://x.test/rent?area=asdf&bhk=2BHK&sort=budget'), ['area']);
     expect(to).toBe('/rent?bhk=2BHK&sort=budget');
   });
 
+  test('drops several at once', () => {
+    const to = dropUnknownFilters(new URL('https://x.test/rent?area=asdf&neighbourhood=gone&bhk=2BHK'), ['area', 'neighbourhood']);
+    expect(to).toBe('/rent?bhk=2BHK');
+  });
+
   test('drops page too, since removing a filter changes the result set', () => {
-    expect(areaRedirectUrl(new URL('https://x.test/industrial?area=asdf&page=4'), resolved, 'asdf')).toBe('/industrial');
+    expect(dropUnknownFilters(new URL('https://x.test/industrial?area=asdf&page=4'), ['area'])).toBe('/industrial');
   });
 });
 
-describe('isAreaOnlyFilter', () => {
-  // Guards the empty-state wording: naming the area is only honest when the area is what emptied it.
-  test('true when area is the only filter applied', () => {
-    expect(isAreaOnlyFilter({ area: 'mahesh-nagar', segment: 'residential', page: 2 })).toBe(true);
+describe('soleNarrowingFilter', () => {
+  // Guards the empty-state wording: naming a place is only honest when that place is what
+  // emptied the page, not when a rent bound or a BHK did.
+  test('names the one filter in play', () => {
+    expect(soleNarrowingFilter({ area: 'mahesh-nagar', segment: 'residential', page: 2 })).toBe('area');
+    expect(soleNarrowingFilter({ neighbourhood: 'sodala', sort: 'budget' })).toBe('neighbourhood');
   });
-  test('false when another filter could be what emptied the results', () => {
-    expect(isAreaOnlyFilter({ area: 'mahesh-nagar', bhk: '3BHK' })).toBe(false);
-    expect(isAreaOnlyFilter({ area: 'mahesh-nagar', maxRent: 9000 })).toBe(false);
-    expect(isAreaOnlyFilter({ area: 'mahesh-nagar', furnishing: 'furnished' })).toBe(false);
-    expect(isAreaOnlyFilter({ area: 'mahesh-nagar', neighbourhood: 'sodala' })).toBe(false);
+  test('null when another filter could be what emptied the results', () => {
+    expect(soleNarrowingFilter({ area: 'mahesh-nagar', bhk: '3BHK' })).toBeNull();
+    expect(soleNarrowingFilter({ area: 'mahesh-nagar', maxRent: 9000 })).toBeNull();
+    expect(soleNarrowingFilter({ neighbourhood: 'sodala', furnishing: 'furnished' })).toBeNull();
   });
-  test('false when no area is filtered', () => {
-    expect(isAreaOnlyFilter({ bhk: '3BHK' })).toBe(false);
+  test('null when area and neighbourhood are both set, since either could be the cause', () => {
+    expect(soleNarrowingFilter({ area: 'mahesh-nagar', neighbourhood: 'sodala' })).toBeNull();
+  });
+  test('null when nothing narrowing is applied', () => {
+    expect(soleNarrowingFilter({ segment: 'residential' })).toBeNull();
   });
 });

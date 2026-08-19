@@ -72,22 +72,25 @@ export function parseListingFilters(url: URL): ListingFilters {
   return f;
 }
 
-// An ?area= slug that names no major area at all (typo, junk, a renamed slug) has no label
-// anywhere, so the honest resolution is to drop the filter rather than show a raw slug or
-// pretend no filter is applied. Returns the URL to redirect to, or null to stay put — which is
-// the case whenever the area is absent or was resolved to a real name.
-export function areaRedirectUrl(url: URL, areas: { slug: string }[], area?: string): string | null {
-  if (!area || areas.some((a) => a.slug === area)) return null;
+// Filter params that name nothing real — a typo, junk, a renamed slug, a neighbourhood that was
+// removed — have no label anywhere, so the honest resolution is to drop them rather than show a
+// raw slug or silently filter to an unexplained empty page. Returns the URL to redirect to, or
+// null to stay put. `page` goes too: the result set changes, so the old page may not exist.
+export function dropUnknownFilters(url: URL, unknown: string[]): string | null {
+  if (!unknown.length) return null;
   const u = new URL(url);
-  u.searchParams.delete('area');
-  u.searchParams.delete('page'); // dropping a filter changes the result set; the old page may not exist
+  for (const param of unknown) u.searchParams.delete(param);
+  u.searchParams.delete('page');
   return u.pathname + u.search;
 }
 
-// Whether `area` is the only thing narrowing the results. The empty state may name the area only
-// then — with bhk/rent/furnishing also set, any of them could be what emptied the page, and
-// blaming the area would be a quieter version of the same misrepresentation.
-export function isAreaOnlyFilter(f: ListingFilters): boolean {
-  return !!f.area && !f.bhk && !f.furnishing && !f.neighbourhood
-    && f.minRent == null && f.maxRent == null;
+// Which place filter is the only thing narrowing the results, if any. The empty state may name a
+// place only then — with a rent bound or a BHK also set, any of them could be what emptied the
+// page, and blaming the place would be a quieter version of showing a raw slug.
+export function soleNarrowingFilter(f: ListingFilters): 'area' | 'neighbourhood' | null {
+  if (f.bhk || f.furnishing || f.minRent != null || f.maxRent != null) return null;
+  if (f.area && f.neighbourhood) return null; // either could be the cause
+  if (f.area) return 'area';
+  if (f.neighbourhood) return 'neighbourhood';
+  return null;
 }
