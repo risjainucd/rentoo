@@ -15,3 +15,6 @@ inventory 2026/
 RENTOO/
 seed/
 .claude/
+
+# impeccable per-session local overrides
+.impeccable/config.local.json
