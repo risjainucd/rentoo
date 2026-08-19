@@ -10,6 +10,7 @@ const { title, email = null, back = false } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/Rentooicon.svg" />
     <link rel="icon" type="image/png" href="/Rentooicon.png" />
     <title>{title}</title>
   </head>
@@ -17,7 +18,7 @@ const { title, email = null, back = false } = Astro.props;
     <header class="admin-bar">
       <div class="brand">
         {back && <a class="back" href="/admin">← All listings</a>}
-        <img src="/Rentoo.svg" alt="Rentoo" class="logo" />
+        <img src="/Rentoo.svg" alt="Rentoo" width="445" height="84" class="logo" />
         <span class="tag">Admin</span>
       </div>
       {email && <span class="who">{email}</span>}

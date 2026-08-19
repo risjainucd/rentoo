@@ -1,6 +1,6 @@
 import { expect, test, describe } from 'vitest';
 import {
-  renditionPlan, watermarkLayout, normalizePhotoOrder, photoBaseKey, randomPhotoToken,
+  renditionPlan, watermarkLayout, normalizePhotoOrder, photoBaseKey, randomPhotoToken, WORDMARK_FRAC,
 } from '../src/lib/admin-photos';
 
 describe('renditionPlan', () => {
@@ -15,12 +15,13 @@ describe('renditionPlan', () => {
 });
 
 describe('watermarkLayout', () => {
-  test('centers a 0.6x-width wordmark on a landscape photo', () => {
+  test('centers the wordmark on a landscape photo', () => {
     const l = watermarkLayout(1000, 750, 4); // logo aspect 4:1
-    expect(l.w).toBe(600);            // 0.6 * 1000
-    expect(l.h).toBe(150);            // 600 / 4
-    expect(l.left).toBe(200);         // (1000-600)/2
-    expect(l.top).toBe(300);          // (750-150)/2
+    const w = Math.round(1000 * WORDMARK_FRAC);
+    expect(l.w).toBe(w);
+    expect(l.h).toBe(Math.round(w / 4));
+    expect(l.left).toBe(Math.round((1000 - l.w) / 2));
+    expect(l.top).toBe(Math.round((750 - l.h) / 2));
   });
   test('clamps the wordmark to fit inside a tall/narrow photo', () => {
     const l = watermarkLayout(300, 1200, 4); // 0.6*300=180 wide, 45 tall — fits
