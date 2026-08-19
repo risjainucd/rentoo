@@ -68,7 +68,7 @@ const statusLabel = card.status === 'available'
           ₹{card.rent_inr.toLocaleString('en-IN')}<span class="price-unit"> / month</span>
         </span>
       </div>
-      <h3 class="card-title">{card.title}</h3>
+      <h3 class:list={['card-title', !card.landmark && 'card-title--lead']}>{card.title}</h3>
       {card.landmark && <p class="card-landmark">{card.landmark}</p>}
       {(card.bhk_type || card.furnishing) && (
         <p class="card-meta-row">
@@ -456,12 +456,15 @@ const statusLabel = card.status === 'available'
     color: var(--ink-muted);
   }
 
+  /* Four of six cards in a typical grid read "3BHK Apartment" — the type classification
+     does no differentiating work, while the landmark below it is the line that does. The
+     classification reads as a kicker; the place carries the card. */
   .card-title {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.9375rem;
+    font-weight: 500;
     line-height: 1.35;
-    color: var(--ink);
-    margin-bottom: 4px;
+    color: var(--ink-muted);
+    margin-bottom: var(--space-xs);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -470,10 +473,18 @@ const statusLabel = card.status === 'available'
   }
 
   .card-landmark {
-    font-size: 0.9375rem;
-    color: var(--ink-muted);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--ink);
     line-height: 1.35;
     margin-bottom: var(--space-sm);
+  }
+
+  /* A listing with no landmark has nothing to promote, so the classification leads. */
+  .card-title--lead {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
   }
 
   .card-meta-row {

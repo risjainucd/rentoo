@@ -60,9 +60,13 @@ The user confirmed these are current implementation, open to change — do not t
 - **Photo watermarking** is current practice, not locked.
 - **Placement of brokerage information** is not locked.
 
-### Undecided — do not resolve by inventing
+### Resolved
 
-- **Whether tenants pay brokerage is currently self-contradictory on the live site.** The homepage proof stat reads "₹0 — Brokerage charged to tenants. Ever.", while homepage body copy and `/about` say the fee is "agreed up front", "same rate for everyone", and known "before you ever see the flat". Confirm with the client before any surface restates it.
+- **Tenants do pay brokerage** (confirmed by the user 2026-08-19). The homepage previously
+  carried a "₹0 — Brokerage charged to tenants. Ever." proof stat contradicting its own body
+  copy and `/about`; the stat was the false half and has been removed. The surviving claim,
+  consistent across the home page, `/about` and `/contact`, is that the fee is standard, the
+  same for everyone, and agreed before a viewing. Do not reintroduce a zero-brokerage claim.
 
 ## Brand Commitments
 
