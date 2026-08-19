@@ -22,6 +22,11 @@ const landmark = property.landmark?.trim() || null;
 const landmarkNear = withLocative(landmark);
 
 const images = media.filter(m => m.kind === 'photo').map((m, i) => ({
+  // The 600px card rendition is the smallest one that exists in R2 today, and the thumb strip
+  // paints it at 120px — the 1200px gallery file it used to reuse cost ~130KB per tile. Matches
+  // src/pages/rent/[slug].astro; this is why the commercial and industrial pages need no edit
+  // of their own, since both hand their media straight to this component.
+  thumb: mediaUrl(m.r2_key, 'card'),
   gallery: mediaUrl(m.r2_key, 'gallery'),
   full: mediaUrl(m.r2_key, 'full'),
   alt: `${typeLabel} in ${neighbourhood.name} — photo ${i + 1}`,

@@ -1,7 +1,12 @@
 ---
 interface VideoProp { src: string; poster: string; alt: string }
 interface Props {
-  images: { gallery: string; full: string; alt: string }[];
+  // `thumb` feeds the strip, `gallery` the stage. They were one URL until now, so the strip —
+  // which is on screen at load — pulled every 1200px photo (~126KB) down to paint a 120px tile.
+  // Optional because a caller without a small rendition must still render, just at the old cost.
+  // Both callers pass one today (rent/[slug].astro and SpaceDetail.astro, the latter covering
+  // commercial + industrial), so the fallback below is only a safety net for a future third.
+  images: { thumb?: string; gallery: string; full: string; alt: string }[];
   video?: VideoProp;
 }
 const { images, video } = Astro.props;
@@ -29,6 +34,8 @@ const single = slideCount <= 1;
           </video>
         </div>
       )}
+      {/* Only the slide that is actually on screen loads eagerly: when there is a video it takes
+          slide 0, which puts the first photo off-screen to the right, so it stays lazy too. */}
       {images.map((img, i) => (
         <div class="gallery-slide" data-kind="photo">
           <img
@@ -67,6 +74,10 @@ const single = slideCount <= 1;
         aria-label="Play video tour"
         aria-current="true"
       >
+        {/* Deliberately the same URL as the stage's <video poster>, not a smaller rendition: the
+            video is slide 0, so the browser fetches that poster anyway and this tile costs nothing.
+            Measured on rentoo.in: tour-gallery.webp 28.7KB (already loading) vs tour-card.webp
+            23.3KB (a second request). Worth splitting only once a 240px tour-thumb.webp exists. */}
         <img src={video!.poster} alt={video!.alt} width="120" height="80" loading="lazy" />
         <span class="gallery-play-badge" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -85,7 +96,7 @@ const single = slideCount <= 1;
           aria-label={`Photo ${i + 1}`}
           aria-current={!hasVideo && i === 0 ? 'true' : 'false'}
         >
-          <img src={img.gallery} alt={img.alt} width="120" height="80" loading="lazy" />
+          <img src={img.thumb ?? img.gallery} alt={img.alt} width="120" height="80" loading="lazy" />
         </button>
       );
     })}

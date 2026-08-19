@@ -25,7 +25,13 @@ const LOGO = 'Rentoo.svg';
 const SAMPLE = process.argv.includes('--sample');
 const SAMPLE_SLUGS_LIMIT = 4;
 
+// Every entry here becomes one uploaded object per photo, `properties/<slug>/<idx>-<name>.webp`.
+// The seed rows key off the base (no size suffix), so adding a size changes what is in the bucket
+// and nothing about media.sql. `dims` below is read off 'gallery' — leave that one alone.
+// 'thumb' feeds the detail-page thumbnail strip, which paints at 120px; until this script has been
+// re-run over the whole inventory the strip must keep asking for 'card'.
 const SIZES = [
+  { name: 'thumb', width: 240, quality: 70 },
   { name: 'card', width: 600, quality: 72 },
   { name: 'gallery', width: 1200, quality: 80 },
   { name: 'full', width: 2000, quality: 82 },

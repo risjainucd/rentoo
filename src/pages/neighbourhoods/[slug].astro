@@ -82,9 +82,12 @@ const others = allNeighbourhoods.filter(nb => nb.slug !== n.slug);
         </div>
       ) : (
         <div class="card-grid" role="list">
-          {items.map(card => (
+          {items.map((card, i) => (
             <div role="listitem">
-              <PropertyCard card={card} />
+              {/* The first row is above the fold at every width this grid has (max 3 columns), and
+                  lazy is the one place it costs more than it saves: the fetch waits for layout,
+                  for a photo the visitor is already looking at. */}
+              <PropertyCard card={card} priority={i < 3} />
             </div>
           ))}
         </div>

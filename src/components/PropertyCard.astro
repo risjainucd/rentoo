@@ -3,7 +3,11 @@ import { mediaUrl } from '../lib/media';
 import type { ListingCard } from '../lib/types';
 import Pill from './Pill.astro';
 
-const { card } = Astro.props as { card: ListingCard };
+// `priority` is opt-in per card, set by the page for the handful of cards that land in the first
+// screenful. Those images are the one place `loading="lazy"` costs more than it saves: the fetch
+// only starts after layout, for a photo the visitor is already looking at. It defaults to false so
+// a caller that never passes it renders exactly the lazy card it renders today.
+const { card, priority = false } = Astro.props as { card: ListingCard; priority?: boolean };
 
 const sectionPath = card.segment === 'commercial' ? '/commercial' : card.segment === 'industrial' ? '/industrial' : '/rent';
 const href = `${sectionPath}/${card.slug}`;
@@ -36,7 +40,7 @@ const statusLabel = card.status === 'available'
         src={cover}
         width={card.cover_w ?? 400}
         height={card.cover_h ?? 280}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
         alt={card.title}
       />
     ) : (
@@ -101,6 +105,9 @@ const statusLabel = card.status === 'available'
       let i = 0;
       const show = (n: number) => {
         i = (n + photos.length) % photos.length; // wrap-around
+        // No `srcset` on this <img>, and adding one is not free: a srcset outranks src, so the
+        // browser would keep repainting the first photo and the carousel would silently freeze.
+        // Anyone introducing one has to assign img.srcset here alongside img.src.
         img.src = photos[i];
         if (cur) cur.textContent = String(i + 1);
       };

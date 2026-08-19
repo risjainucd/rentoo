@@ -14,6 +14,29 @@ const href = `${sectionPath}/${card.slug}`;
 const key = (card.photos && card.photos.length ? card.photos[0] : card.cover_key) ?? null;
 const img = key ? mediaUrl(key, 'gallery') : null;
 
+// This photo is the page's LCP element, and `gallery` (1200px) is more than the slot ever asks
+// for on a narrow screen. Offering `card` (600px) alongside it lets the browser drop to the
+// smaller file wherever the slot genuinely fits it, and keep `gallery` where it doesn't. Only
+// these two renditions are listed on purpose: `full` (2000px) would be picked by dense desktop
+// displays and would make the LCP heavier than it is today.
+const imgSrcset = key ? `${mediaUrl(key, 'card')} 600w, ${mediaUrl(key, 'gallery')} 1200w` : undefined;
+
+// `sizes` has to describe the real rendered width of .featured-media or the choice above is a
+// guess. Reading it off the style block below plus the layout tokens in globals.css:
+//   .section-inner is border-box, so content width = min(100vw, 1280px) - 2 x --gutter,
+//   and --gutter steps 16px -> 24px (>=768) -> 32px (>=1024);
+//   below 900px the grid is one column, so the media takes that whole width;
+//   from 900px up it is the 1.35fr track of a `1.35fr 1fr` grid split by a 48px (--space-3xl)
+//   gap, i.e. (content - 48px) x 1.35/2.35;
+//   past 1280px the container stops growing, so the media pins at a flat 671px.
+const imgSizes = [
+  '(min-width: 1280px) 671px',
+  '(min-width: 1024px) calc((100vw - 112px) * 1.35 / 2.35)',
+  '(min-width: 900px) calc((100vw - 96px) * 1.35 / 2.35)',
+  '(min-width: 768px) calc(100vw - 48px)',
+  'calc(100vw - 32px)',
+].join(', ');
+
 const statusVariant = card.status === 'available' ? 'status-available' : card.status === 'rented' ? 'status-rented' : 'status-on-hold';
 const statusLabel = card.status === 'available' ? 'Available' : card.status === 'rented' ? 'Rented' : 'On Hold';
 
@@ -28,7 +51,17 @@ const specs = [card.bhk_type, card.furnishing].filter(Boolean) as string[];
     <div class="featured-grid">
       <a class="featured-media" href={href} aria-label={`View ${card.title}`}>
         {img ? (
-          <img src={img} alt={card.title} loading="eager" fetchpriority="high" width={card.cover_w ?? 1200} height={card.cover_h ?? 800} />
+          <img
+            src={img}
+            srcset={imgSrcset}
+            sizes={imgSizes}
+            alt={card.title}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width={card.cover_w ?? 1200}
+            height={card.cover_h ?? 800}
+          />
         ) : (
           <div class="featured-media-placeholder"></div>
         )}
