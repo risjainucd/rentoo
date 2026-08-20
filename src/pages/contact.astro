@@ -763,8 +763,14 @@ import { WHATSAPP_NUMBER, CONTACT_EMAIL } from '../lib/site';
     }
   }
 
+  /* 1.25rem is DESIGN.md's Title step — the role this heading actually plays. The
+     Base UI original was `text-lg` (1.125rem), a size the ramp does not carry, and
+     DESIGN.md already flags the ramp as over-granular and due consolidation, so
+     adding a seventh step to keep 18px would push against its own direction. At
+     1.25rem the Display Floor Rule hands the line to Space Grotesk. */
   :global(.contact-dialog-title) {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
+    font-family: var(--font-display);
     font-weight: 600;
     line-height: 1.25;
     letter-spacing: -0.025em;
